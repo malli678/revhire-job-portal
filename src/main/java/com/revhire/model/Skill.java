@@ -9,7 +9,39 @@ import jakarta.persistence.ManyToOne;
 @Entity
 public class Skill {
 
-    @Id
+    public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getSkillName() {
+		return skillName;
+	}
+
+	public void setSkillName(String skillName) {
+		this.skillName = skillName;
+	}
+
+	public String getProficiency() {
+		return proficiency;
+	}
+
+	public void setProficiency(String proficiency) {
+		this.proficiency = proficiency;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
