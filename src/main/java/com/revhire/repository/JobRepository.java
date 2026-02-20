@@ -1,5 +1,8 @@
 package com.revhire.repository;
 
-public class JobRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.revhire.model.Job;
+
+public interface JobRepository extends JpaRepository<Job, Long> {
 
 }

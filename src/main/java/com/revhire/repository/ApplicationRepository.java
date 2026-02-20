@@ -1,5 +1,5 @@
 package com.revhire.repository;
 
-public class ApplicationRepository {
+public interface ApplicationRepository {
 
 }
