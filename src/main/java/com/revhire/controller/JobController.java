@@ -4,6 +4,7 @@ import com.revhire.model.Employer;
 import com.revhire.model.Job;
 import com.revhire.service.EmployerService;
 import com.revhire.service.JobService;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -23,48 +24,84 @@ public class JobController {
         this.employerService = employerService;
     }
 
+    // =========================
     // POST JOB
+    // =========================
     @PostMapping("/save")
     public String saveJob(@ModelAttribute Job job,
                           Authentication authentication) {
 
         String email = authentication.getName();
+
         Employer employer =
                 employerService.getEmployerByEmail(email);
 
         job.setEmployer(employer);
+
         jobService.saveJob(job);
 
-        return "redirect:/employer/dashboard";
+        return "redirect:/employer/manage-jobs";
     }
 
-    // VIEW ALL JOBS (Job Search)
+    // =========================
+    // VIEW ALL JOBS (SEARCH PAGE)
+    // =========================
     @GetMapping("/all")
     @ResponseBody
     public List<Job> getAllJobs() {
         return jobService.getAllJobs();
     }
 
+    // =========================
     // JOB DETAILS
+    // =========================
     @GetMapping("/{id}")
     @ResponseBody
     public Job getJob(@PathVariable Long id) {
         return jobService.getJobById(id);
     }
 
+    // =========================
     // DELETE JOB
+    // =========================
     @DeleteMapping("/delete/{id}")
     @ResponseBody
     public String deleteJob(@PathVariable Long id) {
+
         jobService.deleteJob(id);
-        return "Job Deleted";
+        return "Job Deleted Successfully";
     }
 
-    // CLOSE / REOPEN / FILLED
+    // =========================
+    // UPDATE STATUS
+    // ACTIVE / CLOSED / FILLED
+    // =========================
     @PutMapping("/status/{id}/{status}")
     @ResponseBody
     public Job updateStatus(@PathVariable Long id,
                             @PathVariable String status) {
+
         return jobService.updateStatus(id, status);
     }
+
+    // =========================
+    // SEARCH BY LOCATION
+    // =========================
+    @GetMapping("/search/location")
+    @ResponseBody
+    public List<Job> searchByLocation(@RequestParam String location) {
+
+        return jobService.searchByLocation(location);
+    }
+
+    // =========================
+    // SEARCH BY TITLE
+    // =========================
+    @GetMapping("/search/title")
+    @ResponseBody
+    public List<Job> searchByTitle(@RequestParam String title) {
+
+        return jobService.searchByTitle(title);
+    }
+
 }

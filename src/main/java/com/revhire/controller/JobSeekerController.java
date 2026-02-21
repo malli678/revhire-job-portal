@@ -2,6 +2,7 @@ package com.revhire.controller;
 
 import com.revhire.model.User;
 import com.revhire.service.UserService;
+
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -17,17 +18,27 @@ public class JobSeekerController {
         this.userService = userService;
     }
 
+    // JobSeeker Dashboard
     @GetMapping("/jobseeker/dashboard")
-    public String dashboard(Model model, Authentication authentication, HttpSession session) {
+    public String dashboard(Model model,
+                            Authentication authentication,
+                            HttpSession session) {
+
         String email = authentication.getName();
         User user = userService.findByEmail(email);
-        
+
         session.setAttribute("userId", user.getUserId());
         session.setAttribute("userName", user.getFullName());
         session.setAttribute("userRole", user.getRole().name());
-        
+
         model.addAttribute("user", user);
-        
+
         return "jobseeker/dashboard";
+    }
+
+    // Search Jobs Page (NEW)
+    @GetMapping("/jobseeker/search-jobs")
+    public String searchJobsPage() {
+        return "jobseeker/search-jobs";
     }
 }

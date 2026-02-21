@@ -2,6 +2,8 @@ package com.revhire.controller;
 
 import com.revhire.model.User;
 import com.revhire.service.UserService;
+import com.revhire.service.JobService;
+
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -12,11 +14,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class EmployerController {
 
     private final UserService userService;
+    private final JobService jobService;
 
-    public EmployerController(UserService userService) {
+    // Constructor Injection
+    public EmployerController(UserService userService,
+                              JobService jobService) {
         this.userService = userService;
+        this.jobService = jobService;
     }
 
+    // Employer Dashboard
     @GetMapping("/employer/dashboard")
     public String dashboard(Model model,
                             Authentication authentication,
@@ -36,5 +43,20 @@ public class EmployerController {
         model.addAttribute("user", user);
 
         return "employer/dashboard";
+    }
+
+    // Open Post Job Page
+    @GetMapping("/employer/post-job")
+    public String postJobPage() {
+        return "employer/post-job";
+    }
+
+    // Manage Jobs Page
+    @GetMapping("/employer/manage-jobs")
+    public String manageJobs(Model model) {
+
+        model.addAttribute("jobs", jobService.getAllJobs());
+
+        return "employer/manage-jobs";
     }
 }
