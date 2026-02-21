@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Search Jobs</title>
+</head>
+<body>
+
+<h2>Search Jobs</h2>
+
+<h3>Search By Location</h3>
+<input type="text" id="location">
+<button onclick="searchLocation()">Search</button>
+
+<h3>Search By Title</h3>
+<input type="text" id="title">
+<button onclick="searchTitle()">Search</button>
+
+<hr>
+
+<div id="results"></div>
+
+<script>
+
+function searchLocation(){
+    let location=document.getElementById("location").value;
+
+    fetch('/jobs/search/location?location='+location)
+    .then(res=>res.json())
+    .then(data=>showJobs(data));
+}
+
+function searchTitle(){
+    let title=document.getElementById("title").value;
+
+    fetch('/jobs/search/title?title='+title)
+    .then(res=>res.json())
+    .then(data=>showJobs(data));
+}
+
+function showJobs(jobs){
+
+    let html="";
+
+    jobs.forEach(job=>{
+        html += `
+            <div>
+                <h3>${job.title}</h3>
+                <p>${job.location}</p>
+                <a href="/jobs/${job.jobId}">View Details</a>
+                <hr>
+            </div>
+        `;
+    });
+
+    document.getElementById("results").innerHTML = html;
+}
+
+</script>
+
+</body>
+</html>

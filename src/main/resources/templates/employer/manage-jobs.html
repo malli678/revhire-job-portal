@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Manage Jobs</title>
+</head>
+<body>
+
+<h2>Manage Jobs</h2>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Location</th>
+        <th>Status</th>
+        <th>Actions</th>
+    </tr>
+
+    <tr th:each="job : ${jobs}">
+        <td th:text="${job.jobId}"></td>
+        <td th:text="${job.title}"></td>
+        <td th:text="${job.location}"></td>
+        <td th:text="${job.status}"></td>
+
+        <td>
+            <a th:href="@{'/jobs/' + ${job.jobId}}">View</a> |
+
+            <a href="#" th:onclick="'updateStatus(' + ${job.jobId} + ',\'CLOSED\')'">
+                Close
+            </a> |
+
+            <a href="#" th:onclick="'updateStatus(' + ${job.jobId} + ',\'ACTIVE\')'">
+                Reopen
+            </a> |
+
+            <a href="#" th:onclick="'deleteJob(' + ${job.jobId} + ')'">
+                Delete
+            </a>
+        </td>
+    </tr>
+</table>
+
+<script>
+
+function deleteJob(id){
+    fetch('/jobs/delete/' + id,{
+        method:'DELETE'
+    }).then(()=>location.reload());
+}
+
+function updateStatus(id,status){
+    fetch('/jobs/status/' + id + '/' + status,{
+        method:'PUT'
+    }).then(()=>location.reload());
+}
+
+</script>
+
+</body>
+</html>
