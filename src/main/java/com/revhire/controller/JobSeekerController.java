@@ -1,12 +1,8 @@
 package com.revhire.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.revhire.exception.UnauthorizedException;
@@ -17,74 +13,94 @@ import com.revhire.service.ResumeService;
 
 import jakarta.servlet.http.HttpSession;
 
+@Controller
 public class JobSeekerController {
-	private ResumeService resumeservice;
-	
-	@PostMapping("/uploadResume")
-	public String uploadResume(@RequestParam("file") MultipartFile file) {
 
-	    resumeservice.uploadResume(file);
+    private final ResumeService resumeService;
+    private final JobSeekerService jobSeekerService;
+    private final EducationService educationService;
 
-	    return "redirect:/jobseeker/resume?success";
-	}
-	
-	private JobSeekerService jobseekerservice;
-	@PostMapping("/saveJob/{jobId}")
-	public ResponseEntity<?> saveJob(@PathVariable Long jobId, HttpSession session) {
+    public JobSeekerController(
+            ResumeService resumeService,
+            JobSeekerService jobSeekerService,
+            EducationService educationService) {
 
-	    Long userId = (Long) session.getAttribute("userId");
+        this.resumeService = resumeService;
+        this.jobSeekerService = jobSeekerService;
+        this.educationService = educationService;
+    }
 
-	    if (userId == null) {
-	        throw new UnauthorizedException("Please login first");
-	    }
+    // ✅ Upload Resume
+    @PostMapping("/uploadResume")
+    public String uploadResume(@RequestParam("file") MultipartFile file) {
 
-	    return jobseekerservice.saveJob(userId, jobId);
-	}
-	
-	
-	@GetMapping("/saved-jobs")
-	public ResponseEntity<?> viewSavedJobs(HttpSession session) {
+        resumeService.uploadResume(file);
 
-	    Long userId = (Long) session.getAttribute("userId");
+        return "redirect:/jobseeker/resume?success";
+    }
 
-	    if (userId == null) {
-	        throw new UnauthorizedException("Please login first");
-	    }
+    // ✅ Save Job
+    @PostMapping("/saveJob/{jobId}")
+    @ResponseBody
+    public ResponseEntity<?> saveJob(@PathVariable Long jobId, HttpSession session) {
 
-	    return jobseekerservice.getSavedJobs(userId);
-	}
-	
-	private EducationService educationservice;
-	
-	@PostMapping("/education/add")
-	public ResponseEntity<?> addEducation(@ModelAttribute Education education,
-	                                      HttpSession session) {
+        Long userId = (Long) session.getAttribute("userId");
 
-	    Long userId = (Long) session.getAttribute("userId");
+        if (userId == null) {
+            throw new UnauthorizedException("Please login first");
+        }
 
-	    if (userId == null) {
-	        throw new UnauthorizedException("Please login first");
-	    }
+        return jobSeekerService.saveJob(userId, jobId);
+    }
 
-	    return educationservice.addEducation(userId, education);
-	}
-	
-	@GetMapping("/education")
-	public ResponseEntity<?> viewEducation(HttpSession session) {
+    // ✅ View Saved Jobs
+    @GetMapping("/saved-jobs")
+    @ResponseBody
+    public ResponseEntity<?> viewSavedJobs(HttpSession session) {
 
-	    Long userId = (Long) session.getAttribute("userId");
+        Long userId = (Long) session.getAttribute("userId");
 
-	    if (userId == null) {
-	        throw new UnauthorizedException("Please login first");
-	    }
+        if (userId == null) {
+            throw new UnauthorizedException("Please login first");
+        }
 
-	    return educationservice.getEducation(userId);
-	}
+        return jobSeekerService.getSavedJobs(userId);
+    }
 
-	
-	@DeleteMapping("/education/delete/{id}")
-	public ResponseEntity<?> deleteEducation(@PathVariable Long id) {
+    // ✅ Add Education
+    @PostMapping("/education/add")
+    @ResponseBody
+    public ResponseEntity<?> addEducation(@ModelAttribute Education education,
+                                          HttpSession session) {
 
-	    return educationservice.deleteEducation(id);
-	}
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            throw new UnauthorizedException("Please login first");
+        }
+
+        return educationService.addEducation(userId, education);
+    }
+
+    // ✅ View Education
+    @GetMapping("/education")
+    @ResponseBody
+    public ResponseEntity<?> viewEducation(HttpSession session) {
+
+        Long userId = (Long) session.getAttribute("userId");
+
+        if (userId == null) {
+            throw new UnauthorizedException("Please login first");
+        }
+
+        return educationService.getEducation(userId);
+    }
+
+    // ✅ Delete Education
+    @DeleteMapping("/education/delete/{id}")
+    @ResponseBody
+    public ResponseEntity<?> deleteEducation(@PathVariable Long id) {
+
+        return educationService.deleteEducation(id);
+    }
 }

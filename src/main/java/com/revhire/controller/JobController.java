@@ -1,7 +1,8 @@
 package com.revhire.controller;
 
-public class JobController {
-	
+import org.springframework.stereotype.Controller;
 
+@Controller
+public class JobController {
 
 }
