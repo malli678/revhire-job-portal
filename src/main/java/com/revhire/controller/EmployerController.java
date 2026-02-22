@@ -1,8 +1,11 @@
 package com.revhire.controller;
 
-import com.revhire.model.*;
+import com.revhire.model.Employer;
+import com.revhire.model.Job;
+import com.revhire.model.User;
 import com.revhire.service.EmployerService;
 import com.revhire.service.UserService;
+
 import jakarta.servlet.http.HttpSession;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -21,11 +24,22 @@ public class EmployerController {
         this.employerService = employerService;
     }
 
+    // =========================
+    // DASHBOARD (KEEP SAME)
+    // =========================
     @GetMapping("/dashboard")
     public String dashboard(HttpSession session,
                             Authentication authentication) {
 
+        if (authentication == null) {
+            return "redirect:/auth/login";
+        }
+
         User user = userService.findByEmail(authentication.getName());
+
+        if (user == null) {
+            return "redirect:/auth/login";
+        }
 
         session.setAttribute("userId", user.getUserId());
         session.setAttribute("userName", user.getFullName());
@@ -33,7 +47,9 @@ public class EmployerController {
         return "employer/dashboard";
     }
 
+    // =========================
     // POST JOB
+    // =========================
     @PostMapping("/post-job")
     @ResponseBody
     public Job postJob(@RequestBody Job job,
@@ -45,7 +61,9 @@ public class EmployerController {
         return employerService.postJob(job, emp);
     }
 
+    // =========================
     // EDIT JOB
+    // =========================
     @PutMapping("/job/{id}")
     @ResponseBody
     public Job editJob(@PathVariable Long id,
@@ -53,29 +71,37 @@ public class EmployerController {
         return employerService.updateJob(id, job);
     }
 
-    // DELETE
+    // =========================
+    // DELETE JOB
+    // =========================
     @DeleteMapping("/job/{id}")
     @ResponseBody
     public String delete(@PathVariable Long id) {
         employerService.deleteJob(id);
-        return "Deleted";
+        return "Deleted Successfully";
     }
 
-    // CLOSE
+    // =========================
+    // CLOSE JOB
+    // =========================
     @PutMapping("/job/{id}/close")
     @ResponseBody
     public Job close(@PathVariable Long id) {
         return employerService.closeJob(id);
     }
 
-    // REOPEN
+    // =========================
+    // REOPEN JOB
+    // =========================
     @PutMapping("/job/{id}/reopen")
     @ResponseBody
     public Job reopen(@PathVariable Long id) {
         return employerService.reopenJob(id);
     }
 
-    // FILLED
+    // =========================
+    // MARK FILLED
+    // =========================
     @PutMapping("/job/{id}/filled")
     @ResponseBody
     public Job filled(@PathVariable Long id) {

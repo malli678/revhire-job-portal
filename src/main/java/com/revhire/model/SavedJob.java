@@ -3,6 +3,8 @@ package com.revhire.model;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "saved_jobs")
 public class SavedJob {
@@ -17,6 +19,8 @@ public class SavedJob {
     private Job job;
     
     @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
+
     @JoinColumn(name = "jobseeker_id", nullable = false)
     private JobSeeker jobSeeker;
     

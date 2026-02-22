@@ -24,7 +24,6 @@ public class Education {
     private String grade;
     private String description;
     
-    // Getters and Setters
     public Long getEducationId() { return educationId; }
     public void setEducationId(Long educationId) { this.educationId = educationId; }
     

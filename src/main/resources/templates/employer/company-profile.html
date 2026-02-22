@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Company Profile</title>
+</head>
+<body>
+
+<h2>Company Profile</h2>
+
+<p>Name: <span th:text="${user.companyName}"></span></p>
+<p>Industry: <span th:text="${user.industry}"></span></p>
+<p>Website: <span th:text="${user.companyWebsite}"></span></p>
+<p>Description: <span th:text="${user.companyDescription}"></span></p>
+
+</body>
+</html>

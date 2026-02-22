@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Manage Jobs</title>
+</head>
+<body>
+
+<h2>Manage Jobs</h2>
+
+<div th:each="job : ${jobs}">
+    <h3 th:text="${job.title}"></h3>
+    <p th:text="${job.location}"></p>
+
+    <a th:href="@{/employer/edit-job(id=${job.jobId})}">Edit</a>
+    <a th:href="@{/jobs/{id}(id=${job.jobId})}">Delete</a>
+    <hr>
+</div>
+
+</body>
+</html>

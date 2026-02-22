@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Post Job - RevHire</title>
+<style>
+body{font-family:Arial;background:#f4f4f4}
+.container{width:600px;margin:auto;background:white;padding:20px;margin-top:30px}
+input,textarea{width:100%;padding:8px;margin:8px 0}
+button{background:#28a745;color:white;padding:10px;border:none}
+</style>
+</head>
+<body>
+
+<div class="container">
+<h2>Post New Job</h2>
+
+<form th:action="@{/jobs}" method="post" th:object="${jobDto}">
+<input type="text" th:field="*{title}" placeholder="Job Title"/>
+<textarea th:field="*{description}" placeholder="Description"></textarea>
+<input type="text" th:field="*{location}" placeholder="Location"/>
+<input type="text" th:field="*{jobType}" placeholder="Job Type"/>
+<input type="text" th:field="*{experienceRequired}" placeholder="Experience"/>
+<input type="number" th:field="*{salaryMin}" placeholder="Salary Min"/>
+<input type="number" th:field="*{salaryMax}" placeholder="Salary Max"/>
+
+<button type="submit">Post Job</button>
+</form>
+
+</div>
+</body>
+</html>
