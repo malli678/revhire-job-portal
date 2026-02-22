@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Applicants</title>
+</head>
+<body>
+
+<h2>Applicants</h2>
+
+<!-- BULK UPDATE FORM -->
+<form th:action="@{/applications/bulk-update}" method="post">
+
+<table border="1">
+    <tr>
+        <th>Select</th>
+        <th>Candidate</th>
+        <th>Status</th>
+        <th>Notes</th>
+        <th>Individual Action</th>
+    </tr>
+
+    <tr th:each="app : ${applications}">
+        <td>
+            <input type="checkbox"
+                   name="applicationIds"
+                   th:value="${app.id}" />
+        </td>
+
+        <td th:text="${app.jobSeeker.name}"></td>
+        <td th:text="${app.status}"></td>
+        <td th:text="${app.notes}"></td>
+
+        <td>
+
+            <!-- Shortlist -->
+            <form th:if="${app.status.name() == 'APPLIED'}"
+                  th:action="@{/applications/shortlist}"
+                  method="post">
+                <input type="hidden" name="applicationId"
+                       th:value="${app.id}" />
+                <button type="submit">Shortlist</button>
+            </form>
+
+            <!-- Reject -->
+            <form th:if="${app.status.name() == 'APPLIED'}"
+                  th:action="@{/applications/reject}"
+                  method="post">
+                <input type="hidden" name="applicationId"
+                       th:value="${app.id}" />
+                <button type="submit">Reject</button>
+            </form>
+
+            <!-- Add Notes -->
+            <form th:action="@{/applications/add-notes}"
+                  method="post">
+                <input type="hidden" name="applicationId"
+                       th:value="${app.id}" />
+                <input type="text" name="notes"
+                       placeholder="Add note" />
+                <button type="submit">Save</button>
+            </form>
+
+        </td>
+    </tr>
+</table>
+
+<br>
+
+<label><b>Bulk Update Status:</b></label>
+<select name="status">
+    <option value="SHORTLISTED">Shortlist Selected</option>
+    <option value="REJECTED">Reject Selected</option>
+</select>
+
+<button type="submit">Update Selected</button>
+
+</form>
+
+</body>
+</html>

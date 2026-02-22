@@ -1,27 +1,23 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-<title>Job Details</title>
+    <title>Job Details</title>
 </head>
 <body>
 
 <h2 th:text="${job.title}"></h2>
 
-<p><b>Company:</b> <span th:text="${job.employer.companyName}"></span></p>
+<p><b>Location:</b> <span th:text="${job.location}"></span></p>
+<p><b>Description:</b> <span th:text="${job.description}"></span></p>
 
-<p><b>Description:</b></p>
-<p th:text="${job.description}"></p>
+<hr>
 
-<p><b>Location:</b>
-<span th:text="${job.location}"></span></p>
+<form th:action="@{/applications/apply}" method="post">
+    <input type="hidden" name="jobId" th:value="${job.id}" />
+    <input type="hidden" name="jobSeekerId" th:value="${jobSeekerId}" />
 
-<p><b>Experience Required:</b>
-<span th:text="${job.experienceRequired}"></span></p>
-
-<p><b>Salary:</b>
-<span th:text="${job.salaryMin}"></span> -
-<span th:text="${job.salaryMax}"></span>
-</p>
+    <button type="submit">Apply Job</button>
+</form>
 
 </body>
 </html>

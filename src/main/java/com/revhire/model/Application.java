@@ -4,60 +4,85 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "applications")
+@Table(name = "applications",
+       uniqueConstraints = @UniqueConstraint(columnNames = {"job_id", "job_seeker_id"}))
 public class Application {
-    
+
+    // ===== ENUM (Simple Version - 4 Status) =====
+    public enum ApplicationStatus {
+        APPLIED,
+        SHORTLISTED,
+        REJECTED,
+        WITHDRAWN
+    }
+
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "app_seq")
-    @SequenceGenerator(name = "app_seq", sequenceName = "APPLICATION_SEQ", allocationSize = 1)
-    private Long applicationId;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    // Many applications can belong to one job
+    @ManyToOne
     @JoinColumn(name = "job_id", nullable = false)
     private Job job;
-    
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "jobseeker_id", nullable = false)
+
+    // Many applications can belong to one job seeker
+    @ManyToOne
+    @JoinColumn(name = "job_seeker_id", nullable = false)
     private JobSeeker jobSeeker;
-    
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    private ApplicationStatus status;
+
     private LocalDateTime appliedDate;
-    private LocalDateTime lastUpdatedDate;
-    private String coverLetter;
-    private String resumePath;
-    private String notes;
     
-    public Application() {
-        this.status = "APPLIED";
-        this.appliedDate = LocalDateTime.now();
-        this.lastUpdatedDate = LocalDateTime.now();
+    //Note
+    @Column(length = 1000)
+    private String notes;
+
+    // ===== GETTERS & SETTERS =====
+
+    public Long getId() {
+        return id;
+    }
+
+    public Job getJob() {
+        return job;
+    }
+
+    public void setJob(Job job) {
+        this.job = job;
+    }
+
+    public JobSeeker getJobSeeker() {
+        return jobSeeker;
+    }
+
+    public void setJobSeeker(JobSeeker jobSeeker) {
+        this.jobSeeker = jobSeeker;
+    }
+
+    public ApplicationStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(ApplicationStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getAppliedDate() {
+        return appliedDate;
+    }
+
+    public void setAppliedDate(LocalDateTime appliedDate) {
+        this.appliedDate = appliedDate;
     }
     
-    // Getters and Setters
-    public Long getApplicationId() { return applicationId; }
-    public void setApplicationId(Long applicationId) { this.applicationId = applicationId; }
-    
-    public Job getJob() { return job; }
-    public void setJob(Job job) { this.job = job; }
-    
-    public JobSeeker getJobSeeker() { return jobSeeker; }
-    public void setJobSeeker(JobSeeker jobSeeker) { this.jobSeeker = jobSeeker; }
-    
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-    
-    public LocalDateTime getAppliedDate() { return appliedDate; }
-    public void setAppliedDate(LocalDateTime appliedDate) { this.appliedDate = appliedDate; }
-    
-    public LocalDateTime getLastUpdatedDate() { return lastUpdatedDate; }
-    public void setLastUpdatedDate(LocalDateTime lastUpdatedDate) { this.lastUpdatedDate = lastUpdatedDate; }
-    
-    public String getCoverLetter() { return coverLetter; }
-    public void setCoverLetter(String coverLetter) { this.coverLetter = coverLetter; }
-    
-    public String getResumePath() { return resumePath; }
-    public void setResumePath(String resumePath) { this.resumePath = resumePath; }
-    
-    public String getNotes() { return notes; }
-    public void setNotes(String notes) { this.notes = notes; }
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
 }
