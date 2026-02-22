@@ -2,8 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Resume</title>
+
     <style>
-        body { font-family:'Segoe UI'; background:#f5f6fa; padding:30px; }
+        body {
+            font-family:'Segoe UI';
+            background:#f5f6fa;
+            padding:30px;
+        }
 
         .card {
             background:white;
@@ -14,12 +19,39 @@
             box-shadow:0 4px 20px rgba(0,0,0,0.05);
         }
 
+        h2 {
+            margin-top:0;
+            color:#333;
+        }
+
+        input[type="file"] {
+            margin-top:10px;
+        }
+
         button {
             background:#667eea;
             color:white;
             border:none;
             padding:10px 20px;
             border-radius:6px;
+            cursor:pointer;
+            font-size:14px;
+        }
+
+        button:hover {
+            background:#5563d6;
+        }
+
+        .error {
+            color:red;
+            margin-top:10px;
+            font-size:14px;
+        }
+
+        .file-info {
+            margin-top:10px;
+            font-size:14px;
+            color:#555;
         }
     </style>
 </head>
@@ -33,15 +65,52 @@
           enctype="multipart/form-data"
           action="/uploadResume">
 
-        <input type="file" name="file" required/>
+        <!-- ✅ FILE INPUT -->
+        <input type="file" id="resumeFile" name="file" required/>
 
-        <br><br>
+        <!-- ✅ FILE INFO -->
+        <div id="fileInfo" class="file-info"></div>
 
-        <button>Upload Resume</button>
+        <!-- ✅ ERROR MESSAGE -->
+        <div id="errorMsg" class="error"></div>
+
+        <br>
+
+        <button type="submit">Upload Resume</button>
 
     </form>
 
 </div>
+
+<!-- ✅ VALIDATION SCRIPT -->
+<script>
+document.getElementById("resumeFile").addEventListener("change", function () {
+
+    const file = this.files[0];
+    const maxSize = 2 * 1024 * 1024; // 2MB
+
+    if (file) {
+
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+
+        document.getElementById("fileInfo").innerText =
+            "Selected File Size: " + sizeMB + " MB";
+
+        if (file.size > maxSize) {
+
+            document.getElementById("errorMsg").innerText =
+                "❌ File size must be less than 2MB";
+
+            this.value = ""; // clear file
+            document.getElementById("fileInfo").innerText = "";
+
+        } else {
+
+            document.getElementById("errorMsg").innerText = "";
+        }
+    }
+});
+</script>
 
 </body>
 </html>
