@@ -2,26 +2,28 @@ package com.revhire.util;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.revhire.exception.FileStorageException;
 public class FileValidator {
 
-    private static final long MAX_SIZE = 2 * 1024 * 1024; // 2MB
+    private static final long MAX_RESUME_SIZE = 2 * 1024 * 1024; // 2MB
 
     public static void validateResume(MultipartFile file) {
 
         if (file.isEmpty()) {
-            throw new RuntimeException("File is empty");
+            throw new FileStorageException("File is empty");
         }
 
-        if (file.getSize() > MAX_SIZE) {
-            throw new RuntimeException("File size exceeds 2MB limit");
+        if (file.getSize() > MAX_RESUME_SIZE) {
+            throw new FileStorageException("File exceeds 2MB limit");
         }
 
-        String type = file.getContentType();
+        String contentType = file.getContentType();
 
-        if (!(type.equals("application/pdf") ||
-              type.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))) {
+        if (contentType == null ||
+                (!contentType.equals("application/pdf")
+                 && !contentType.contains("word"))) {
 
-            throw new RuntimeException("Only PDF or DOCX allowed");
+            throw new FileStorageException("Only PDF/DOC/DOCX allowed");
         }
     }
 }
