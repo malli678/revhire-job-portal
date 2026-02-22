@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.revhire.model.User.Role;
+
 @Entity
 @Table(name = "employers")
 @PrimaryKeyJoinColumn(name = "user_id")

@@ -62,6 +62,7 @@ public class PasswordService {
         tokenRepository.delete(resetToken);
     }
 
+    @Transactional
     public String generateResetToken(String email) {
         Optional<User> userOpt = userRepository.findByEmail(email);
         
@@ -71,8 +72,11 @@ public class PasswordService {
 
         User user = userOpt.get();
         
-        // Delete existing token if any
-        tokenRepository.deleteByUserUserId(user.getUserId());
+        // Delete existing token first
+        Optional<PasswordResetToken> existingToken = tokenRepository.findByUserUserId(user.getUserId());
+        if (existingToken.isPresent()) {
+            tokenRepository.delete(existingToken.get());
+        }
 
         // Generate new token
         String token = UUID.randomUUID().toString();

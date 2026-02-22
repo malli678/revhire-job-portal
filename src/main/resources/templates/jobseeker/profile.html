@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Profile</title>
+    <style>
+        body { font-family:'Segoe UI'; background:#f5f6fa; padding:30px; }
+
+        .card {
+            background:white;
+            padding:25px;
+            border-radius:10px;
+            max-width:700px;
+            margin:auto;
+            box-shadow:0 4px 20px rgba(0,0,0,0.05);
+        }
+
+        .progress {
+            background:#eee;
+            border-radius:20px;
+            overflow:hidden;
+        }
+
+        .progress-bar {
+            background:#667eea;
+            color:white;
+            padding:6px;
+            text-align:center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+
+    <h2 th:text="${user.fullName}"></h2>
+
+    <p>Email: <span th:text="${user.email}"></span></p>
+    <p>Location: <span th:text="${user.location}"></span></p>
+
+    <hr>
+
+    <h3>Profile Completion</h3>
+
+    <div class="progress">
+        <div class="progress-bar"
+             th:style="'width:' + ${completion} + '%'">
+
+            <span th:text="${completion + '%'}"></span>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
