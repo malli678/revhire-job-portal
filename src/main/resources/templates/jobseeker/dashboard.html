@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Job Seeker Dashboard - RevHire</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; }
+
+        .header {
+            background: #007bff;
+            color: white;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .card h2 { margin-top: 0; color: #333; }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            margin-left: 20px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-box {
+            flex: 1;
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .stat-box h3 {
+            font-size: 32px;
+            margin: 0;
+            color: #007bff;
+        }
+
+        .stat-box p {
+            margin: 10px 0 0;
+            color: #666;
+        }
+
+        .menu a {
+            text-decoration: none;
+            margin-right: 15px;
+            color: #007bff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>RevHire - Job Seeker</h1>
+
+    <div class="nav-links">
+        <span th:text="${session.userName}">User</span>
+        <a href="/auth/logout">Logout</a>
+    </div>
+</div>
+
+<div class="container">
+
+    <!-- ✅ Welcome Card -->
+    <div class="card">
+        <h2>Welcome, <span th:text="${user.fullName}">User</span>!</h2>
+        <p>Email: <span th:text="${user.email}">email</span></p>
+        <p>Location: <span th:text="${user.location}">Location</span></p>
+    </div>
+
+    <!-- ✅ Navigation Menu -->
+    <div class="card menu">
+
+        <a href="/jobseeker/search-jobs">Search Jobs</a> |
+        <a href="/jobseeker/saved-jobs">Saved Jobs</a> |
+        <a href="/jobseeker/applications">My Applications</a> |
+        <a href="/jobseeker/profile">Profile</a> |
+        <a href="/jobseeker/resume">Resume</a>
+
+    </div>
+
+    <!-- ✅ Dynamic Stats -->
+    <div class="stats">
+
+        <div class="stat-box">
+            <h3 th:text="${applicationCount}">0</h3>
+            <p>Applications</p>
+        </div>
+
+        <div class="stat-box">
+            <h3 th:text="${savedCount}">0</h3>
+            <p>Saved Jobs</p>
+        </div>
+
+        <div class="stat-box">
+            <h3 th:text="${completion + '%'}">0%</h3>
+            <p>Profile Completion</p>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

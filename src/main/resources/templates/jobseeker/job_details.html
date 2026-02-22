@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Resume</title>
+    <title>Job Details</title>
     <style>
         body { font-family:'Segoe UI'; background:#f5f6fa; padding:30px; }
 
@@ -9,10 +9,12 @@
             background:white;
             padding:25px;
             border-radius:10px;
-            max-width:500px;
+            max-width:900px;
             margin:auto;
             box-shadow:0 4px 20px rgba(0,0,0,0.05);
         }
+
+        .company { color:#667eea; font-weight:bold; }
 
         button {
             background:#667eea;
@@ -20,6 +22,7 @@
             border:none;
             padding:10px 20px;
             border-radius:6px;
+            cursor:pointer;
         }
     </style>
 </head>
@@ -27,21 +30,29 @@
 
 <div class="card">
 
-    <h2>📎 Upload Resume</h2>
+    <h2 th:text="${job.title}"></h2>
 
-    <form method="post"
-          enctype="multipart/form-data"
-          action="/uploadResume">
+    <div class="company" th:text="${job.employer.companyName}"></div>
 
-        <input type="file" name="file" required/>
+    <p>📍 <span th:text="${job.location}"></span></p>
 
-        <br><br>
+    <hr>
 
-        <button>Upload Resume</button>
+    <p th:text="${job.description}"></p>
 
-    </form>
+    <br>
+
+    <button th:attr="onclick=|saveJob(${job.jobId})|">Save Job</button>
 
 </div>
+
+<script>
+function saveJob(id){
+    fetch('/saveJob/' + id,{method:'POST'})
+    .then(r=>r.text())
+    .then(alert);
+}
+</script>
 
 </body>
 </html>

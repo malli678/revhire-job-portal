@@ -7,8 +7,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.revhire.exception.ResourceNotFoundException;
-import com.revhire.model.*;
-import com.revhire.repository.*;
+import com.revhire.model.Education;
+import com.revhire.model.JobSeeker;
+import com.revhire.repository.EducationRepository;
+import com.revhire.repository.JobSeekerRepository;
 
 @Service
 public class EducationService {
@@ -17,15 +19,15 @@ public class EducationService {
     private EducationRepository educationRepository;
 
     @Autowired
-    private UserRepository userRepository;
+    private JobSeekerRepository jobSeekerRepository;
 
     // ✅ Add Education
-    public ResponseEntity<?> addEducation(Long userId, Education education) {
+    public ResponseEntity<?> addEducation(Long jobSeekerId, Education education) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
+                .orElseThrow(() -> new ResourceNotFoundException("JobSeeker not found"));
 
-        education.setUser(user);
+        education.setJobSeeker(jobSeeker);
 
         educationRepository.save(education);
 
@@ -33,12 +35,12 @@ public class EducationService {
     }
 
     // ✅ View Education
-    public ResponseEntity<?> getEducation(Long userId) {
+    public ResponseEntity<?> getEducation(Long jobSeekerId) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
+                .orElseThrow(() -> new ResourceNotFoundException("JobSeeker not found"));
 
-        List<Education> educationList = educationRepository.findByUser(user);
+        List<Education> educationList = educationRepository.findByJobSeeker(jobSeeker);
 
         return ResponseEntity.ok(educationList);
     }

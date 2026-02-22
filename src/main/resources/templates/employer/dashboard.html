@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Employer Dashboard - RevHire</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; }
+        .header { background: #28a745; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .container { max-width: 1200px; margin: 20px auto; padding: 20px; }
+        .card { background: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card h2 { margin-top: 0; color: #333; }
+        .nav-links a { color: white; text-decoration: none; margin-left: 20px; }
+        .stats { display: flex; gap: 20px; }
+        .stat-box { flex: 1; background: #f8f9fa; padding: 20px; text-align: center; border-radius: 8px; }
+        .stat-box h3 { font-size: 32px; margin: 0; color: #28a745; }
+        .stat-box p { margin: 10px 0 0; color: #666; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>RevHire - Employer</h1>
+        <div class="nav-links">
+            <span th:text="${session.userName}">User</span>
+            <a href="/auth/logout">Logout</a>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h2>Welcome, <span th:text="${user.fullName}">Employer</span>!</h2>
+            <p>Company: <span th:text="${user.companyName}">Company</span></p>
+            <p>Industry: <span th:text="${user.industry}">Industry</span></p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <h3>0</h3>
+                <p>Active Jobs</p>
+            </div>
+            <div class="stat-box">
+                <h3>0</h3>
+                <p>Total Applicants</p>
+            </div>
+            <div class="stat-box">
+                <h3>0</h3>
+                <p>Shortlisted</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

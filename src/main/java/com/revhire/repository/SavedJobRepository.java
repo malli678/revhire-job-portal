@@ -6,12 +6,12 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.revhire.model.SavedJob;
-import com.revhire.model.User;
+import com.revhire.model.JobSeeker;
 import com.revhire.model.Job;
 
 public interface SavedJobRepository extends JpaRepository<SavedJob, Long> {
 
-    List<SavedJob> findByUser(User user);
+    List<SavedJob> findByJobSeeker(JobSeeker jobSeeker);
 
-    Optional<SavedJob> findByUserAndJob(User user, Job job);
+    Optional<SavedJob> findByJobSeekerAndJob(JobSeeker jobSeeker, Job job);
 }

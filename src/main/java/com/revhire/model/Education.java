@@ -1,93 +1,53 @@
 package com.revhire.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
+import java.time.LocalDate;
 
 @Entity
+@Table(name = "education")
 public class Education {
-
+    
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    private String degree;
-    private String specialization;
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "edu_seq")
+    @SequenceGenerator(name = "edu_seq", sequenceName = "EDUCATION_SEQ", allocationSize = 1)
+    private Long educationId;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "jobseeker_id", nullable = false)
+    private JobSeeker jobSeeker;
+    
     private String institution;
-    private int startYear;
-    private int endYear;
+    private String degree;
+    private String fieldOfStudy;
+    private LocalDate startDate;
+    private LocalDate endDate;
     private String grade;
-
-    @ManyToOne
-    private User user;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getDegree() {
-		return degree;
-	}
-
-	public void setDegree(String degree) {
-		this.degree = degree;
-	}
-
-	public String getSpecialization() {
-		return specialization;
-	}
-
-	public void setSpecialization(String specialization) {
-		this.specialization = specialization;
-	}
-
-	public String getInstitution() {
-		return institution;
-	}
-
-	public void setInstitution(String institution) {
-		this.institution = institution;
-	}
-
-	public int getStartYear() {
-		return startYear;
-	}
-
-	public void setStartYear(int startYear) {
-		this.startYear = startYear;
-	}
-
-	public int getEndYear() {
-		return endYear;
-	}
-
-	public void setEndYear(int endYear) {
-		this.endYear = endYear;
-	}
-
-	public String getGrade() {
-		return grade;
-	}
-
-	public void setGrade(String grade) {
-		this.grade = grade;
-	}
-
-	public User getUser() {
-		return user;
-	}
-
-	public void setUser(User user) {
-		this.user = user;
-	}
+    private String description;
     
+    public Long getEducationId() { return educationId; }
+    public void setEducationId(Long educationId) { this.educationId = educationId; }
     
-
-    // Getters & Setters
+    public JobSeeker getJobSeeker() { return jobSeeker; }
+    public void setJobSeeker(JobSeeker jobSeeker) { this.jobSeeker = jobSeeker; }
+    
+    public String getInstitution() { return institution; }
+    public void setInstitution(String institution) { this.institution = institution; }
+    
+    public String getDegree() { return degree; }
+    public void setDegree(String degree) { this.degree = degree; }
+    
+    public String getFieldOfStudy() { return fieldOfStudy; }
+    public void setFieldOfStudy(String fieldOfStudy) { this.fieldOfStudy = fieldOfStudy; }
+    
+    public LocalDate getStartDate() { return startDate; }
+    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+    
+    public LocalDate getEndDate() { return endDate; }
+    public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
+    
+    public String getGrade() { return grade; }
+    public void setGrade(String grade) { this.grade = grade; }
+    
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 }

@@ -1,5 +1,10 @@
 package com.revhire.repository;
 
-public interface ApplicationRepository {
+import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
+import com.revhire.model.*;
 
+public interface ApplicationRepository extends JpaRepository<Application, Long> {
+
+    List<Application> findByJobSeeker(JobSeeker jobSeeker);
 }
