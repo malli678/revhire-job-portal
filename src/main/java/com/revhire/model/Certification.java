@@ -23,7 +23,6 @@ public class Certification {
     private String credentialId;
     private String credentialUrl;
     
-    // Getters and Setters
     public Long getCertificationId() { return certificationId; }
     public void setCertificationId(Long certificationId) { this.certificationId = certificationId; }
     

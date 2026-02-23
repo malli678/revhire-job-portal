@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>My Applications</title>
+    <style>
+        body { font-family:'Segoe UI'; background:#f5f6fa; padding:30px; }
+
+        .job-card {
+            background:white;
+            padding:20px;
+            border-radius:10px;
+            margin-bottom:15px;
+            box-shadow:0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .company { color:#667eea; font-weight:bold; }
+
+        .status {
+            background:#667eea;
+            color:white;
+            padding:5px 12px;
+            border-radius:20px;
+            font-size:13px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>📄 My Applications</h2>
+
+<div th:each="app : ${applications}" class="job-card">
+
+    <h3 th:text="${app.job.title}"></h3>
+
+    <div class="company" th:text="${app.job.employer.companyName}"></div>
+
+    <p>
+        Status:
+        <span class="status" th:text="${app.status}"></span>
+    </p>
+
+</div>
+
+</body>
+</html>

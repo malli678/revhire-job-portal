@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.revhire.model.User.Role;
+
 @Entity
 @Table(name = "employers")
 @PrimaryKeyJoinColumn(name = "user_id")
@@ -16,7 +18,7 @@ public class Employer extends User {
     private String companyDescription;
     private String headquarters;
 
-    // IMPORTANT FOR JOB MODULE
+    // Keep jobs list for Job module
     @OneToMany(mappedBy = "employer", cascade = CascadeType.ALL)
     private List<Job> jobs = new ArrayList<>();
 
@@ -25,8 +27,9 @@ public class Employer extends User {
         this.setRole(Role.EMPLOYER);
     }
 
-    // Getters & Setters
-
+    // =========================
+    // Getters and Setters
+    // =========================
     public String getCompanyName() { return companyName; }
     public void setCompanyName(String companyName) { this.companyName = companyName; }
 

@@ -1,38 +1,102 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <title>Post Job - RevHire</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            padding: 20px;
+        }
+
+        .container {
+            width: 650px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            color: #222;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 6px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        textarea {
+            height: 100px;
+        }
+
+        button {
+            margin-top: 15px;
+            background: #28a745;
+            color: white;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #218838;
+        }
+
+    </style>
 </head>
+
 <body>
 
-<h2>Post New Job</h2>
+<div class="container">
 
-<form action="/jobs/save" method="post">
+    <h2>📝 Post New Job</h2>
 
-    Title:
-    <input type="text" name="title"><br><br>
+    <!-- ⭐ CORRECT THYMELEAF FORM -->
+    <form th:action="@{/jobs/save}"
+          method="post"
+          th:object="${jobDto}">
 
-    Description:
-    <textarea name="description"></textarea><br><br>
+        <label>Title</label>
+        <input type="text" th:field="*{title}" required/>
 
-    Location:
-    <input type="text" name="location"><br><br>
+        <label>Description</label>
+        <textarea th:field="*{description}" required></textarea>
 
-    Job Type:
-    <input type="text" name="jobType"><br><br>
+        <label>Location</label>
+        <input type="text" th:field="*{location}" required/>
 
-    Experience Required:
-    <input type="text" name="experienceRequired"><br><br>
+        <label>Job Type</label>
+        <input type="text" th:field="*{jobType}" placeholder="Full-time / Part-time"/>
 
-    Salary Min:
-    <input type="number" name="salaryMin"><br><br>
+        <label>Experience Required</label>
+        <input type="text" th:field="*{experienceRequired}"/>
 
-    Salary Max:
-    <input type="number" name="salaryMax"><br><br>
+        <label>Salary Min</label>
+        <input type="number" th:field="*{salaryMin}" min="0"/>
 
-    <button type="submit">Post Job</button>
+        <label>Salary Max</label>
+        <input type="number" th:field="*{salaryMax}" min="0"/>
 
-</form>
+        <button type="submit">Post Job</button>
+
+    </form>
+
+</div>
 
 </body>
 </html>

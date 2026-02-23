@@ -4,7 +4,6 @@ import com.revhire.dto.EmployerRegistrationDto;
 import com.revhire.dto.JobSeekerRegistrationDto;
 import com.revhire.dto.LoginDto;
 import com.revhire.service.UserService;
-import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,37 +18,22 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class AuthController {
 
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
-    
+
     private final UserService userService;
-    
-    // Explicit constructor (no Lombok needed)
+
     public AuthController(UserService userService) {
         this.userService = userService;
     }
 
+    // ✅ ONLY show login page
     @GetMapping("/login")
     public String showLoginForm(Model model) {
         model.addAttribute("loginDto", new LoginDto());
         return "auth/login";
     }
 
-    @PostMapping("/login")
-    public String processLogin(@Valid @ModelAttribute LoginDto loginDto,
-                               BindingResult result,
-                               HttpSession session,
-                               RedirectAttributes redirectAttributes) {
-
-        if (result.hasErrors()) return "auth/login";
-
-        try {
-            userService.login(loginDto, session);
-            return "redirect:/dashboard";
-        } catch (Exception e) {
-            log.error("Login failed: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/auth/login";
-        }
-    }
+    // ❌ REMOVED manual login method
+    // Spring Security handles POST /auth/login
 
     @GetMapping("/register/seeker")
     public String showJobSeekerRegistrationForm(Model model) {
@@ -107,12 +91,5 @@ public class AuthController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/auth/register/employer";
         }
-    }
-
-    @GetMapping("/logout")
-    public String logout(HttpSession session, RedirectAttributes redirectAttributes) {
-        session.invalidate();
-        redirectAttributes.addFlashAttribute("success", "You have been logged out successfully.");
-        return "redirect:/auth/login";
     }
 }

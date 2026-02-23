@@ -1,44 +1,173 @@
 package com.revhire.controller;
 
-import com.revhire.model.User;
-import com.revhire.service.UserService;
+import com.revhire.exception.UnauthorizedException;
+import com.revhire.model.*;
+import com.revhire.service.*;
 
 import jakarta.servlet.http.HttpSession;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Controller
+@RequestMapping("/jobseeker")
 public class JobSeekerController {
 
-    private final UserService userService;
+	private final ResumeService resumeService;
+	private final JobSeekerService jobSeekerService;
+	private final EducationService educationService;
+	private final UserService userService;
 
-    public JobSeekerController(UserService userService) {
-        this.userService = userService;
-    }
+	public JobSeekerController(ResumeService resumeService, JobSeekerService jobSeekerService,
+			EducationService educationService, UserService userService) {
 
-    // JobSeeker Dashboard
-    @GetMapping("/jobseeker/dashboard")
-    public String dashboard(Model model,
-                            Authentication authentication,
-                            HttpSession session) {
+		this.resumeService = resumeService;
+		this.jobSeekerService = jobSeekerService;
+		this.educationService = educationService;
+		this.userService = userService;
+	}
 
-        String email = authentication.getName();
-        User user = userService.findByEmail(email);
+	// =========================
+	// DASHBOARD
+	// =========================
+	@GetMapping("/dashboard")
+	public String dashboard(Model model, Authentication auth, HttpSession session) {
 
-        session.setAttribute("userId", user.getUserId());
-        session.setAttribute("userName", user.getFullName());
-        session.setAttribute("userRole", user.getRole().name());
+		User user = userService.findByEmail(auth.getName());
 
-        model.addAttribute("user", user);
+		session.setAttribute("userId", user.getUserId());
+		session.setAttribute("userName", user.getFullName());
 
-        return "jobseeker/dashboard";
-    }
+		Long userId = user.getUserId();
 
-    // Search Jobs Page (NEW)
-    @GetMapping("/jobseeker/search-jobs")
-    public String searchJobsPage() {
-        return "jobseeker/search-jobs";
-    }
+		model.addAttribute("user", user);
+		model.addAttribute("savedCount", jobSeekerService.getSavedJobsList(userId).size());
+		model.addAttribute("applicationCount", jobSeekerService.getApplicationsList(userId).size());
+
+		if (user instanceof JobSeeker js) {
+			model.addAttribute("completion", js.calculateProfileCompletion());
+		}
+
+		return "jobseeker/dashboard";
+	}
+
+	// =========================
+	// SEARCH JOBS PAGE
+	// =========================
+	@GetMapping("/search-jobs")
+	public String searchJobs(Model model, HttpSession session) {
+
+	    validateSession(session);
+
+	    model.addAttribute("jobs", jobSeekerService.getAllJobs());
+	    model.addAttribute("role", "JOBSEEKER");
+
+	    return "jobseeker/search-jobs";
+	}
+
+	// =========================
+	// SAVED JOBS PAGE
+	// =========================
+	@GetMapping("/saved-jobs")
+	public String savedJobs(Model model, HttpSession session) {
+
+		Long userId = validateSession(session);
+		model.addAttribute("savedJobs", jobSeekerService.getSavedJobsList(userId));
+
+		return "jobseeker/saved-jobs";
+	}
+	
+	@PostMapping("/applyJob/{jobId}")
+	@ResponseBody
+	public ResponseEntity<?> applyJob(@PathVariable Long jobId,
+	                                   HttpSession session){
+
+	    Long userId = validateSession(session);
+	    return jobSeekerService.applyJob(userId, jobId);
+	}
+
+	// =========================
+	// APPLICATIONS PAGE
+	// =========================
+	@GetMapping("/applications")
+	public String applications(Model model, HttpSession session) {
+
+		Long userId = validateSession(session);
+		model.addAttribute("applications", jobSeekerService.getApplicationsList(userId));
+
+		return "jobseeker/applications";
+	}
+
+	// =========================
+	// JOB DETAILS
+	// =========================
+	@GetMapping("/job/{id}")
+	public String jobDetails(@PathVariable Long id, Model model, HttpSession session) {
+
+		validateSession(session);
+		model.addAttribute("job", jobSeekerService.getJobById(id));
+
+		return "jobseeker/job_details";
+	}
+
+	// =========================
+	// RESUME PAGE
+	// =========================
+	@GetMapping("/resume")
+	public String resumePage(HttpSession session) {
+		validateSession(session);
+		return "jobseeker/resume";
+	}
+
+	// =========================
+	// PROFILE PAGE
+	// =========================
+	@GetMapping("/profile")
+	public String profile(Model model, HttpSession session) {
+
+		Long userId = validateSession(session);
+		model.addAttribute("user", userService.getUserById(userId));
+
+		return "jobseeker/profile";
+	}
+
+	// =========================
+	// UPLOAD RESUME
+	// =========================
+	@PostMapping("/uploadResume")
+	public String uploadResume(@RequestParam MultipartFile file, HttpSession session) {
+
+		validateSession(session);
+		resumeService.uploadResume(file);
+
+		return "redirect:/jobseeker/resume?success";
+	}
+
+	// =========================
+	// SAVE JOB API
+	// =========================
+	@PostMapping("/saveJob/{jobId}")
+	@ResponseBody
+	public ResponseEntity<?> saveJob(@PathVariable Long jobId, HttpSession session) {
+
+		Long userId = validateSession(session);
+		return jobSeekerService.saveJob(userId, jobId);
+	}
+
+	// =========================
+	// SESSION VALIDATION (Reusable)
+	// =========================
+	private Long validateSession(HttpSession session) {
+
+		Long userId = (Long) session.getAttribute("userId");
+		if (userId == null) {
+			throw new UnauthorizedException("Session expired. Please login again.");
+		}
+
+		return userId;
+	}
 }

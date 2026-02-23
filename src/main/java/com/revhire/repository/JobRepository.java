@@ -1,6 +1,7 @@
 package com.revhire.repository;
 
 import com.revhire.model.Job;
+import com.revhire.model.Employer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -9,11 +10,38 @@ import java.util.List;
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long> {
 
-    List<Job> findByLocation(String location);
+    // ===================================
+    // SEARCH BY TITLE / ROLE
+    // ===================================
+    List<Job> findByTitleContainingIgnoreCase(String title);
 
-    List<Job> findByJobType(String jobType);
+    // ===================================
+    // SEARCH BY LOCATION
+    // ===================================
+    List<Job> findByLocationContainingIgnoreCase(String location);
 
-    List<Job> findByTitleContaining(String title);
+    // ===================================
+    // SEARCH BY EXPERIENCE
+    // ===================================
+    List<Job> findByExperienceRequiredContainingIgnoreCase(String experience);
 
+    // ===================================
+    // SEARCH BY JOB TYPE
+    // ===================================
+    List<Job> findByJobTypeIgnoreCase(String jobType);
+
+    // ===================================
+    // SEARCH BY SALARY
+    // ===================================
+    List<Job> findBySalaryMinGreaterThanEqual(Double salary);
+
+    // ===================================
+    // SEARCH BY STATUS
+    // ===================================
     List<Job> findByStatus(String status);
+
+    // ===================================
+    // GET JOBS BY EMPLOYER (VERY IMPORTANT)
+    // ===================================
+    List<Job> findByEmployer(Employer employer);
 }
