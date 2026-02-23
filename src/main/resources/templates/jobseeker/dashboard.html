@@ -1,66 +1,163 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Job Seeker Dashboard - RevHire</title>
+    <title>Dashboard - RevHire</title>
 
     <style>
-        body { font-family: Arial, sans-serif; margin:0; background:#f4f4f4; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin:0;
+            background:#f5f6fa;
+        }
 
+        /* HEADER */
         .header {
-            background:#007bff;
-            color:white;
-            padding:15px 30px;
+            background:white;
+            padding:18px 40px;
             display:flex;
             justify-content:space-between;
             align-items:center;
+            box-shadow:0 2px 10px rgba(0,0,0,0.05);
         }
 
+		.logo {
+		    font-size:22px;
+		    font-weight:bold;
+		    color:#667eea;
+		    text-decoration:none;   /* ✅ removes underline */
+		}
+		.logo:hover {
+		    opacity:0.8;
+		}
+
+        .header-right {
+            display:flex;
+            align-items:center;
+            gap:20px;
+            font-weight:500;
+        }
+
+        .logout {
+            background:#667eea;
+            color:white;
+            padding:8px 18px;
+            border-radius:6px;
+            text-decoration:none;
+            font-size:14px;
+        }
+
+        /* CONTAINER */
         .container {
             max-width:1200px;
-            margin:20px auto;
-            padding:20px;
+            margin:30px auto;
+            padding:0 20px;
         }
 
+        /* CARD */
         .card {
             background:white;
-            padding:20px;
-            margin-bottom:20px;
-            border-radius:8px;
-            box-shadow:0 2px 4px rgba(0,0,0,0.1);
+            padding:25px;
+            border-radius:12px;
+            box-shadow:0 4px 20px rgba(0,0,0,0.04);
+            margin-bottom:25px;
         }
 
-        .card h2 { margin-top:0; }
+        /* WELCOME */
+        .welcome h2 {
+            margin:0;
+            font-size:24px;
+        }
 
-        .nav-links a {
-            color:white;
+        .user-meta {
+            color:#666;
+            margin-top:10px;
+            line-height:1.6;
+        }
+
+        /* NAVIGATION */
+        .menu {
+            display:flex;
+            gap:25px;
+            flex-wrap:wrap;
+            justify-content:space-between;
+        }
+
+        .menu a {
+            flex:1;
+            min-width:180px;
+            background:#edf2ff;
+            padding:14px;
+            border-radius:10px;
             text-decoration:none;
-            margin-left:20px;
+            color:#667eea;
+            font-weight:600;
+            text-align:center;
+            transition:0.2s;
         }
 
+        .menu a:hover {
+            background:#667eea;
+            color:white;
+        }
+
+        .menu a.primary {
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            color:white;
+        }
+
+        .menu a.primary:hover {
+            opacity:0.9;
+        }
+
+        /* STATS */
         .stats {
             display:flex;
             gap:20px;
+            flex-wrap:wrap;
         }
 
         .stat-box {
             flex:1;
-            background:#f8f9fa;
-            padding:20px;
-            text-align:center;
-            border-radius:8px;
+            min-width:250px;
+            background:white;
+            padding:22px;
+            border-radius:12px;
+            box-shadow:0 6px 25px rgba(0,0,0,0.05);
         }
 
         .stat-box h3 {
             font-size:32px;
             margin:0;
-            color:#007bff;
+            color:#667eea;
         }
 
-        .menu a {
-            text-decoration:none;
-            margin-right:15px;
-            color:#007bff;
-            font-weight:bold;
+        .stat-box p {
+            margin:6px 0 0;
+            color:#666;
+            font-weight:500;
+        }
+
+        /* PROFILE STRENGTH */
+        .strength {
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            color:white;
+        }
+
+        .strength h3 {
+            color:white;
+        }
+
+        .progress-container {
+            margin-top:15px;
+            background:rgba(255,255,255,0.3);
+            height:8px;
+            border-radius:10px;
+        }
+
+        .progress-bar {
+            height:100%;
+            background:white;
+            border-radius:10px;
         }
     </style>
 </head>
@@ -69,36 +166,52 @@
 
 <!-- HEADER -->
 <div class="header">
-    <h1>RevHire - Job Seeker</h1>
-
-    <div class="nav-links">
-        <span th:text="${session.userName}">User</span>
-        <a th:href="@{/auth/logout}">Logout</a>
+<a th:href="@{/jobseeker/dashboard}" class="logo">RevHire</a>
+    <div class="header-right">
+        <span>Hi, <span th:text="${session.userName}">User</span></span>
+        <a th:href="@{/auth/logout}" class="logout">Logout</a>
     </div>
 </div>
 
 <div class="container">
 
     <!-- WELCOME -->
-    <div class="card">
+    <div class="card welcome">
+
         <h2>
-            Welcome,
-            <span th:text="${user.fullName}">User</span>!
+            Welcome back,
+            <span th:text="${user.fullName}">User</span> 👋
         </h2>
 
-        <p>Email: <span th:text="${user.email}"></span></p>
-        <p>Location: <span th:text="${user.location}"></span></p>
+        <div class="user-meta">
+            <div>Email: <span th:text="${user.email}"></span></div>
+            <div>Location: <span th:text="${user.location}"></span></div>
+        </div>
+
     </div>
 
-    <!-- MENU -->
+    <!-- PRIMARY NAVIGATION -->
     <div class="card menu">
 
-        <!-- VERY IMPORTANT → use thymeleaf links -->
-        <a th:href="@{/jobs/search-page}">Search Jobs</a> |
-        <a th:href="@{/jobseeker/saved-jobs}">Saved Jobs</a> |
-        <a th:href="@{/jobseeker/applications}">My Applications</a> |
-        <a th:href="@{/jobseeker/profile}">Profile</a> |
-        <a th:href="@{/jobseeker/resume}">Resume</a>
+        <a th:href="@{/jobseeker/search-jobs}" class="primary">
+            🔍 Search Jobs
+        </a>
+
+        <a th:href="@{/jobseeker/saved-jobs}">
+            💾 Saved Jobs
+        </a>
+
+        <a th:href="@{/jobseeker/applications}">
+            📄 My Applications
+        </a>
+
+        <a th:href="@{/jobseeker/profile}">
+            👤 Profile
+        </a>
+
+        <a th:href="@{/jobseeker/resume}">
+            📎 Resume
+        </a>
 
     </div>
 
@@ -107,7 +220,7 @@
 
         <div class="stat-box">
             <h3 th:text="${applicationCount}">0</h3>
-            <p>Applications</p>
+            <p>Applications Submitted</p>
         </div>
 
         <div class="stat-box">
@@ -115,9 +228,15 @@
             <p>Saved Jobs</p>
         </div>
 
-        <div class="stat-box">
+        <div class="stat-box strength">
             <h3 th:text="${completion + '%'}">0%</h3>
-            <p>Profile Completion</p>
+            <p>Profile Strength</p>
+
+            <div class="progress-container">
+                <div class="progress-bar"
+                     th:style="'width:' + ${completion} + '%'">
+                </div>
+            </div>
         </div>
 
     </div>

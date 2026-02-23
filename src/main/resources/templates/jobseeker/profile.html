@@ -2,52 +2,161 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>My Profile</title>
-    <style>
-        body { font-family:'Segoe UI'; background:#f5f6fa; padding:30px; }
 
-        .card {
-            background:white;
-            padding:25px;
-            border-radius:10px;
-            max-width:700px;
-            margin:auto;
-            box-shadow:0 4px 20px rgba(0,0,0,0.05);
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .progress {
-            background:#eee;
-            border-radius:20px;
-            overflow:hidden;
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #eef2ff, #f8fafc);
+            padding: 40px;
+            color: #2d3748;
+        }
+
+        .card {
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            max-width: 750px;
+            margin: auto;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+            transition: 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.10);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        h2 {
+            font-size: 26px;
+            margin-bottom: 4px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .info {
+            margin-top: 15px;
+            line-height: 1.9;
+        }
+
+        .info p {
+            font-size: 15px;
+            color: #4a5568;
+        }
+
+        .info span {
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        hr {
+            margin: 25px 0;
+            border: none;
+            height: 1px;
+            background: #edf2f7;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .progress-container {
+            background: #edf2f7;
+            border-radius: 30px;
+            overflow: hidden;
+            height: 26px;
         }
 
         .progress-bar {
-            background:#667eea;
-            color:white;
-            padding:6px;
-            text-align:center;
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #5a67d8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
+            transition: width 0.4s ease;
+        }
+
+        .badge {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            background: #ebf4ff;
+            color: #5a67d8;
+            font-weight: 600;
         }
     </style>
 </head>
+
 <body>
 
 <div class="card">
 
-    <h2 th:text="${user.fullName}"></h2>
+    <div class="profile-header">
+        <div class="avatar"
+             th:text="${#strings.substring(user.fullName,0,1)}">
+        </div>
 
-    <p>Email: <span th:text="${user.email}"></span></p>
-    <p>Location: <span th:text="${user.location}"></span></p>
+        <div>
+            <h2 th:text="${user.fullName}">User Name</h2>
+            <div class="subtitle">RevHire Job Seeker Profile</div>
+        </div>
+    </div>
+
+    <div class="info">
+        <p>Email: <span th:text="${user.email}">example@email.com</span></p>
+        <p>Location: <span th:text="${user.location}">Chennai</span></p>
+    </div>
 
     <hr>
 
     <h3>Profile Completion</h3>
 
-    <div class="progress">
+    <div class="progress-container">
         <div class="progress-bar"
              th:style="'width:' + ${completion} + '%'">
 
-            <span th:text="${completion + '%'}"></span>
+            <span th:text="${completion + '%'}">75%</span>
 
         </div>
+    </div>
+
+    <div class="badge"
+         th:if="${completion >= 80}">
+        Strong Profile ✅
     </div>
 
 </div>
