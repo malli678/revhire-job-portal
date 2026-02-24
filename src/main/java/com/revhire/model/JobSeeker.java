@@ -20,6 +20,9 @@ public class JobSeeker extends User {
     private String profileSummary;
     private String linkedInProfile;
     private String portfolioUrl;
+    private String objective;
+    private String degree;
+    private String year;
     
     @ElementCollection
     @CollectionTable(name = "jobseeker_skills", joinColumns = @JoinColumn(name = "jobseeker_id"))
@@ -179,7 +182,14 @@ public class JobSeeker extends User {
     public void setSavedJobs(List<SavedJob> savedJobs) {
         this.savedJobs = savedJobs;
     }
-    
+    public String getObjective() { return objective; }
+    public void setObjective(String objective) { this.objective = objective; }
+
+    public String getDegree() { return degree; }
+    public void setDegree(String degree) { this.degree = degree; }
+
+    public String getYear() { return year; }
+    public void setYear(String year) { this.year = year; }
     // Helper method
     public Double calculateProfileCompletion() {
         double completion = 0.0;

@@ -4,157 +4,261 @@
     <title>Resume - RevHire</title>
 
     <style>
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
+
         body {
-            font-family:'Segoe UI';
-            background:#f5f6fa;
-            padding:40px;
+            font-family:'Segoe UI', sans-serif;
+            background:linear-gradient(135deg,#eef2ff,#f8fafc);
+            padding:40px 20px;
+            color:#2d3748;
+        }
+
+        .container{
+            max-width:900px;
+            margin:auto;
         }
 
         .card {
             background:white;
             padding:30px;
-            border-radius:12px;
-            max-width:520px;
-            margin:auto;
-            box-shadow:0 10px 30px rgba(0,0,0,0.05);
+            border-radius:18px;
+            box-shadow:0 15px 40px rgba(0,0,0,0.08);
+            margin-bottom:25px;
+            transition:0.25s ease;
         }
 
-        h2 {
-            margin-top:0;
+        .card:hover{
+            transform:translateY(-2px);
+        }
+
+        h2{
+            font-size:22px;
             margin-bottom:20px;
-            color:#2d3748;
+            color:#1a202c;
         }
 
-        input[type="file"] {
-            margin-top:10px;
+        h3{
+            font-size:17px;
+            margin:18px 0 10px;
+        }
+
+        label{
+            font-size:13px;
+            color:#718096;
+            display:block;
+            margin-bottom:6px;
+        }
+
+        textarea, input{
+            width:100%;
+            padding:12px;
+            border:1px solid #e2e8f0;
+            border-radius:12px;
+            margin-bottom:14px;
+            font-size:14px;
+        }
+
+        textarea{
+            resize:none;
+            height:90px;
+        }
+
+        textarea:focus, input:focus{
+            outline:none;
+            border-color:#667eea;
+            box-shadow:0 0 0 3px rgba(102,126,234,0.15);
         }
 
         button {
-            background:#667eea;
+            background:linear-gradient(135deg,#667eea,#5a67d8);
             color:white;
             border:none;
-            padding:12px 22px;
-            border-radius:8px;
+            padding:12px 20px;
+            border-radius:12px;
             cursor:pointer;
             font-size:14px;
             font-weight:600;
-            transition:0.2s;
         }
 
-        button:hover {
-            background:#5563d6;
+        button:hover{
+            transform:translateY(-1px);
+            box-shadow:0 10px 25px rgba(102,126,234,0.35);
         }
 
-        button:disabled {
-            background:gray;
-            cursor:not-allowed;
-        }
-
-        .error {
-            color:#e53e3e;
-            margin-top:12px;
-            font-size:14px;
-            font-weight:500;
-        }
-
-        .file-info {
-            margin-top:12px;
-            font-size:14px;
-            color:#4a5568;
-        }
-
-        .success {
+        .success{
             background:#e6fffa;
             color:#065f46;
             padding:12px;
-            border-radius:8px;
+            border-radius:12px;
             margin-bottom:18px;
             font-weight:600;
-            animation:fadeIn 0.3s ease-in-out;
+            animation:fadeIn 0.3s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity:0; transform:translateY(-5px); }
-            to { opacity:1; transform:translateY(0); }
+        .resume-preview{
+            background:#f7f9ff;
+            border:1px solid #e6ebff;
+            padding:18px;
+            border-radius:14px;
+            font-size:14px;
+            margin-top:20px;
         }
 
-        .hint {
+        .resume-preview strong{
+            display:block;
+            margin-bottom:10px;
+            font-size:15px;
+            color:#4c51bf;
+        }
+
+        .skills span{
+            display:inline-block;
+            background:#edf2ff;
+            color:#5a67d8;
+            padding:6px 12px;
+            border-radius:20px;
+            font-size:12px;
+            margin:4px 6px 0 0;
+            font-weight:600;
+        }
+
+        .file-box{
+            background:#f8fafc;
+            border:1px dashed #cbd5f5;
+            padding:16px;
+            border-radius:14px;
+            margin-top:18px;
+        }
+
+        .download-btn{
+            display:inline-block;
+            margin-top:10px;
+            background:#667eea;
+            color:white;
+            padding:8px 14px;
+            border-radius:10px;
+            text-decoration:none;
             font-size:13px;
-            color:#718096;
-            margin-top:5px;
         }
+
+        @keyframes fadeIn{
+            from{ opacity:0; transform:translateY(-5px); }
+            to{ opacity:1; transform:translateY(0); }
+        }
+
     </style>
 </head>
+
 <body>
 
-<div class="card">
+<div class="container">
 
-    <h2>📎 Upload Resume</h2>
+    <!-- ✅ BUILDER -->
+    <div class="card">
 
-    <!-- ✅ SUCCESS MESSAGE -->
-    <div th:if="${param.success}" class="success">
-        ✅ Resume uploaded successfully!
+        <h2>Resume Builder</h2>
+
+        <!-- ✅ SUCCESS MESSAGE -->
+        <div th:if="${successMsg}" class="success">
+            <span th:text="${successMsg}"></span>
+        </div>
+
+        <!-- ✅ EMPTY FORM -->
+        <form method="post"
+              th:action="@{/jobseeker/saveResumeDetails}"
+              th:object="${resumeForm}">
+
+            <h3>Career Objective</h3>
+
+            <label>Objective</label>
+            <textarea th:field="*{objective}"></textarea>
+
+            <h3>Education</h3>
+
+            <label>Degree</label>
+            <input th:field="*{degree}"/>
+
+            <label>Year</label>
+            <input th:field="*{year}"/>
+
+            <h3>Skills</h3>
+
+            <label>Skills (comma separated)</label>
+            <input th:field="*{skills}"/>
+
+            <button type="submit">Save Resume Details</button>
+
+        </form>
+
+        <!-- ✅ SAVED PREVIEW -->
+        <div th:if="${resumePreview.objective != null}" class="resume-preview">
+
+            <strong>Saved Resume Preview</strong>
+
+            <p><b>Objective:</b>
+                <span th:text="${resumePreview.objective}"></span>
+            </p>
+
+            <p><b>Degree:</b>
+                <span th:text="${resumePreview.degree}"></span>
+            </p>
+
+            <p><b>Year:</b>
+                <span th:text="${resumePreview.year}"></span>
+            </p>
+
+            <div class="skills">
+                <span th:each="skill : ${#strings.arraySplit(resumePreview.skills, ',')}"
+                      th:text="${skill}">
+                </span>
+            </div>
+        </div>
+
     </div>
 
-    <form method="post"
-          enctype="multipart/form-data"
-          th:action="@{/jobseeker/uploadResume}">
+    <!-- ✅ FILE -->
+    <div class="card">
 
-        <input type="file" id="resumeFile" name="file" required/>
+        <h2>Resume File</h2>
 
-        <div class="hint">Allowed size: Max 2MB</div>
+        <div th:if="${param.success}" class="success">
+            Resume uploaded successfully ✅
+        </div>
 
-        <div id="fileInfo" class="file-info"></div>
-        <div id="errorMsg" class="error"></div>
+        <form method="post"
+              enctype="multipart/form-data"
+              th:action="@{/jobseeker/uploadResume}">
 
-        <br>
+            <input type="file" name="file" required/>
+            <button type="submit">Upload Resume</button>
 
-        <button id="uploadBtn" type="submit">Upload Resume</button>
+        </form>
 
-    </form>
+        <div th:if="${resumeFile != null}" class="file-box">
+
+            <b>Previously Uploaded Resume</b>
+
+            <p th:text="${resumeFile}"></p>
+
+            <a th:href="@{/jobseeker/downloadResume}" class="download-btn">
+                Download Resume
+            </a>
+        </div>
+
+    </div>
 
 </div>
 
-<!-- ✅ VALIDATION SCRIPT -->
 <script>
-
-const fileInput = document.getElementById("resumeFile");
-const errorMsg = document.getElementById("errorMsg");
-const fileInfo = document.getElementById("fileInfo");
-const uploadBtn = document.getElementById("uploadBtn");
-
-fileInput.addEventListener("change", function () {
-
-    const file = this.files[0];
-    const maxSize = 2 * 1024 * 1024; // 2MB
-
-    if (file) {
-
-        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
-
-        fileInfo.innerText =
-            "📄 " + file.name + " (" + sizeMB + " MB)";
-
-        if (file.size > maxSize) {
-
-            errorMsg.innerText = "❌ File size must be less than 2MB";
-            uploadBtn.disabled = true;
-
-        } else {
-
-            errorMsg.innerText = "";
-            uploadBtn.disabled = false;
-        }
-    }
-});
-
-
-// ✅ Auto hide success message
 setTimeout(() => {
-    const success = document.querySelector(".success");
-    if(success) success.style.display = "none";
+    const msg = document.querySelector(".success");
+    if(msg) msg.style.display = "none";
 }, 3000);
-
 </script>
 
 </body>

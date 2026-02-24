@@ -8,6 +8,9 @@ public class Resume {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @OneToOne
+    @JoinColumn(name = "jobseeker_id")
+    private JobSeeker jobSeeker;
 
     private String fileName;
     private String fileType;
@@ -49,4 +52,13 @@ public class Resume {
     public void setFilePath(String filePath) {
         this.filePath = filePath;
     }
+
+	public JobSeeker getJobSeeker() {
+		return jobSeeker;
+	}
+
+	public void setJobSeeker(JobSeeker jobSeeker) {
+		this.jobSeeker = jobSeeker;
+	}
+    
 }

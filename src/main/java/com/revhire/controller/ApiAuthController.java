@@ -3,12 +3,12 @@ package com.revhire.controller;
 import com.revhire.model.User;
 import com.revhire.repository.UserRepository;
 import com.revhire.util.JwtUtil;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
@@ -20,21 +20,23 @@ public class ApiAuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-    private final UserDetailsService userDetailsService;
     private final UserRepository userRepository;
 
     public ApiAuthController(AuthenticationManager authenticationManager,
-                            JwtUtil jwtUtil,
-                            UserDetailsService userDetailsService,
-                            UserRepository userRepository) {
+                             JwtUtil jwtUtil,
+                             UserRepository userRepository) {
+
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
         this.userRepository = userRepository;
     }
 
+    // =========================
+    // LOGIN (JSON → JWT)
+    // =========================
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> credentials) {
+
         try {
             String email = credentials.get("email");
             String password = credentials.get("password");
@@ -43,10 +45,19 @@ public class ApiAuthController {
                     new UsernamePasswordAuthenticationToken(email, password)
             );
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-            User user = userRepository.findByEmail(email).orElse(null);
+            // ✅ Fetch user safely ⭐⭐⭐
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-            String token = jwtUtil.generateToken(email, user.getRole().name());
+            // ✅ Extract role from Spring Security ⭐⭐⭐
+            String role = authentication.getAuthorities()
+                    .stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .findFirst()
+                    .orElse(user.getRole().name());
+
+            // ✅ Generate JWT ⭐⭐⭐
+            String token = jwtUtil.generateToken(email, role);
 
             Map<String, Object> response = new HashMap<>();
             response.put("success", true);
@@ -54,37 +65,49 @@ public class ApiAuthController {
             response.put("userId", user.getUserId());
             response.put("email", user.getEmail());
             response.put("fullName", user.getFullName());
-            response.put("role", user.getRole().name());
+            response.put("role", role);
 
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
+
             Map<String, Object> response = new HashMap<>();
             response.put("success", false);
             response.put("message", "Invalid email or password");
+
             return ResponseEntity.status(401).body(response);
         }
     }
 
+    // =========================
+    // TOKEN VALIDATION
+    // =========================
     @GetMapping("/validate")
-    public ResponseEntity<Map<String, Object>> validateToken(@RequestHeader("Authorization") String token) {
+    public ResponseEntity<Map<String, Object>> validateToken(
+            @RequestHeader("Authorization") String token) {
+
         try {
+
             if (token.startsWith("Bearer ")) {
                 token = token.substring(7);
             }
 
-            String username = jwtUtil.extractUsername(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            if (jwtUtil.validateToken(token)) {
 
-            if (jwtUtil.validateToken(token, userDetails)) {
-                User user = userRepository.findByEmail(username).orElse(null);
+                String email = jwtUtil.extractUsername(token);
+
+                User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("User not found"));
+
                 Map<String, Object> response = new HashMap<>();
                 response.put("valid", true);
                 response.put("userId", user.getUserId());
                 response.put("email", user.getEmail());
                 response.put("role", user.getRole().name());
+
                 return ResponseEntity.ok(response);
             }
+
         } catch (Exception e) {
             // Token invalid
         }
