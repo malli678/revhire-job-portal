@@ -1,20 +1,129 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-<title>Edit Job</title>
+<title>Edit Job - RevHire</title>
+
+<style>
+
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f4f4;
+    padding:20px;
+}
+
+.container{
+    max-width:700px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:10px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+h2{
+    margin-top:0;
+    color:#333;
+}
+
+label{
+    display:block;
+    margin-top:12px;
+    font-weight:bold;
+    color:#444;
+}
+
+input, textarea{
+    width:100%;
+    padding:10px;
+    margin-top:6px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    font-size:14px;
+}
+
+textarea{
+    min-height:120px;
+    resize:vertical;
+}
+
+.btn{
+    margin-top:18px;
+    background:#28a745;
+    color:white;
+    border:none;
+    padding:10px 18px;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:14px;
+}
+
+.btn:hover{
+    background:#218838;
+}
+
+.back{
+    display:inline-block;
+    margin-bottom:15px;
+    text-decoration:none;
+    background:#6c757d;
+    color:white;
+    padding:7px 14px;
+    border-radius:6px;
+}
+
+.back:hover{
+    background:#5a6268;
+}
+
+</style>
 </head>
+
 <body>
 
-<h2>Edit Job</h2>
+<div class="container">
 
-<form th:action="@{/jobs/{id}(id=${job.jobId})}" method="post" th:object="${jobDto}">
-<input type="text" th:field="*{title}" />
-<textarea th:field="*{description}"></textarea>
-<input type="text" th:field="*{location}" />
-<input type="text" th:field="*{jobType}" />
+<a href="/employer/manage-jobs" class="back">⬅ Back to Manage Jobs</a>
 
-<button type="submit">Update Job</button>
+<h2>✏ Edit Job</h2>
+
+<!-- ⭐ FIXED FORM ACTION -->
+<form th:action="@{'/employer/job/update/' + ${job.jobId}}"
+      method="post">
+
+    <label>Job Title</label>
+    <input type="text" name="title"
+           th:value="${job.title}" required/>
+
+    <label>Description</label>
+    <textarea name="description"
+              th:text="${job.description}" required></textarea>
+
+    <label>Location</label>
+    <input type="text" name="location"
+           th:value="${job.location}" required/>
+
+    <label>Job Type</label>
+    <input type="text" name="jobType"
+           th:value="${job.jobType}" required/>
+
+    <label>Experience Required</label>
+    <input type="text" name="experienceRequired"
+           th:value="${job.experienceRequired}" />
+
+    <label>Salary Min</label>
+    <input type="number" name="salaryMin"
+           th:value="${job.salaryMin}" />
+
+    <label>Salary Max</label>
+    <input type="number" name="salaryMax"
+           th:value="${job.salaryMax}" />
+
+    <button class="btn" type="submit">Update Job</button>
+
 </form>
+
+</div>
 
 </body>
 </html>

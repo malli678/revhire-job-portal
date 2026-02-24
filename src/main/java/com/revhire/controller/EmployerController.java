@@ -32,7 +32,7 @@ public class EmployerController {
     }
 
     // =========================
-    // DASHBOARD  ⭐ FIXED
+    // DASHBOARD
     // =========================
     @GetMapping("/dashboard")
     public String dashboard(Model model,
@@ -49,15 +49,12 @@ public class EmployerController {
             return "redirect:/auth/login";
         }
 
-        // session values
         session.setAttribute("userId", user.getUserId());
         session.setAttribute("userName", user.getFullName());
         session.setAttribute("userRole", user.getRole().name());
 
-        // send user
         model.addAttribute("user", user);
 
-        // ⭐ IMPORTANT FIX STARTS HERE
         Employer employer =
                 employerService.getEmployerByEmail(authentication.getName());
 
@@ -70,9 +67,8 @@ public class EmployerController {
                         .count();
 
         model.addAttribute("activeJobs", activeJobs);
-        model.addAttribute("totalApplicants", 0); // future feature
-        model.addAttribute("shortlisted", 0);     // future feature
-        // ⭐ IMPORTANT FIX ENDS HERE
+        model.addAttribute("totalApplicants", 0);
+        model.addAttribute("shortlisted", 0);
 
         return "employer/dashboard";
     }
@@ -94,7 +90,7 @@ public class EmployerController {
     }
 
     // =========================
-    // EDIT JOB
+    // EDIT JOB API (REST)
     // =========================
     @PutMapping("/job/{id}")
     @ResponseBody
@@ -141,7 +137,7 @@ public class EmployerController {
     }
 
     // =========================
-    // Manage Jobs Page
+    // MANAGE JOBS PAGE
     // =========================
     @GetMapping("/manage-jobs")
     public String manageJobs(Model model,
@@ -155,14 +151,14 @@ public class EmployerController {
 
         return "employer/manage-jobs";
     }
-    
+
+    // =========================
+    // SEARCH JOBS PAGE
+    // =========================
     @GetMapping("/search-jobs")
     public String searchJobs(Model model) {
 
-        // load all jobs
         model.addAttribute("jobs", jobService.getAllJobs());
-
-        // ⭐ VERY IMPORTANT (ADD THIS)
         model.addAttribute("role", "EMPLOYER");
 
         return "jobseeker/search-jobs";
@@ -175,8 +171,10 @@ public class EmployerController {
     public String postJobPage() {
         return "employer/post-job";
     }
-    
-    //  company profile 
+
+    // =========================
+    // COMPANY PROFILE
+    // =========================
     @GetMapping("/company-profile")
     public String companyProfile(Model model, Authentication auth) {
 
@@ -187,12 +185,41 @@ public class EmployerController {
 
         return "employer/company-profile";
     }
-    
+
+    // =========================
+    // VIEW JOB DETAILS
+    // =========================
     @GetMapping("/job/{id}")
     public String viewJob(@PathVariable Long id, Model model) {
 
         model.addAttribute("job", jobService.getJobById(id));
 
         return "employer/job-details";
+    }
+
+    // =========================
+    // OPEN EDIT PAGE
+    // =========================
+    @GetMapping("/job/edit/{id}")
+    public String openEditJob(@PathVariable Long id, Model model) {
+
+        Job job = jobService.getJobById(id);
+
+        model.addAttribute("job", job);
+        model.addAttribute("jobDto", job);
+
+        return "employer/edit-job";
+    }
+
+    // =========================
+    // UPDATE JOB (WEB FORM)
+    // =========================
+    @PostMapping("/job/update/{id}")
+    public String updateJobFromForm(@PathVariable Long id,
+                                    @ModelAttribute Job job) {
+
+        employerService.updateJob(id, job);
+
+        return "redirect:/employer/manage-jobs";
     }
 }
