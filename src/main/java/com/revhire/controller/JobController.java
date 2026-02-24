@@ -1,5 +1,6 @@
 package com.revhire.controller;
 
+import com.revhire.dto.JobDto;
 import com.revhire.model.Employer;
 import com.revhire.model.Job;
 import com.revhire.service.EmployerService;
@@ -8,6 +9,7 @@ import com.revhire.service.JobService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.ui.Model;
 
 import java.util.List;
 
@@ -24,42 +26,111 @@ public class JobController {
         this.employerService = employerService;
     }
 
+    // =========================
+    // WEB: SAVE JOB (Thymeleaf Form)
+    // =========================
     @PostMapping("/save")
     public String saveJob(@ModelAttribute Job job,
                           Authentication authentication) {
 
         String email = authentication.getName();
         Employer employer = employerService.getEmployerByEmail(email);
-        job.setEmployer(employer);
-        jobService.saveJob(job);
+
+        jobService.saveJob(job, employer);
 
         return "redirect:/employer/manage-jobs";
     }
 
-    @GetMapping("/all")
+    // =========================
+    // REST: POST JOB (JSON)
+    // =========================
+    @PostMapping
     @ResponseBody
-    public List<Job> getAllJobs() {
-        return jobService.getAllJobs();
+    public Job postJob(@RequestBody JobDto dto,
+                       Authentication authentication) {
+
+        String email = authentication.getName();
+        Employer employer = employerService.getEmployerByEmail(email);
+
+        return jobService.postJob(dto, employer);
     }
 
-    @GetMapping("/{id}")
+    // =========================
+    // REST: EDIT JOB
+    // =========================
+    @PutMapping("/{id}")
     @ResponseBody
-    public Job getJob(@PathVariable Long id) {
-        return jobService.getJobById(id);
+    public Job editJob(@PathVariable Long id,
+                       @RequestBody JobDto dto) {
+        return jobService.editJob(id, dto);
     }
 
-    @DeleteMapping("/delete/{id}")
+    // =========================
+    // REST: DELETE JOB
+    // =========================
+    @DeleteMapping("/{id}")
     @ResponseBody
-    public String deleteJob(@PathVariable Long id) {
+    public void deleteJob(@PathVariable Long id) {
         jobService.deleteJob(id);
-        return "Job Deleted Successfully";
     }
 
-    @PutMapping("/status/{id}/{status}")
+    // =========================
+    // STATUS UPDATES
+    // =========================
+    @PutMapping("/{id}/close")
     @ResponseBody
-    public Job updateStatus(@PathVariable Long id,
-                            @PathVariable String status) {
-        return jobService.updateStatus(id, status);
+    public Job closeJob(@PathVariable Long id) {
+        return jobService.closeJob(id);
+    }
+
+    @PutMapping("/{id}/reopen")
+    @ResponseBody
+    public Job reopenJob(@PathVariable Long id) {
+        return jobService.reopenJob(id);
+    }
+
+    @PutMapping("/{id}/filled")
+    @ResponseBody
+    public Job markFilled(@PathVariable Long id) {
+        return jobService.markFilled(id);
+    }
+
+    // =========================
+    // SEARCH PAGE (WEB)
+    // =========================
+    @GetMapping("/search-page")
+    public String searchJobsPage(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) Double salary,
+            Model model) {
+
+        List<Job> jobs = jobService.getAllJobs();
+
+        if (title != null && !title.isEmpty()) {
+            jobs = jobService.searchByRole(title);
+        }
+
+        if (location != null && !location.isEmpty()) {
+            jobs = jobService.searchByLocation(location);
+        }
+
+        if (salary != null) {
+            jobs = jobService.searchBySalary(salary);
+        }
+
+        model.addAttribute("jobs", jobs);
+
+        return "jobseeker/search-jobs";
+    }
+
+    // =========================
+    // SEARCH APIs
+    // =========================
+    @GetMapping("/search/role")
+    @ResponseBody
+    public List<Job> searchByRole(@RequestParam String title) {
+        return jobService.searchByRole(title);
     }
 
     @GetMapping("/search/location")
@@ -72,5 +143,43 @@ public class JobController {
     @ResponseBody
     public List<Job> searchByTitle(@RequestParam String title) {
         return jobService.searchByTitle(title);
+    }
+
+    // =========================
+    // GET ALL JOBS
+    // =========================
+    @GetMapping("/all")
+    @ResponseBody
+    public List<Job> getAllJobs() {
+        return jobService.getAllJobs();
+    }
+
+    // =========================
+    // OPEN POST JOB PAGE
+    // =========================
+    @GetMapping("/post")
+    public String openPostJobPage(Model model) {
+        model.addAttribute("jobDto", new JobDto());
+        return "employer/post-job";
+    }
+
+    // =========================
+    // EMPLOYER VIEW JOB DETAILS
+    // =========================
+    @GetMapping("/{id}")
+    public String viewEmployerJob(@PathVariable Long id, Model model) {
+        model.addAttribute("job", jobService.getJobById(id));
+        return "employer/job-details";
+    }
+
+    // =========================
+    // JOB SEEKER VIEW JOB DETAILS
+    // =========================
+    @GetMapping("/view/{id}")
+    public String viewJobDetails(@PathVariable Long id,
+                                 Model model) {
+
+        model.addAttribute("job", jobService.getJobById(id));
+        return "jobseeker/job-details";
     }
 }

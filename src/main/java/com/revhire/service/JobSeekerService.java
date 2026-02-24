@@ -1,5 +1,6 @@
 package com.revhire.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,34 @@ public class JobSeekerService {
 
         return ResponseEntity.ok("Job saved successfully");
     }
+    
+    public ResponseEntity<String> applyJob(Long userId, Long jobId) {
 
+        JobSeeker jobSeeker = jobSeekerRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("JobSeeker not found"));
+
+        Job job = jobRepository.findById(jobId)
+                .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        // ✅ CHECK DUPLICATE FIRST
+        boolean alreadyApplied =
+                applicationRepository.findByJobAndJobSeeker(job, jobSeeker).isPresent();
+
+        if (alreadyApplied) {
+            return ResponseEntity.badRequest()
+                    .body("Already applied for this job");
+        }
+
+        Application application = new Application();
+        application.setJob(job);
+        application.setJobSeeker(jobSeeker);
+        application.setAppliedDate(LocalDateTime.now());
+        application.setStatus(Application.ApplicationStatus.APPLIED);
+
+        applicationRepository.save(application);
+
+        return ResponseEntity.ok("Applied Successfully");
+    }
     public List<Job> getAllJobs() {
         return jobRepository.findAll();
     }
@@ -66,5 +94,16 @@ public class JobSeekerService {
     public Job getJobById(Long id) {
         return jobRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
+    }
+    public void withdrawApplication(Long applicationId, String notes) {
+
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new RuntimeException("Application not found"));
+
+        application.setStatus(Application.ApplicationStatus.WITHDRAWN);
+        application.setNotes(notes);
+
+        applicationRepository.save(application);
+     
     }
 }

@@ -3,6 +3,7 @@ package com.revhire.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.revhire.service.ApplicationService;
 import com.revhire.model.Application;
@@ -11,8 +12,8 @@ import java.util.List;
 
 import org.springframework.ui.Model;
 
-//@RestController
 @Controller
+
 
 @RequestMapping("/applications")
 public class ApplicationController {
@@ -20,57 +21,102 @@ public class ApplicationController {
     @Autowired
     private ApplicationService applicationService;
 
-
-    
+    // ================= APPLY =================
     @PostMapping("/apply")
+   // @GetMapping("/apply")
     public String applyJob(@RequestParam Long jobId,
                            @RequestParam Long jobSeekerId) {
 
         applicationService.applyJob(jobId, jobSeekerId);
 
-        return "redirect:/applications/my-applications?jobSeekerId=" + jobSeekerId;
+        return "redirect:/applications/jobseeker/" + jobSeekerId;
     }
 
-    // WITHDRAW
+    // ================= WITHDRAW =================
     @PostMapping("/withdraw")
-    public String withdraw(@RequestParam Long applicationId) {
+    public String withdraw(@RequestParam Long applicationId,
+                           @RequestParam Long jobSeekerId) {
 
         applicationService.withdrawApplication(applicationId);
-        return "Application withdrawn successfully";
+
+        return "redirect:/applications/jobseeker/" + jobSeekerId;
     }
 
-    // UPDATE STATUS
-    @PostMapping("/update-status")
-    public String updateStatus(@RequestParam Long applicationId,
-                               @RequestParam Application.ApplicationStatus status) {
+    // ================= SHORTLIST =================
+    @PostMapping("/shortlist")
+    public String shortlist(
+            @RequestParam Long applicationId,
+            @RequestParam Long jobId,
+            @RequestParam String notes) {
 
-        applicationService.updateApplicationStatus(applicationId, status);
-        return "Status updated successfully";
+        applicationService.shortlistCandidate(applicationId, notes);
+
+        return "redirect:/applications/job/" + jobId;
     }
-    
-    //BULK UPDATE
+
+    // ================= REJECT =================
+    @PostMapping("/reject")
+    public String reject(@RequestParam Long applicationId,
+                         @RequestParam Long jobId,
+                         @RequestParam String notes) {
+
+        applicationService.rejectCandidate(applicationId, notes);
+
+        return "redirect:/applications/job/" + jobId;
+    }
+
+    // ================= BULK UPDATE =================
     @PostMapping("/bulk-update")
-    public String bulkUpdate(@RequestParam List<Long> applicationIds,
-                             @RequestParam Application.ApplicationStatus status) {
+    public String bulkUpdate(
+            @RequestParam(value = "applicationIds", required = false)
+            List<Long> applicationIds,
 
-        applicationService.bulkUpdateStatus(applicationIds, status);
-        return "Bulk status updated";
+            @RequestParam(value = "status", required = false)
+            String status,
+
+            @RequestParam(value = "bulkNote", required = false)
+            String bulkNote,
+
+            RedirectAttributes redirectAttributes) {
+
+        if (status == null || status.isEmpty()) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Please select a bulk action.");
+            return "redirect:/employer/dashboard";
+        }
+
+        if (applicationIds == null || applicationIds.isEmpty()) {
+            redirectAttributes.addFlashAttribute(
+                    "errorMessage",
+                    "Please select at least one applicant.");
+            return "redirect:/employer/dashboard";
+        }
+
+        Application.ApplicationStatus newStatus =
+                Application.ApplicationStatus.valueOf(status);
+
+        applicationService.bulkUpdateStatus(
+                applicationIds, newStatus, bulkNote);
+
+        redirectAttributes.addFlashAttribute(
+                "successMessage",
+                "Bulk update successful.");
+
+        return "redirect:/employer/dashboard";
     }
-    
-    //ADDING NOTES
+    // ================= ADD NOTES =================
     @PostMapping("/add-notes")
     public String addNotes(@RequestParam Long applicationId,
-                           @RequestParam String notes) {
+                           @RequestParam String notes,
+                           @RequestParam Long jobId) {
 
         applicationService.addNotes(applicationId, notes);
-        return "Notes added";
+
+        return "redirect:/applications/job/" + jobId;
     }
 
-
-    // VIEW APPLICATIONS BY JOB SEEKER
-
-    
-    
+    // ================= VIEW JOB SEEKER APPLICATIONS =================
     @GetMapping("/jobseeker/{jobSeekerId}")
     public String viewApplicationsByJobSeeker(
             @PathVariable Long jobSeekerId,
@@ -84,10 +130,7 @@ public class ApplicationController {
         return "jobseeker/applications";
     }
 
-    // VIEW APPLICATIONS BY JOB
-
-    
-    
+    // ================= VIEW JOB APPLICANTS =================
     @GetMapping("/job/{jobId}")
     public String viewApplicationsByJob(
             @PathVariable Long jobId,
@@ -100,6 +143,4 @@ public class ApplicationController {
 
         return "employer/applicants";
     }
-    
-    
 }

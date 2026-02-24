@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<title>Job Details</title>
+
+<style>
+body{
+    font-family:Arial;
+    background:#f4f4f4;
+    padding:30px;
+}
+.card{
+    max-width:800px;
+    margin:auto;
+    background:white;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+h2{margin-top:0;}
+.back{
+    background:#28a745;
+    color:white;
+    padding:8px 15px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    text-decoration:none;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+<h2 th:text="${job.title}"></h2>
+
+<p><b>Company:</b> <span th:text="${job.employer.companyName}"></span></p>
+<p><b>Location:</b> <span th:text="${job.location}"></span></p>
+<p><b>Type:</b> <span th:text="${job.jobType}"></span></p>
+<p><b>Experience:</b> <span th:text="${job.experienceRequired}"></span></p>
+<p><b>Salary:</b> ₹ <span th:text="${job.salaryMin}"></span>
+ - ₹ <span th:text="${job.salaryMax}"></span></p>
+
+<hr>
+
+<p th:text="${job.description}"></p>
+
+<br>
+
+<a href="/employer/manage-jobs" class="back">⬅ Back</a>
+
+</div>
+
+</body>
+</html>

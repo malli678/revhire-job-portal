@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Search Jobs - RevHire</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family:Arial;
+    background:#f3f2ef;
+}
+
+/* MAIN LAYOUT */
+.wrapper{
+    max-width:1200px;
+    margin:auto;
+    padding:20px;
+    display:grid;
+    grid-template-columns:280px 1fr;
+    gap:20px;
+}
+
+/* LEFT FILTER PANEL */
+.filters{
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    height:fit-content;
+    position:sticky;
+    top:15px;
+}
+
+.filters h3{
+    margin-top:0;
+}
+
+.filters input{
+    width:100%;
+    margin-bottom:10px;
+    padding:10px;
+    border:1px solid #ccc;
+    border-radius:6px;
+}
+
+.filters button{
+    width:100%;
+    background:#0a66c2;
+    color:white;
+    border:none;
+    padding:10px;
+    border-radius:6px;
+    cursor:pointer;
+}
+
+/* JOB LIST */
+.jobs{
+    display:flex;
+    flex-direction:column;
+    gap:15px;
+}
+
+/* CARD */
+.job-card{
+    background:white;
+    padding:18px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    transition:0.2s;
+}
+
+.job-card:hover{
+    transform:translateY(-3px);
+}
+
+.title{
+    font-size:20px;
+    font-weight:bold;
+    color:#222;
+}
+
+.company{
+    color:#0a66c2;
+    font-weight:bold;
+    margin:6px 0;
+}
+
+.badge{
+    display:inline-block;
+    background:#eef3f8;
+    padding:4px 10px;
+    border-radius:12px;
+    font-size:12px;
+    margin-right:6px;
+}
+
+.salary{
+    margin-top:10px;
+    font-size:18px;
+    font-weight:bold;
+}
+
+/* BUTTONS */
+.btn{
+    display:inline-block;
+    margin-top:10px;
+    background:#0a66c2;
+    color:white;
+    padding:8px 12px;
+    border-radius:6px;
+    text-decoration:none;
+}
+
+.back{
+    margin-top:20px;
+    display:inline-block;
+    background:#6c757d;
+}
+
+/* MOBILE */
+@media(max-width:900px){
+.wrapper{
+grid-template-columns:1fr;
+}
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<!-- LEFT FILTER -->
+<form method="get"
+      th:action="@{/jobs/search-page}"
+      class="filters">
+
+<h3>🔎 Filters</h3>
+
+<input name="title" placeholder="Job Role"/>
+<input name="location" placeholder="Location"/>
+<input name="salary" placeholder="Min Salary"/>
+
+<button>Search Jobs</button>
+
+<a th:if="${role=='JOBSEEKER'}"
+   href="/jobseeker/dashboard"
+   class="btn back">⬅ Back</a>
+
+<a th:if="${role=='EMPLOYER'}"
+   href="/employer/dashboard"
+   class="btn back">⬅ Back</a>
+
+</form>
+
+<!-- RIGHT JOB LIST -->
+<div class="jobs">
+
+<div class="job-card" th:each="job : ${jobs}">
+
+<div class="title" th:text="${job.title}"></div>
+
+<div class="company"
+     th:text="${job.employer!=null ? job.employer.companyName : 'Company'}">
+</div>
+
+<p th:text="${job.description}"></p>
+
+<span class="badge" th:text="${job.jobType}"></span>
+<span class="badge" th:text="${job.experienceRequired}"></span>
+
+<div class="salary">
+₹ <span th:text="${job.salaryMin}"></span>
+ -
+₹ <span th:text="${job.salaryMax}"></span>
+</div>
+
+<a th:if="${role=='JOBSEEKER'}"
+   th:href="@{'/jobseeker/job/' + ${job.jobId}}"
+   class="btn">
+View Details
+</a>
+
+<a th:if="${role=='EMPLOYER'}"
+   th:href="@{'/employer/job/' + ${job.jobId}}"
+   class="btn">
+View Details
+</a>
+<a th:href="@{/jobs/view/{id}(id=${job.jobId})}">
+    <button style="background:green;color:white;">
+        View & Apply
+    </button>
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>

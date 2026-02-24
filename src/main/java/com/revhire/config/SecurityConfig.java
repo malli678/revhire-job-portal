@@ -49,9 +49,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/**", "/auth/**")
-            )
+        .csrf(csrf -> csrf
+                .ignoringRequestMatchers(
+                    "/api/**",
+                    "/auth/**",
+                    "/jobs/**",
+                    "/jobseeker/**"   // ✅ ADD THIS
+                )
+        )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .maximumSessions(1)
@@ -61,6 +66,10 @@ public class SecurityConfig {
                 .securityContextRepository(securityContextRepository())
             )
             .authorizeHttpRequests(authz -> authz
+            
+            	
+            		
+            		
                 .requestMatchers("/", "/auth/**", "/css/**", "/js/**", "/images/**", "/api/**").permitAll()
                 .requestMatchers("/jobseeker/**").hasRole("JOBSEEKER")
                 .requestMatchers("/employer/**").hasRole("EMPLOYER")

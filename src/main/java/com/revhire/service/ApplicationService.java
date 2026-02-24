@@ -17,113 +17,143 @@ import java.util.List;
 @Service
 public class ApplicationService {
 
-    @Autowired
-    private ApplicationRepository applicationRepository;
+	@Autowired
+	private ApplicationRepository applicationRepository;
 
-    @Autowired
-    private JobRepository jobRepository;
+	@Autowired
+	private JobRepository jobRepository;
 
-    @Autowired
-    private JobSeekerRepository jobSeekerRepository;
+	@Autowired
+	private JobSeekerRepository jobSeekerRepository;
 
-    // APPLY JOB
-    public void applyJob(Long jobId, Long jobSeekerId) {
+	// APPLY JOB
+	public void applyJob(Long jobId, Long jobSeekerId) {
 
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+		Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
 
-        JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
-                .orElseThrow(() -> new RuntimeException("JobSeeker not found"));
+		JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
+				.orElseThrow(() -> new RuntimeException("JobSeeker not found"));
 
-        if (applicationRepository.findByJobAndJobSeeker(job, jobSeeker).isPresent()) {
-            throw new RuntimeException("Already applied for this job");
-        }
+		if (applicationRepository.findByJobAndJobSeeker(job, jobSeeker).isPresent()) {
+			throw new RuntimeException("Already applied for this job");
+		}
 
-        Application application = new Application();
-        application.setJob(job);
-        application.setJobSeeker(jobSeeker);
-        application.setStatus(Application.ApplicationStatus.APPLIED);
-        application.setAppliedDate(LocalDateTime.now());
+		Application application = new Application();
+		application.setJob(job);
+		application.setJobSeeker(jobSeeker);
+		application.setStatus(Application.ApplicationStatus.APPLIED);
+		application.setAppliedDate(LocalDateTime.now());
 
-        applicationRepository.save(application);
-    }
+		applicationRepository.save(application);
+	}
 
-    // WITHDRAW
-    public void withdrawApplication(Long applicationId) {
+	// WITHDRAW
+	public void withdrawApplication(Long applicationId) {
 
-        Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+		Application application = applicationRepository.findById(applicationId)
+				.orElseThrow(() -> new RuntimeException("Application not found"));
 
-        if (application.getStatus() == Application.ApplicationStatus.APPLIED) {
-            application.setStatus(Application.ApplicationStatus.WITHDRAWN);
-            applicationRepository.save(application);
-        } else {
-            throw new RuntimeException("Cannot withdraw");
-        }
-    }
+		if (application.getStatus() == Application.ApplicationStatus.APPLIED) {
+			application.setStatus(Application.ApplicationStatus.WITHDRAWN);
+			applicationRepository.save(application);
+		} else {
+			throw new RuntimeException("Cannot withdraw");
+		}
+	}
 
-    // SHORTLIST
-    public void shortlistCandidate(Long applicationId) {
-        updateApplicationStatus(applicationId,
-                Application.ApplicationStatus.SHORTLISTED);
-    }
+	// SHORTLIST
+	public void shortlistCandidate(Long applicationId, String note) {
 
-    // REJECT
-    public void rejectCandidate(Long applicationId) {
-        updateApplicationStatus(applicationId,
-                Application.ApplicationStatus.REJECTED);
-    }
+		Application app = applicationRepository.findById(applicationId).orElseThrow();
 
-    // UPDATE STATUS
-    public void updateApplicationStatus(Long applicationId,
-                                        Application.ApplicationStatus status) {
+		app.setStatus(Application.ApplicationStatus.SHORTLISTED);
+		app.setNotes(note);
 
-        Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+		applicationRepository.save(app);
+	}
 
-        application.setStatus(status);
-        applicationRepository.save(application);
-    }
+	// REJECT
+	public void rejectCandidate(Long applicationId, String notes) {
 
-    // BULK UPDATE
-    public void bulkUpdateStatus(List<Long> applicationIds,
-                                 Application.ApplicationStatus status) {
+		Application app = applicationRepository.findById(applicationId)
+				.orElseThrow(() -> new RuntimeException("Application not found"));
 
-        List<Application> applications =
-                applicationRepository.findAllById(applicationIds);
+		app.setStatus(Application.ApplicationStatus.REJECTED);
+		app.setNotes(notes);
 
-        for (Application app : applications) {
-            app.setStatus(status);
-        }
+		applicationRepository.save(app);
+	}
 
-        applicationRepository.saveAll(applications);
-    }
+	// UPDATE STATUS
+	public void updateApplicationStatus(Long applicationId, Application.ApplicationStatus status) {
 
-    // ADD NOTES
-    public void addNotes(Long applicationId, String notes) {
+		Application application = applicationRepository.findById(applicationId)
+				.orElseThrow(() -> new RuntimeException("Application not found"));
 
-        Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+		application.setStatus(status);
+		applicationRepository.save(application);
+	}
 
-        application.setNotes(notes);
-        applicationRepository.save(application);
-    }
+	// BULK UPDATE
+	public void bulkUpdate(List<Long> applicationIds, String action) {
 
-    // VIEW BY JOB SEEKER
-    public List<Application> getApplicationsByJobSeeker(Long jobSeekerId) {
+		List<Application> applications = applicationRepository.findAllById(applicationIds);
 
-        JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
-                .orElseThrow(() -> new RuntimeException("JobSeeker not found"));
+		for (Application app : applications) {
 
-        return applicationRepository.findByJobSeeker(jobSeeker);
-    }
+			if ("SHORTLIST".equalsIgnoreCase(action)) {
+				app.setStatus(Application.ApplicationStatus.SHORTLISTED);
+			}
 
-    // VIEW BY JOB
-    public List<Application> getApplicationsByJob(Long jobId) {
+			if ("REJECT".equalsIgnoreCase(action)) {
+				app.setStatus(Application.ApplicationStatus.REJECTED);
+			}
+		}
 
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+		applicationRepository.saveAll(applications);
+	}
 
-        return applicationRepository.findByJob(job);
-    }
+	// ADD NOTES
+	public void addNotes(Long applicationId, String notes) {
+
+		Application application = applicationRepository.findById(applicationId)
+				.orElseThrow(() -> new RuntimeException("Application not found"));
+
+		application.setNotes(notes);
+		applicationRepository.save(application);
+	}
+
+	// VIEW BY JOB SEEKER
+	public List<Application> getApplicationsByJobSeeker(Long jobSeekerId) {
+
+		JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
+				.orElseThrow(() -> new RuntimeException("JobSeeker not found"));
+
+		return applicationRepository.findByJobSeeker(jobSeeker);
+	}
+
+	// VIEW BY JOB
+	public List<Application> getApplicationsByJob(Long jobId) {
+
+		Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
+
+		return applicationRepository.findByJob(job);
+	}
+
+	// bulk update status
+	public void bulkUpdateStatus(List<Long> applicationIds, Application.ApplicationStatus newStatus, String note) {
+
+		List<Application> applications = applicationRepository.findAllById(applicationIds);
+
+		for (Application app : applications) {
+
+			app.setStatus(newStatus);
+
+			if (newStatus == Application.ApplicationStatus.REJECTED) {
+				app.setNotes(note);
+			}
+		}
+
+		applicationRepository.saveAll(applications);
+	}
 }
