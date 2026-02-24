@@ -1,43 +1,148 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>My Applications</title>
+    <title>My Applications - RevHire</title>
+
     <style>
-        body { font-family:'Segoe UI'; background:#f5f6fa; padding:30px; }
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+        }
 
-        .job-card {
+        body{
+            font-family:'Segoe UI', sans-serif;
+            background:linear-gradient(135deg,#eef2ff,#f8fafc);
+            padding:35px 20px;
+            color:#2d3748;
+        }
+
+        .container{
+            max-width:900px;
+            margin:auto;
+        }
+
+        h2{
+            margin-bottom:20px;
+            font-size:24px;
+        }
+
+        /* APPLICATION CARD */
+        .job-card{
             background:white;
-            padding:20px;
-            border-radius:10px;
-            margin-bottom:15px;
-            box-shadow:0 4px 15px rgba(0,0,0,0.05);
+            padding:22px;
+            border-radius:16px;
+            margin-bottom:16px;
+            box-shadow:0 6px 20px rgba(0,0,0,0.06);
+            border:1px solid #edf2f7;
+            transition:0.25s ease;
         }
 
-        .company { color:#667eea; font-weight:bold; }
+        .job-card:hover{
+            transform:translateY(-2px);
+            box-shadow:0 12px 30px rgba(0,0,0,0.10);
+        }
 
-        .status {
-            background:#667eea;
-            color:white;
-            padding:5px 12px;
-            border-radius:20px;
+        h3{
+            font-size:18px;
+            margin-bottom:6px;
+        }
+
+        .company{
+            color:#667eea;
+            font-weight:600;
+            font-size:14px;
+            margin-bottom:12px;
+        }
+
+        /* STATUS ROW */
+        .meta{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-top:8px;
+        }
+
+        .label{
             font-size:13px;
+            color:#718096;
         }
+
+        /* STATUS BADGE */
+        .status{
+            padding:6px 14px;
+            border-radius:20px;
+            font-size:12px;
+            font-weight:600;
+            text-transform:uppercase;
+        }
+
+        /* Dynamic Status Colors */
+        .status.PENDING{
+            background:#fff5f5;
+            color:#e53e3e;
+        }
+
+        .status.SHORTLISTED{
+            background:#f0fff4;
+            color:#38a169;
+        }
+
+        .status.REJECTED{
+            background:#edf2f7;
+            color:#718096;
+        }
+
+        .status.SELECTED{
+            background:#ebf8ff;
+            color:#3182ce;
+        }
+
+        /* EMPTY STATE */
+        .empty{
+            background:white;
+            padding:40px;
+            border-radius:16px;
+            text-align:center;
+            box-shadow:0 6px 20px rgba(0,0,0,0.05);
+            color:#718096;
+        }
+
     </style>
 </head>
+
 <body>
 
-<h2>📄 My Applications</h2>
+<div class="container">
 
-<div th:each="app : ${applications}" class="job-card">
+    <h2>My Applications</h2>
 
-    <h3 th:text="${app.job.title}"></h3>
+    <div th:if="${applications.isEmpty()}" class="empty">
+        You haven’t applied to any jobs yet.
+    </div>
 
-    <div class="company" th:text="${app.job.employer.companyName}"></div>
+    <div th:each="app : ${applications}" class="job-card">
 
-    <p>
-        Status:
-        <span class="status" th:text="${app.status}"></span>
-    </p>
+        <h3 th:text="${app.job.title}">Job Title</h3>
+
+        <div class="company"
+             th:text="${app.job.employer.companyName}">
+        </div>
+
+        <div class="meta">
+
+            <div>
+                <div class="label">Application Status</div>
+            </div>
+
+            <span class="status"
+                  th:classappend="${app.status}"
+                  th:text="${app.status}">
+            </span>
+
+        </div>
+
+    </div>
 
 </div>
 

@@ -7,6 +7,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -45,42 +46,84 @@ public class SecurityConfig {
     public SecurityContextRepository securityContextRepository() {
         return new HttpSessionSecurityContextRepository();
     }
+    
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
-        .csrf(csrf -> csrf
-        	    .ignoringRequestMatchers(
-        	        "/api/**",
-        	        "/auth/**",
-        	        "/jobs/**"   // ⭐ ADD THIS LINE
-        	    )
-        	)
+
+            // ✅ CSRF CONFIG
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers(
+                    "/api/**",
+                    "/auth/**",
+                    "/jobs/**"
+                )
+            )
+
+            // ✅ SESSION CONFIG
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(false)
             )
+
+            // ✅ SECURITY CONTEXT
             .securityContext(context -> context
                 .securityContextRepository(securityContextRepository())
             )
+
+            // ✅ AUTHORIZATION RULES ⭐⭐⭐
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/", "/auth/**", "/css/**", "/js/**", "/images/**", "/api/**").permitAll()
+                .requestMatchers(
+                    "/",
+                    "/auth/**",
+                    "/css/**",
+                    "/js/**",
+                    "/images/**",
+                    "/api/**"
+                ).permitAll()
+
                 .requestMatchers("/jobseeker/**").hasRole("JOBSEEKER")
                 .requestMatchers("/employer/**").hasRole("EMPLOYER")
+
                 .anyRequest().authenticated()
             )
+
+            // ✅ AUTH PROVIDER
             .authenticationProvider(authenticationProvider())
+
+            // ✅ JWT FILTER
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+            // ✅ FORM LOGIN
             .formLogin(form -> form
-                .loginPage("/auth/login")
-                .loginProcessingUrl("/auth/login")
-                .usernameParameter("email")
-                .passwordParameter("password")
-                .defaultSuccessUrl("/dashboard", true)
-                .failureUrl("/auth/login?error")
-                .permitAll()
-            )
+            	    .loginPage("/auth/login")
+            	    .loginProcessingUrl("/auth/login")
+            	    .usernameParameter("email")
+            	    .passwordParameter("password")
+
+            	    .successHandler((request, response, authentication) -> {
+
+            	        String role = authentication.getAuthorities()
+            	                .stream()
+            	                .map(GrantedAuthority::getAuthority)
+            	                .findFirst()
+            	                .orElse("");
+
+            	        if (role.equals("ROLE_EMPLOYER")) {
+            	            response.sendRedirect("/employer/dashboard");
+            	            return;
+            	        }
+
+            	        response.sendRedirect("/jobseeker/dashboard");
+            	    })
+
+            	    .failureUrl("/auth/login?error")
+            	    .permitAll()
+            	)
+            // ✅ LOGOUT
             .logout(logout -> logout
                 .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"))
                 .logoutSuccessUrl("/auth/login?logout")
@@ -88,7 +131,7 @@ public class SecurityConfig {
                 .deleteCookies("JSESSIONID")
                 .permitAll()
             );
-        
+
         return http.build();
     }
 }

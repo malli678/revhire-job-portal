@@ -2,51 +2,244 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>My Profile</title>
-    <style>
-        body { font-family:'Segoe UI'; background:#f5f6fa; padding:30px; }
 
-        .card {
-            background:white;
-            padding:25px;
-            border-radius:10px;
-            max-width:700px;
-            margin:auto;
-            box-shadow:0 4px 20px rgba(0,0,0,0.05);
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
-        .progress {
-            background:#eee;
-            border-radius:20px;
-            overflow:hidden;
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #eef2ff, #f8fafc);
+            padding: 40px;
+            color: #2d3748;
+        }
+
+        .card {
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            max-width: 800px;
+            margin: auto;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.08);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: #667eea;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        h2 {
+            font-size: 26px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        hr {
+            margin: 25px 0;
+            border: none;
+            height: 1px;
+            background: #edf2f7;
+        }
+
+        h3 {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #4c51bf;
+        }
+
+        .info-row {
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+
+        .info-row span {
+            font-weight: 600;
+        }
+
+        .section {
+            margin-bottom: 25px;
+        }
+
+        .experience-card {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .btn {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+        }
+
+        .progress-container {
+            background: #edf2f7;
+            border-radius: 30px;
+            overflow: hidden;
+            height: 24px;
+            margin-top: 10px;
         }
 
         .progress-bar {
-            background:#667eea;
-            color:white;
-            padding:6px;
-            text-align:center;
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #5a67d8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 13px;
+            font-weight: 600;
         }
     </style>
 </head>
+
 <body>
 
 <div class="card">
 
-    <h2 th:text="${user.fullName}"></h2>
+    <!-- HEADER -->
+    <div class="profile-header">
+        <div class="avatar"
+             th:text="${#strings.substring(user.fullName,0,1)}">
+        </div>
 
-    <p>Email: <span th:text="${user.email}"></span></p>
-    <p>Location: <span th:text="${user.location}"></span></p>
+        <div>
+            <h2 th:text="${user.fullName}">User Name</h2>
+            <div class="subtitle">Profile Management</div>
+        </div>
+    </div>
+
+    <!-- PERSONAL DETAILS -->
+    <div class="section">
+        <h3>Personal Details</h3>
+
+        <div class="info-row">
+            Name: <span th:text="${user.fullName}">Bhanu</span>
+        </div>
+
+        <div class="info-row">
+            Email: <span th:text="${user.email}">email@gmail.com</span>
+        </div>
+
+        <div class="info-row">
+            Phone: <span th:text="${user.phoneNumber}">9876543210</span>
+        </div>
+
+        <div class="info-row">
+            Location: <span th:text="${user.location}">Chennai</span>
+        </div>
+    </div>
 
     <hr>
 
-    <h3>Profile Completion</h3>
+    <!-- EMPLOYMENT -->
+    <div class="section">
+        <h3>Employment</h3>
 
-    <div class="progress">
-        <div class="progress-bar"
-             th:style="'width:' + ${completion} + '%'">
+        <div class="info-row">
+            Status: 
+            <span th:text="${user.currentEmploymentStatus}">
+                Fresher
+            </span>
+        </div>
 
-            <span th:text="${completion + '%'}"></span>
+        <div class="info-row">
+            Company: 
+            <span th:text="${user.currentCompany}">
+                ABC Company
+            </span>
+        </div>
 
+        <div class="info-row">
+            Designation: 
+            <span th:text="${user.designation}">
+                Software Developer
+            </span>
+        </div>
+
+        <div class="info-row">
+            Experience: 
+            <span th:text="${user.totalExperienceYears}">0</span> Years
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- WORK EXPERIENCE -->
+    <div class="section">
+        <h3>Work Experience</h3>
+
+        <div th:each="exp : ${user.experiences}" class="experience-card">
+
+            <div>
+                <strong th:text="${exp.designation}">
+                    Software Developer
+                </strong>
+            </div>
+
+            <div th:text="${exp.companyName}">
+                ABC Company
+            </div>
+
+            <div>
+                <span th:text="${exp.startDate}"></span> -
+                <span th:text="${exp.endDate}"></span>
+            </div>
+
+        </div>
+
+        <a th:href="@{/jobseeker/experience/add}" class="btn">
+            + Add Experience
+        </a>
+    </div>
+
+    <hr>
+
+    <!-- PROFILE COMPLETION -->
+    <div class="section">
+        <h3>Profile Completion</h3>
+
+        <div class="progress-container">
+            <div class="progress-bar"
+                 th:style="'width:' + ${completion} + '%'">
+
+                <span th:text="${completion + '%'}">75%</span>
+
+            </div>
         </div>
     </div>
 

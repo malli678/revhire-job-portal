@@ -6,124 +6,208 @@
 
 <style>
 
-body{
+*{
     margin:0;
-    font-family:Arial;
-    background:#f3f2ef;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Segoe UI', sans-serif;
+    background:linear-gradient(135deg,#eef2ff,#f8fafc);
+    color:#2d3748;
 }
 
 /* MAIN LAYOUT */
 .wrapper{
     max-width:1200px;
     margin:auto;
-    padding:20px;
+    padding:30px 20px;
     display:grid;
-    grid-template-columns:280px 1fr;
-    gap:20px;
+    grid-template-columns:300px 1fr;
+    gap:25px;
 }
 
-/* LEFT FILTER PANEL */
+/* FILTER PANEL */
 .filters{
     background:white;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    padding:25px;
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
     height:fit-content;
     position:sticky;
-    top:15px;
+    top:20px;
+    transition:0.3s ease;
+}
+
+.filters:hover{
+    transform:translateY(-2px);
 }
 
 .filters h3{
-    margin-top:0;
+    font-size:20px;
+    margin-bottom:18px;
+}
+
+.filters label{
+    font-size:13px;
+    color:#718096;
+    display:block;
+    margin-bottom:6px;
 }
 
 .filters input{
     width:100%;
-    margin-bottom:10px;
-    padding:10px;
-    border:1px solid #ccc;
-    border-radius:6px;
+    margin-bottom:14px;
+    padding:11px 12px;
+    border:1px solid #e2e8f0;
+    border-radius:8px;
+    font-size:14px;
+    transition:0.2s;
 }
 
+.filters input:focus{
+    outline:none;
+    border-color:#667eea;
+    box-shadow:0 0 0 3px rgba(102,126,234,0.15);
+}
+
+/* BUTTON */
 .filters button{
     width:100%;
-    background:#0a66c2;
+    background:linear-gradient(90deg,#667eea,#5a67d8);
     color:white;
     border:none;
-    padding:10px;
-    border-radius:6px;
+    padding:11px;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:600;
     cursor:pointer;
+    transition:0.2s;
+}
+
+.filters button:hover{
+    transform:translateY(-1px);
+    box-shadow:0 6px 18px rgba(90,103,216,0.35);
 }
 
 /* JOB LIST */
 .jobs{
     display:flex;
     flex-direction:column;
-    gap:15px;
+    gap:18px;
 }
 
-/* CARD */
+/* JOB CARD */
 .job-card{
     background:white;
-    padding:18px;
-    border-radius:10px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.08);
-    transition:0.2s;
+    padding:22px;
+    border-radius:16px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.06);
+    transition:0.25s ease;
+    border:1px solid #edf2f7;
 }
 
 .job-card:hover{
     transform:translateY(-3px);
+    box-shadow:0 12px 30px rgba(0,0,0,0.10);
 }
 
+/* TITLE */
 .title{
     font-size:20px;
-    font-weight:bold;
-    color:#222;
+    font-weight:600;
+    margin-bottom:4px;
 }
 
+/* COMPANY */
 .company{
-    color:#0a66c2;
-    font-weight:bold;
-    margin:6px 0;
+    color:#667eea;
+    font-weight:600;
+    font-size:14px;
+    margin-bottom:12px;
 }
 
+/* DESCRIPTION */
+.job-card p{
+    font-size:14px;
+    color:#4a5568;
+    line-height:1.6;
+    margin-bottom:14px;
+}
+
+/* BADGES */
 .badge{
     display:inline-block;
-    background:#eef3f8;
-    padding:4px 10px;
-    border-radius:12px;
+    background:#edf2ff;
+    color:#5a67d8;
+    padding:5px 12px;
+    border-radius:20px;
     font-size:12px;
+    font-weight:600;
     margin-right:6px;
+    margin-bottom:10px;
 }
 
+/* SALARY */
 .salary{
-    margin-top:10px;
-    font-size:18px;
-    font-weight:bold;
+    margin-top:6px;
+    font-size:17px;
+    font-weight:600;
+    color:#2d3748;
 }
 
-/* BUTTONS */
+/* BUTTON */
 .btn{
     display:inline-block;
-    margin-top:10px;
-    background:#0a66c2;
+    margin-top:14px;
+    background:#667eea;
     color:white;
-    padding:8px 12px;
-    border-radius:6px;
+    padding:9px 14px;
+    border-radius:10px;
+    font-size:13px;
     text-decoration:none;
+    font-weight:600;
+    transition:0.2s;
 }
 
+.btn:hover{
+    background:#5a67d8;
+    transform:translateY(-1px);
+}
+
+/* BACK BUTTON */
 .back{
-    margin-top:20px;
-    display:inline-block;
-    background:#6c757d;
+    margin-top:18px;
+    display:block;
+    text-align:center;
+    background:#edf2f7;
+    color:#4a5568;
+}
+
+.back:hover{
+    background:#e2e8f0;
+}
+
+/* EMPTY STATE */
+.empty{
+    background:white;
+    padding:40px;
+    border-radius:16px;
+    text-align:center;
+    box-shadow:0 6px 20px rgba(0,0,0,0.05);
+    color:#718096;
 }
 
 /* MOBILE */
 @media(max-width:900px){
-.wrapper{
-grid-template-columns:1fr;
-}
+    .wrapper{
+        grid-template-columns:1fr;
+    }
+
+    .filters{
+        position:static;
+    }
 }
 
 </style>
@@ -133,31 +217,40 @@ grid-template-columns:1fr;
 
 <div class="wrapper">
 
-<!-- LEFT FILTER -->
+<!-- FILTER PANEL -->
 <form method="get"
       th:action="@{/jobs/search-page}"
       class="filters">
 
-<h3>🔎 Filters</h3>
+<h3>Search Filters</h3>
 
-<input name="title" placeholder="Job Role"/>
-<input name="location" placeholder="Location"/>
-<input name="salary" placeholder="Min Salary"/>
+<label>Job Role</label>
+<input name="title" placeholder="e.g. Java Developer"/>
+
+<label>Location</label>
+<input name="location" placeholder="e.g. Chennai"/>
+
+<label>Minimum Salary</label>
+<input name="salary" placeholder="e.g. 400000"/>
 
 <button>Search Jobs</button>
 
 <a th:if="${role=='JOBSEEKER'}"
    href="/jobseeker/dashboard"
-   class="btn back">⬅ Back</a>
+   class="btn back">Back to Dashboard</a>
 
 <a th:if="${role=='EMPLOYER'}"
    href="/employer/dashboard"
-   class="btn back">⬅ Back</a>
+   class="btn back">Back to Dashboard</a>
 
 </form>
 
-<!-- RIGHT JOB LIST -->
+<!-- JOB LIST -->
 <div class="jobs">
+
+<div th:if="${jobs.isEmpty()}" class="empty">
+    No jobs found. Try adjusting filters.
+</div>
 
 <div class="job-card" th:each="job : ${jobs}">
 
