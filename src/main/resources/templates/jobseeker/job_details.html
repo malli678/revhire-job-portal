@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+	<meta name="_csrf" th:content="${_csrf.token}"/>
+	<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Job Details</title>
     <style>
         body { font-family:'Segoe UI'; background:#f5f6fa; padding:30px; }
@@ -48,9 +50,19 @@
 
 <script>
 function saveJob(id){
-    fetch('/saveJob/' + id,{method:'POST'})
-    .then(r=>r.text())
-    .then(alert);
+
+    const token = document.querySelector("meta[name='_csrf']").content;
+    const header = document.querySelector("meta[name='_csrf_header']").content;
+
+    fetch('/jobseeker/saveJob/' + id,{
+        method:'POST',
+        headers:{
+            [header]: token
+        }
+    })
+    .then(response => response.text())
+    .then(data => alert(data))
+    .catch(error => console.error(error));
 }
 </script>
 
