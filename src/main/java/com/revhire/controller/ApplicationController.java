@@ -35,13 +35,13 @@ public class ApplicationController {
     // ================= WITHDRAW =================
     @PostMapping("/withdraw")
     public String withdraw(@RequestParam Long applicationId,
+                           @RequestParam String notes,
                            @RequestParam Long jobSeekerId) {
 
-        applicationService.withdrawApplication(applicationId);
+        applicationService.withdrawApplication(applicationId, notes);
 
         return "redirect:/applications/jobseeker/" + jobSeekerId;
     }
-
     // ================= SHORTLIST =================
     @PostMapping("/shortlist")
     public String shortlist(

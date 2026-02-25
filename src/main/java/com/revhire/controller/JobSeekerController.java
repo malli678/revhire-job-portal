@@ -106,11 +106,23 @@ public class JobSeekerController {
     @PostMapping("/applyJob/{jobId}")
     @ResponseBody
     public ResponseEntity<String> applyJob(@PathVariable Long jobId,
-                                           HttpSession session) {
+                                           Authentication authentication) {
 
-        Long userId = validateSession(session);
+        try {
 
-        return jobSeekerService.applyJob(userId, jobId);
+            String email = authentication.getName();
+
+            User user = userService.findByEmail(email);
+
+            if (user == null)
+                throw new RuntimeException("User not found");
+
+            return jobSeekerService.applyJob(user.getUserId(), jobId);
+
+        } 
+        catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
     // =========================
     // WITHDRAW APPLICATION 

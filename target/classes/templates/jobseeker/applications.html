@@ -3,10 +3,13 @@
 <head>
     <title>My Applications - RevHire</title>
     <meta charset="UTF-8">
+
+    <!-- ✅ CSRF -->
     <meta name="_csrf" th:content="${_csrf.token}"/>
     <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 
     <style>
+
         body {
             font-family:'Segoe UI', sans-serif;
             background:linear-gradient(135deg,#eef2ff,#f8fafc);
@@ -14,107 +17,204 @@
             color:#2d3748;
         }
 
-        h2 { margin-bottom:20px; font-size:26px; text-align:center; }
+        h2 {
+            margin-bottom:10px;
+            font-size:26px;
+            text-align:center;
+        }
 
-        /* CARD STYLE */
+        .top-bar{
+            display:flex;
+            justify-content:flex-end;
+            margin-bottom:20px;
+        }
+
+        .back-btn{
+            background:#667eea;
+            color:white;
+            padding:8px 16px;
+            border-radius:10px;
+            text-decoration:none;
+            font-size:14px;
+            font-weight:600;
+            transition:0.2s;
+        }
+
         .container { max-width:1000px; margin:auto; }
+
         .job-card {
             background:white;
             padding:20px;
             border-radius:16px;
             margin-bottom:16px;
             box-shadow:0 6px 20px rgba(0,0,0,0.06);
-            border:1px solid #edf2f7;
-            transition:0.25s ease;
         }
-        .job-card:hover { transform:translateY(-2px); box-shadow:0 12px 30px rgba(0,0,0,0.10); }
 
-        h3 { font-size:18px; margin-bottom:6px; }
-        .company { color:#667eea; font-weight:600; font-size:14px; margin-bottom:12px; }
-
-        /* STATUS BADGE */
         .status {
             padding:6px 14px;
             border-radius:20px;
             font-size:12px;
             font-weight:600;
-            text-transform:uppercase;
         }
-        .status.APPLIED { background:#ebf8ff; color:#3182ce; }
-        .status.SHORTLISTED { background:#f0fff4; color:#38a169; }
-        .status.REJECTED { background:#fff5f5; color:#e53e3e; }
-        .status.WITHDRAWN { background:#fffaf0; color:#dd6b20; }
-        .status.SELECTED { background:#f0faff; color:#2b6cb0; }
 
-        /* TABLE STYLE */
-        table { width:100%; border-collapse: collapse; background:white; margin-top:20px; border-radius:8px; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.06);}
-        th, td { padding:12px; border-bottom:1px solid #edf2f7; text-align:left; }
-        th { background:#667eea; color:white; font-weight:600; }
-        .withdraw-btn { background:#dc3545; color:white; border:none; padding:6px 10px; border-radius:4px; cursor:pointer; }
+        .withdraw-btn {
+            background:#dc3545;
+            color:white;
+            border:none;
+            padding:6px 10px;
+            border-radius:6px;
+            cursor:pointer;
+        }
 
-        /* EMPTY STATE */
-        .empty { text-align:center; background:white; padding:40px; border-radius:16px; box-shadow:0 6px 20px rgba(0,0,0,0.05); color:#718096; font-size:18px; }
+        .empty {
+            text-align:center;
+            background:white;
+            padding:40px;
+            border-radius:16px;
+        }
+
+        .notes {
+            margin-top:8px;
+            font-size:13px;
+            background:#f7fafc;
+            padding:6px 10px;
+            border-radius:8px;
+            display:inline-block;
+        }
+
+        /* ✅ MODAL STYLE ⭐⭐⭐⭐⭐ */
+        #withdrawModal {
+            display:none;
+            position:fixed;
+            top:0; left:0; right:0; bottom:0;
+            background:rgba(0,0,0,0.4);
+            justify-content:center;
+            align-items:center;
+        }
+
+        .modal-box {
+            background:white;
+            padding:25px;
+            border-radius:12px;
+            width:350px;
+            text-align:center;
+        }
+
+        .modal-btn {
+            padding:8px 14px;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+            margin:8px;
+        }
+
+        .confirm-btn { background:#dc3545; color:white; }
+        .cancel-btn { background:#6c757d; color:white; }
+
     </style>
 </head>
+
 <body>
 
 <div class="container">
 
     <h2>My Applications</h2>
 
+    <div class="top-bar">
+        <a href="/jobseeker/dashboard" class="back-btn">
+            ⬅ Back to Dashboard
+        </a>
+    </div>
+
     <div th:if="${applications.isEmpty()}" class="empty">
         You haven’t applied to any jobs yet.
     </div>
 
-    <!-- CARD STYLE LAYOUT -->
+    <!-- CARD STYLE -->
     <div th:each="app : ${applications}" class="job-card">
 
-        <h3 th:text="${app.job.title}">Job Title</h3>
-        <div class="company" th:text="${app.job.employer.companyName}"></div>
-        <p>📍 <span th:text="${app.job.location}"></span></p>
-        <p><b>Salary:</b> ₹<span th:text="${app.job.salaryMin}"></span> - ₹<span th:text="${app.job.salaryMax}"></span></p>
-        <p th:text="${app.job.description}"></p>
+        <h3 th:text="${app.job.title}"></h3>
 
         <div>
-            <span class="status" th:classappend="${app.status}" th:text="${app.status}"></span>
+            <span class="status"
+                  th:text="${app.status}">
+            </span>
         </div>
 
-        <!-- Withdraw button -->
-        <div th:if="${app.status == T(com.revhire.model.Application.ApplicationStatus).APPLIED}" style="margin-top:10px;">
-            <form th:action="@{/jobseeker/withdraw/{id}(id=${app.id})}" method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <input type="text" name="notes" placeholder="Reason" required style="width:150px; margin-right:8px;" />
-                <button type="submit" class="withdraw-btn">Withdraw</button>
+        <div th:if="${app.notes != null}" class="notes">
+            <b>Reason:</b> <span th:text="${app.notes}"></span>
+        </div>
+
+        <!-- ✅ Withdraw -->
+        <div th:if="${app.status.name() == 'APPLIED'}">
+
+            <form th:action="@{/jobseeker/withdraw/{id}(id=${app.id})}"
+                  method="post">
+
+                <input type="hidden"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}" />
+
+                <input type="text"
+                       name="notes"
+                       placeholder="Reason"
+                       required />
+
+                <!-- ✅ MODIFIED BUTTON ⭐⭐⭐⭐⭐ -->
+                <button type="button"
+                        class="withdraw-btn"
+                        onclick="openWithdrawModal(this)">
+                    Withdraw
+                </button>
             </form>
         </div>
 
     </div>
 
-    <!-- OPTIONAL TABLE VIEW (for quick overview) -->
-    <table th:if="${!applications.isEmpty()}" style="margin-top:30px;">
-        <tr>
-            <th>Job Title</th>
-            <th>Company</th>
-            <th>Status</th>
-            <th>Applied Date</th>
-            <th>Action</th>
-        </tr>
-        <tr th:each="app : ${applications}">
-            <td th:text="${app.job.title}"></td>
-            <td th:text="${app.job.employer.companyName}"></td>
-            <td th:text="${app.status}" th:class="'status ' + ${app.status}"></td>
-            <td th:text="${#temporals.format(app.appliedDate, 'dd-MM-yyyy HH:mm')}"></td>
-            <td>
-                <form th:action="@{/jobseeker/withdraw/{id}(id=${app.id})}" method="post"
-                      th:if="${app.status == T(com.revhire.model.Application.ApplicationStatus).APPLIED}">
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                    <input type="text" name="notes" placeholder="Reason" required style="width:120px;" />
-                    <button type="submit" class="withdraw-btn">Withdraw</button>
-                </form>
-            </td>
-        </tr>
-    </table>
-
 </div>
+
+<!-- ✅ WITHDRAW MODAL ⭐⭐⭐⭐⭐ -->
+<div id="withdrawModal">
+
+    <div class="modal-box">
+
+        <h3>Withdraw Application</h3>
+        <p>Are you sure you want to withdraw?</p>
+
+        <button class="modal-btn confirm-btn"
+                onclick="confirmWithdrawAction()">
+            Yes, Withdraw
+        </button>
+
+        <button class="modal-btn cancel-btn"
+                onclick="closeWithdrawModal()">
+            Cancel
+        </button>
+
+    </div>
+</div>
+
+<!-- ✅ SCRIPT ⭐⭐⭐⭐⭐ -->
+<script>
+
+let withdrawForm = null;
+
+function openWithdrawModal(button) {
+    withdrawForm = button.closest("form");
+    document.getElementById("withdrawModal").style.display = "flex";
+}
+
+function closeWithdrawModal() {
+    document.getElementById("withdrawModal").style.display = "none";
+}
+
+function confirmWithdrawAction() {
+    if (withdrawForm) {
+        withdrawForm.submit();
+    }
+}
+
+</script>
+
 </body>
 </html>

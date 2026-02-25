@@ -144,4 +144,20 @@ public class JobService {
         return jobRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
     }
+    //updatejob
+    public Job updateJob(Long id, Job updatedJob) {
+
+        Job job = jobRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        job.setTitle(updatedJob.getTitle());
+        job.setDescription(updatedJob.getDescription());
+        job.setLocation(updatedJob.getLocation());
+        job.setJobType(updatedJob.getJobType());
+        job.setExperienceRequired(updatedJob.getExperienceRequired());
+        job.setSalaryMin(updatedJob.getSalaryMin());
+        job.setSalaryMax(updatedJob.getSalaryMax());
+
+        return jobRepository.save(job);
+    }
 }

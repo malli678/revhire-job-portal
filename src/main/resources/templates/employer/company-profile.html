@@ -2,81 +2,247 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-<title>Company Profile</title>
+    <title>Company Profile - RevHire</title>
+    <meta charset="UTF-8">
 
-<style>
+    <style>
 
-body{
-    font-family:Arial;
-    background:#f4f4f4;
-    margin:0;
-}
+        body{
+            font-family:'Segoe UI', Arial, sans-serif;
+            background:linear-gradient(135deg,#eef2ff,#f8fafc);
+            margin:0;
+            padding:50px 20px;
+            color:#2d3748;
+        }
 
-.container{
-    max-width:700px;
-    margin:50px auto;
-}
+        .container{
+            max-width:1100px;
+            margin:auto;
+        }
 
-.card{
-    background:white;
-    padding:30px;
-    border-radius:12px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-}
+        .card{
+            background:white;
+            padding:40px;
+            border-radius:22px;
+            box-shadow:0 12px 40px rgba(0,0,0,0.08);
+            transition:0.25s ease;
+        }
 
-h2{
-    margin-top:0;
-    color:#333;
-}
+        .card:hover{
+            transform:translateY(-2px);
+            box-shadow:0 18px 55px rgba(0,0,0,0.12);
+        }
 
-.label{
-    font-weight:bold;
-    color:#555;
-}
+        /* HEADER */
+        .header{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            margin-bottom:30px;
+        }
 
-.value{
-    margin-bottom:15px;
-    color:#222;
-}
+        h2{
+            margin:0;
+            font-size:28px;
+            font-weight:700;
+        }
 
-.back{
-    display:inline-block;
-    margin-top:20px;
-    background:#6c757d;
-    color:white;
-    padding:10px 16px;
-    border-radius:6px;
-    text-decoration:none;
-}
+        .badge{
+            background:#ebf8ff;
+            color:#3182ce;
+            padding:6px 14px;
+            border-radius:20px;
+            font-size:12px;
+            font-weight:600;
+        }
 
-</style>
+        /* GRID */
+        .grid{
+            display:grid;
+            grid-template-columns:1fr 1fr;
+            gap:22px;
+        }
+
+        .field{
+            background:#f8fafc;
+            padding:18px;
+            border-radius:14px;
+            border:1px solid #edf2f7;
+            transition:0.2s ease;
+        }
+
+        .field:hover{
+            background:#f1f5f9;
+        }
+
+        .label{
+            font-size:11px;
+            font-weight:700;
+            color:#718096;
+            margin-bottom:8px;
+            text-transform:uppercase;
+            letter-spacing:0.5px;
+        }
+
+        .value{
+            font-size:17px;
+            font-weight:600;
+            color:#1a202c;
+            word-break: break-word;
+        }
+
+        .full{
+            grid-column:span 2;
+        }
+
+        /* WEBSITE LINK ⭐⭐⭐ */
+        .website-link{
+            text-decoration:none;
+            color:#667eea;
+            font-weight:600;
+        }
+
+        .website-link:hover{
+            text-decoration:underline;
+        }
+
+        /* ACTION BUTTONS */
+        .actions{
+            margin-top:35px;
+            display:flex;
+            gap:14px;
+        }
+
+        .btn{
+            padding:11px 22px;
+            border-radius:12px;
+            text-decoration:none;
+            font-weight:600;
+            font-size:14px;
+            transition:0.2s ease;
+        }
+
+        .edit-btn{
+            background:#667eea;
+            color:white;
+        }
+
+        .edit-btn:hover{
+            background:#5a67d8;
+        }
+
+        .back-btn{
+            background:#718096;
+            color:white;
+        }
+
+        .back-btn:hover{
+            background:#4a5568;
+        }
+
+        /* EMPTY VALUE STYLE ⭐⭐⭐ */
+        .empty{
+            color:#a0aec0;
+            font-weight:500;
+        }
+
+    </style>
 </head>
 
 <body>
 
 <div class="container">
 
-<div class="card">
+    <div class="card">
 
-<h2>🏢 Company Profile</h2>
+        <div class="header">
+            <h2>🏢 Company Profile</h2>
+            <div class="badge">Employer Account</div>
+        </div>
 
-<div class="label">Name:</div>
-<div class="value" th:text="${user.companyName}"></div>
+        <div class="grid">
 
-<div class="label">Industry:</div>
-<div class="value" th:text="${user.industry}"></div>
+            <!-- Company Name -->
+            <div class="field">
+                <div class="label">Company Name</div>
+                <div class="value"
+                     th:text="${user.companyName ?: '-'}"
+                     th:classappend="${user.companyName == null ? 'empty' : ''}">
+                </div>
+            </div>
 
-<div class="label">Website:</div>
-<div class="value" th:text="${user.companyWebsite}"></div>
+            <!-- Industry -->
+            <div class="field">
+                <div class="label">Industry</div>
+                <div class="value"
+                     th:text="${user.industry ?: '-'}"
+                     th:classappend="${user.industry == null ? 'empty' : ''}">
+                </div>
+            </div>
 
-<div class="label">Description:</div>
-<div class="value" th:text="${user.companyDescription}"></div>
+            <!-- Company Size -->
+            <div class="field">
+                <div class="label">Company Size</div>
+                <div class="value"
+                     th:text="${user.companySize ?: '-'}"
+                     th:classappend="${user.companySize == null ? 'empty' : ''}">
+                </div>
+            </div>
 
-<a href="/employer/dashboard" class="back">
-⬅ Back to Dashboard
-</a>
+            <!-- Website ⭐⭐⭐ SAFE FIX -->
+            <div class="field">
+                <div class="label">Website</div>
 
-</div>
+                <div class="value" th:if="${user.companyWebsite != null}">
+                    <a class="website-link"
+                       th:href="${#strings.startsWith(user.companyWebsite,'http') 
+                                ? user.companyWebsite 
+                                : 'https://' + user.companyWebsite}"
+                       th:text="${user.companyWebsite}">
+                    </a>
+                </div>
+
+                <div class="value empty" th:if="${user.companyWebsite == null}">
+                    -
+                </div>
+            </div>
+
+            <!-- Description -->
+            <div class="field full">
+                <div class="label">Company Description</div>
+                <div class="value"
+                     th:text="${user.companyDescription ?: '-'}"
+                     th:classappend="${user.companyDescription == null ? 'empty' : ''}">
+                </div>
+            </div>
+
+            <!-- Headquarters -->
+            <div class="field">
+                <div class="label">Headquarters</div>
+                <div class="value"
+                     th:text="${user.headquarters ?: '-'}"
+                     th:classappend="${user.headquarters == null ? 'empty' : ''}">
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ACTIONS -->
+        <div class="actions">
+
+            <a href="/employer/company-profile/edit"
+               class="btn edit-btn">
+                ✏ Edit Profile
+            </a>
+
+            <a href="/employer/dashboard"
+               class="btn back-btn">
+                ⬅ Back to Dashboard
+            </a>
+
+        </div>
+
+    </div>
 
 </div>
 

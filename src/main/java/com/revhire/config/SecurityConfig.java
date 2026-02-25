@@ -29,11 +29,13 @@ public class SecurityConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
+    // ✅ PASSWORD ENCODER
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // ✅ AUTH PROVIDER
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -42,24 +44,24 @@ public class SecurityConfig {
         return authProvider;
     }
 
+    // ✅ SECURITY CONTEXT (SESSION BASED)
     @Bean
     public SecurityContextRepository securityContextRepository() {
         return new HttpSessionSecurityContextRepository();
     }
-    
 
+    // ✅ FILTER CHAIN ⭐⭐⭐
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-        .csrf(csrf -> csrf
-                .ignoringRequestMatchers(
-                    "/api/**",
-                    "/auth/**",
-                    "/jobs/**",
-                    "/jobseeker/**"   // ✅ ADD THIS
-                )
-        )
+
+            // ✅ CSRF CONFIG
+            .csrf(csrf -> csrf
+                .ignoringRequestMatchers("/api/**")
+            )
+
+            // ✅ SESSION MANAGEMENT
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .maximumSessions(1)
@@ -74,49 +76,59 @@ public class SecurityConfig {
             // ✅ AUTHORIZATION RULES ⭐⭐⭐
             .authorizeHttpRequests(authz -> authz
 
-            	    // Public pages
-            	    .requestMatchers("/auth/login", "/auth/forgot-password", "/auth/register").permitAll()
+                // ✅ PUBLIC ROUTES ⭐⭐⭐⭐⭐
+                .requestMatchers(
+                    "/auth/login",
+                    "/auth/forgot-password",
+                    "/auth/reset-password",
+                    "/auth/register/**",   // ⭐⭐⭐ FIXES YOUR BUG
+                    "/css/**",
+                    "/js/**",
+                    "/images/**"
+                ).permitAll()
 
-            	    // Role-specific pages
-            	    .requestMatchers("/jobseeker/**").hasRole("JOBSEEKER")
-            	    .requestMatchers("/employer/**").hasRole("EMPLOYER")
+                // ✅ ROLE-BASED ACCESS
+                .requestMatchers("/jobseeker/**").hasRole("JOBSEEKER")
+                .requestMatchers("/employer/**").hasRole("EMPLOYER")
 
-            	    // Everything else requires authentication
-            	    .anyRequest().authenticated()
-            	)
+                // ✅ EVERYTHING ELSE REQUIRES LOGIN
+                .anyRequest().authenticated()
+            )
 
             // ✅ AUTH PROVIDER
             .authenticationProvider(authenticationProvider())
 
-            // ✅ JWT FILTER
+            // ✅ JWT FILTER (SAFE TO KEEP)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
-            // ✅ FORM LOGIN
+            // ✅ FORM LOGIN ⭐⭐⭐
             .formLogin(form -> form
-            	    .loginPage("/auth/login")
-            	    .loginProcessingUrl("/auth/login")
-            	    .usernameParameter("email")
-            	    .passwordParameter("password")
+                .loginPage("/auth/login")
+                .loginProcessingUrl("/auth/login")
+                .usernameParameter("email")
+                .passwordParameter("password")
 
-            	    .successHandler((request, response, authentication) -> {
+                // ✅ SUCCESS HANDLER
+                .successHandler((request, response, authentication) -> {
 
-            	        String role = authentication.getAuthorities()
-            	                .stream()
-            	                .map(GrantedAuthority::getAuthority)
-            	                .findFirst()
-            	                .orElse("");
+                    String role = authentication.getAuthorities()
+                            .stream()
+                            .map(GrantedAuthority::getAuthority)
+                            .findFirst()
+                            .orElse("");
 
-            	        if (role.equals("ROLE_EMPLOYER")) {
-            	            response.sendRedirect("/employer/dashboard");
-            	            return;
-            	        }
+                    if (role.equals("ROLE_EMPLOYER")) {
+                        response.sendRedirect("/employer/dashboard");
+                        return;
+                    }
 
-            	        response.sendRedirect("/jobseeker/dashboard");
-            	    })
+                    response.sendRedirect("/jobseeker/dashboard");
+                })
 
-            	    .failureUrl("/auth/login?error")
-            	    .permitAll()
-            	)
+                .failureUrl("/auth/login?error")
+                .permitAll()
+            )
+
             // ✅ LOGOUT
             .logout(logout -> logout
                 .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"))

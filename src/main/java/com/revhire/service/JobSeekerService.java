@@ -55,30 +55,27 @@ public class JobSeekerService {
     // =========================
     // APPLY JOB
     // =========================
-    public ResponseEntity<String> applyJob(Long jobSeekerId, Long jobId) {
-        JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
-                .orElseThrow(() -> new RuntimeException("JobSeeker not found"));
+    public ResponseEntity<String> applyJob(Long userId, Long jobId) {
 
         Job job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
 
-        boolean alreadyApplied = applicationRepository
-        	    .findByJob_JobIdAndJobSeeker_UserId(job.getJobId(), jobSeeker.getUserId())
-        	    .isPresent();
+        JobSeeker jobSeeker = jobSeekerRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("JobSeeker not found"));
 
-        if (alreadyApplied) {
+        if (applicationRepository.findByJobAndJobSeeker(job, jobSeeker).isPresent()) {
             return ResponseEntity.badRequest().body("Already applied for this job");
         }
 
-        Application application = new Application();
-        application.setJob(job);
-        application.setJobSeeker(jobSeeker);
-        application.setAppliedDate(LocalDateTime.now());
-        application.setStatus(Application.ApplicationStatus.APPLIED);
+        Application app = new Application();
+        app.setJob(job);
+        app.setJobSeeker(jobSeeker);
+        app.setStatus(Application.ApplicationStatus.APPLIED);
+        app.setAppliedDate(LocalDateTime.now());
 
-        applicationRepository.save(application);
+        applicationRepository.save(app);
 
-        return ResponseEntity.ok("Applied Successfully");
+        return ResponseEntity.ok("Application Submitted Successfully!");
     }
     // =========================
     // GET ALL JOBS
@@ -120,10 +117,14 @@ public class JobSeekerService {
         Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
 
+        // ✅ SAFETY CHECK ⭐⭐⭐
+        if (application.getStatus() != Application.ApplicationStatus.APPLIED) {
+            throw new RuntimeException("Only APPLIED applications can be withdrawn");
+        }
+
         application.setStatus(Application.ApplicationStatus.WITHDRAWN);
         application.setNotes(notes);
 
         applicationRepository.save(application);
-     
     }
 }

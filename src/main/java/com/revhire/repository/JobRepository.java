@@ -44,4 +44,14 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     // GET JOBS BY EMPLOYER
     // ===================================
     List<Job> findByEmployer(Employer employer);
+
+    // ===================================
+    // DASHBOARD STATISTICS ⭐⭐⭐
+    // ===================================
+
+    // ✅ TOTAL JOBS
+    
+    long countByEmployerUserId(Long userId);
+
+    long countByEmployerUserIdAndStatus(Long userId, String status);
 }

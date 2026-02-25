@@ -8,6 +8,7 @@ import com.revhire.repository.JobRepository;
 import com.revhire.repository.JobSeekerRepository;
 
 import com.revhire.model.Application;
+import com.revhire.model.Employer;
 import com.revhire.model.Job;
 import com.revhire.model.JobSeeker;
 
@@ -28,39 +29,54 @@ public class ApplicationService {
 
 	// APPLY JOB
 	public void applyJob(Long jobId, Long jobSeekerId) {
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
 
-        JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
-                .orElseThrow(() -> new RuntimeException("JobSeeker not found"));
+	    System.out.println("JOB ID = " + jobId);
+	    System.out.println("JOB SEEKER ID = " + jobSeekerId);
 
-        // Check for duplicate application
-        if (applicationRepository.findByJobAndJobSeeker(job, jobSeeker).isPresent()) {
-            throw new RuntimeException("Already applied for this job");
-        }
+	    Job job = jobRepository.findById(jobId)
+	            .orElseThrow(() -> new RuntimeException("Job not found"));
 
-        Application application = new Application();
-        application.setJob(job);
-        application.setJobSeeker(jobSeeker);
-        application.setStatus(Application.ApplicationStatus.APPLIED);
-        application.setAppliedDate(LocalDateTime.now());
+	    JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
+	            .orElseThrow(() -> new RuntimeException("JobSeeker not found"));
 
-        applicationRepository.save(application);
-    }
+	    System.out.println("JOB = " + job.getTitle());
+	    System.out.println("JOB SEEKER = " + jobSeeker.getFullName());
+
+	    if (applicationRepository.findByJobAndJobSeeker(job, jobSeeker).isPresent()) {
+	        System.out.println("DUPLICATE FOUND ⚠️");
+	        throw new RuntimeException("Already applied for this job");
+	    }
+
+	    Application application = new Application();
+	    application.setJob(job);
+	    application.setJobSeeker(jobSeeker);
+	    application.setStatus(Application.ApplicationStatus.APPLIED);
+	    application.setAppliedDate(LocalDateTime.now());
+
+	    applicationRepository.save(application);
+
+	    System.out.println("APPLICATION SAVED ✅");
+	}
 
 
 	// WITHDRAW
-	public void withdrawApplication(Long applicationId) {
+	public void withdrawApplication(Long applicationId, String notes) {
 
-		Application application = applicationRepository.findById(applicationId)
-				.orElseThrow(() -> new RuntimeException("Application not found"));
+	    Application application = applicationRepository.findById(applicationId)
+	            .orElseThrow(() -> new RuntimeException("Application not found"));
 
-		if (application.getStatus() == Application.ApplicationStatus.APPLIED) {
-			application.setStatus(Application.ApplicationStatus.WITHDRAWN);
-			applicationRepository.save(application);
-		} else {
-			throw new RuntimeException("Cannot withdraw");
-		}
+	    if (application.getStatus() == Application.ApplicationStatus.APPLIED) {
+
+	        application.setStatus(Application.ApplicationStatus.WITHDRAWN);
+
+	        // ✅ SAVE REASON ⭐⭐⭐
+	        application.setNotes(notes);
+
+	        applicationRepository.save(application);
+
+	    } else {
+	        throw new RuntimeException("Cannot withdraw");
+	    }
 	}
 
 	// SHORTLIST
@@ -157,5 +173,45 @@ public class ApplicationService {
 		}
 
 		applicationRepository.saveAll(applications);
+	}
+	//filter and count
+	public List<Application> getApplicationsForEmployer(Employer employer) {
+	    return applicationRepository.findAll()
+	            .stream()
+	            .filter(app -> app.getJob().getEmployer().equals(employer))
+	            .toList();
+	}
+
+	public List<Application> filterByStatus(Employer employer,
+	                                        Application.ApplicationStatus status) {
+	    return applicationRepository.findAll()
+        .stream()
+        .filter(app -> app.getJob().getEmployer().equals(employer))
+        .filter(app -> app.getStatus() == status)
+        .toList();
+	}
+
+	public List<Application> filterByExperience(Employer employer, Integer years) {
+	    return applicationRepository.findAll()
+	            .stream()
+	            .filter(app -> app.getJob().getEmployer().equals(employer))
+	            .filter(app -> app.getJobSeeker().getTotalExperienceYears() >= years)
+	            .toList();
+	}
+
+	public List<Application> filterByEducation(Employer employer, String degree) {
+	    return applicationRepository.findAll()
+	            .stream()
+	            .filter(app -> app.getJob().getEmployer().equals(employer))
+	            .filter(app -> degree.equalsIgnoreCase(app.getJobSeeker().getDegree()))
+	            .toList();
+	}
+
+	public List<Application> filterByDate(Employer employer, LocalDateTime date) {
+	    return applicationRepository.findAll()
+	            .stream()
+	            .filter(app -> app.getJob().getEmployer().equals(employer))
+	            .filter(app -> app.getAppliedDate().isAfter(date))
+	            .toList();
 	}
 }
