@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Search Jobs - RevHire</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Segoe UI', sans-serif;
+    background:linear-gradient(135deg,#eef2ff,#f8fafc);
+    color:#2d3748;
+}
+
+/* MAIN LAYOUT */
+.wrapper{
+    max-width:1200px;
+    margin:auto;
+    padding:30px 20px;
+    display:grid;
+    grid-template-columns:300px 1fr;
+    gap:25px;
+}
+
+/* FILTER PANEL */
+.filters{
+    background:white;
+    padding:25px;
+    border-radius:16px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.08);
+    height:fit-content;
+    position:sticky;
+    top:20px;
+    transition:0.3s ease;
+}
+
+.filters:hover{
+    transform:translateY(-2px);
+}
+
+.filters h3{
+    font-size:20px;
+    margin-bottom:18px;
+}
+
+.filters label{
+    font-size:13px;
+    color:#718096;
+    display:block;
+    margin-bottom:6px;
+}
+
+.filters input{
+    width:100%;
+    margin-bottom:14px;
+    padding:11px 12px;
+    border:1px solid #e2e8f0;
+    border-radius:8px;
+    font-size:14px;
+    transition:0.2s;
+}
+
+.filters input:focus{
+    outline:none;
+    border-color:#667eea;
+    box-shadow:0 0 0 3px rgba(102,126,234,0.15);
+}
+
+/* BUTTON */
+.filters button{
+    width:100%;
+    background:linear-gradient(90deg,#667eea,#5a67d8);
+    color:white;
+    border:none;
+    padding:11px;
+    border-radius:10px;
+    font-size:14px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.filters button:hover{
+    transform:translateY(-1px);
+    box-shadow:0 6px 18px rgba(90,103,216,0.35);
+}
+
+/* JOB LIST */
+.jobs{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+}
+
+/* JOB CARD */
+.job-card{
+    background:white;
+    padding:22px;
+    border-radius:16px;
+    box-shadow:0 6px 20px rgba(0,0,0,0.06);
+    transition:0.25s ease;
+    border:1px solid #edf2f7;
+}
+
+.job-card:hover{
+    transform:translateY(-3px);
+    box-shadow:0 12px 30px rgba(0,0,0,0.10);
+}
+
+/* TITLE */
+.title{
+    font-size:20px;
+    font-weight:600;
+    margin-bottom:4px;
+}
+
+/* COMPANY */
+.company{
+    color:#667eea;
+    font-weight:600;
+    font-size:14px;
+    margin-bottom:12px;
+}
+
+/* DESCRIPTION */
+.job-card p{
+    font-size:14px;
+    color:#4a5568;
+    line-height:1.6;
+    margin-bottom:14px;
+}
+
+/* BADGES */
+.badge{
+    display:inline-block;
+    background:#edf2ff;
+    color:#5a67d8;
+    padding:5px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:600;
+    margin-right:6px;
+    margin-bottom:10px;
+}
+
+/* SALARY */
+.salary{
+    margin-top:6px;
+    font-size:17px;
+    font-weight:600;
+    color:#2d3748;
+}
+
+/* BUTTON */
+.btn{
+    display:inline-block;
+    margin-top:14px;
+    background:#667eea;
+    color:white;
+    padding:9px 14px;
+    border-radius:10px;
+    font-size:13px;
+    text-decoration:none;
+    font-weight:600;
+    transition:0.2s;
+}
+
+.btn:hover{
+    background:#5a67d8;
+    transform:translateY(-1px);
+}
+
+/* BACK BUTTON */
+.back{
+    margin-top:18px;
+    display:block;
+    text-align:center;
+    background:#edf2f7;
+    color:#4a5568;
+}
+
+.back:hover{
+    background:#e2e8f0;
+}
+
+/* EMPTY STATE */
+.empty{
+    background:white;
+    padding:40px;
+    border-radius:16px;
+    text-align:center;
+    box-shadow:0 6px 20px rgba(0,0,0,0.05);
+    color:#718096;
+}
+
+/* MOBILE */
+@media(max-width:900px){
+    .wrapper{
+        grid-template-columns:1fr;
+    }
+
+    .filters{
+        position:static;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wrapper">
+
+<!-- FILTER PANEL -->
+<form method="get"
+      th:action="@{/jobs/search-page}"
+      class="filters">
+
+<h3>Search Filters</h3>
+
+<label>Job Role</label>
+<input name="title" placeholder="e.g. Java Developer"/>
+
+<label>Location</label>
+<input name="location" placeholder="e.g. Chennai"/>
+
+<label>Minimum Salary</label>
+<input name="salary" placeholder="e.g. 400000"/>
+
+<button>Search Jobs</button>
+
+<a th:if="${role=='JOBSEEKER'}"
+   href="/jobseeker/dashboard"
+   class="btn back">Back to Dashboard</a>
+
+<a th:if="${role=='EMPLOYER'}"
+   href="/employer/dashboard"
+   class="btn back">Back to Dashboard</a>
+
+</form>
+
+<!-- JOB LIST -->
+<div class="jobs">
+
+<div th:if="${jobs.isEmpty()}" class="empty">
+    No jobs found. Try adjusting filters.
+</div>
+
+<div class="job-card" th:each="job : ${jobs}">
+
+<div class="title" th:text="${job.title}"></div>
+
+<div class="company"
+     th:text="${job.employer!=null ? job.employer.companyName : 'Company'}">
+</div>
+
+<p th:text="${job.description}"></p>
+
+<span class="badge" th:text="${job.jobType}"></span>
+<span class="badge" th:text="${job.experienceRequired}"></span>
+
+<div class="salary">
+₹ <span th:text="${job.salaryMin}"></span>
+ -
+₹ <span th:text="${job.salaryMax}"></span>
+</div>
+
+<a th:if="${role=='JOBSEEKER'}"
+   th:href="@{'/jobseeker/job/' + ${job.jobId}}"
+   class="btn">
+View Details
+</a>
+
+<a th:if="${role=='EMPLOYER'}"
+   th:href="@{'/employer/job/' + ${job.jobId}}"
+   class="btn">
+View Details
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>

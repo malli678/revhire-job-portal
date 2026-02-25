@@ -19,29 +19,23 @@ public class JobService {
     }
 
     // =========================
-    // SAVE JOB (Thymeleaf)
+    // SAVE JOB
     // =========================
     public Job saveJob(Job job, Employer employer) {
-
         job.setPostedDate(LocalDateTime.now());
-
         if (job.getStatus() == null) {
             job.setStatus("ACTIVE");
         }
-
-        // ⭐ VERY IMPORTANT FIX (Dashboard Issue)
         job.setEmployer(employer);
-
         return jobRepository.save(job);
     }
 
     // =========================
-    // REST POST JOB (JobDto)
+    // POST JOB (DTO)
     // =========================
     public Job postJob(JobDto dto, Employer employer) {
 
         Job job = new Job();
-
         job.setTitle(dto.getTitle());
         job.setDescription(dto.getDescription());
         job.setLocation(dto.getLocation());
@@ -49,11 +43,8 @@ public class JobService {
         job.setExperienceRequired(dto.getExperienceRequired());
         job.setSalaryMin(dto.getSalaryMin());
         job.setSalaryMax(dto.getSalaryMax());
-
         job.setPostedDate(LocalDateTime.now());
         job.setStatus("ACTIVE");
-
-        // ⭐ MOST IMPORTANT LINE
         job.setEmployer(employer);
 
         return jobRepository.save(job);
@@ -87,25 +78,22 @@ public class JobService {
     }
 
     // =========================
-    // STATUS UPDATES
+    // STATUS MANAGEMENT
     // =========================
     public Job closeJob(Long id) {
-        Job job = jobRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+        Job job = getJobById(id);
         job.setStatus("CLOSED");
         return jobRepository.save(job);
     }
 
     public Job reopenJob(Long id) {
-        Job job = jobRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+        Job job = getJobById(id);
         job.setStatus("ACTIVE");
         return jobRepository.save(job);
     }
 
     public Job markFilled(Long id) {
-        Job job = jobRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+        Job job = getJobById(id);
         job.setStatus("FILLED");
         return jobRepository.save(job);
     }
@@ -113,30 +101,31 @@ public class JobService {
     // =========================
     // DASHBOARD HELPERS
     // =========================
+    public List<Job> getJobsByEmployer(Employer employer) {
+        return jobRepository.findByEmployer(employer);
+    }
+
     public long countActiveJobs(Employer employer) {
-        return jobRepository.findByEmployer(employer)
+        return getJobsByEmployer(employer)
                 .stream()
                 .filter(j -> "ACTIVE".equals(j.getStatus()))
                 .count();
     }
 
-    public List<Job> getJobsByEmployer(Employer employer) {
-        return jobRepository.findByEmployer(employer);
-    }
-
     // =========================
-    // SEARCH FEATURES
+    // SEARCH
     // =========================
     public List<Job> searchByRole(String title) {
+        return jobRepository.findByTitleContainingIgnoreCase(title);
+    }
+    
+    //adding.....
+    public List<Job> searchByTitle(String title) {
         return jobRepository.findByTitleContainingIgnoreCase(title);
     }
 
     public List<Job> searchByLocation(String location) {
         return jobRepository.findByLocationContainingIgnoreCase(location);
-    }
-
-    public List<Job> searchByExperience(String exp) {
-        return jobRepository.findByExperienceRequiredContainingIgnoreCase(exp);
     }
 
     public List<Job> searchBySalary(Double salary) {
@@ -147,9 +136,6 @@ public class JobService {
         return jobRepository.findByJobTypeIgnoreCase(type);
     }
 
-    // =========================
-    // GET ALL JOBS / DETAILS
-    // =========================
     public List<Job> getAllJobs() {
         return jobRepository.findAll();
     }

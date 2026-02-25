@@ -52,17 +52,14 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-
-            // ✅ CSRF CONFIG
-            .csrf(csrf -> csrf
+        .csrf(csrf -> csrf
                 .ignoringRequestMatchers(
                     "/api/**",
                     "/auth/**",
-                    "/jobs/**"
+                    "/jobs/**",
+                    "/jobseeker/**"   // ✅ ADD THIS
                 )
-            )
-
-            // ✅ SESSION CONFIG
+        )
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .maximumSessions(1)
@@ -76,20 +73,17 @@ public class SecurityConfig {
 
             // ✅ AUTHORIZATION RULES ⭐⭐⭐
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers(
-                    "/",
-                    "/auth/**",
-                    "/css/**",
-                    "/js/**",
-                    "/images/**",
-                    "/api/**"
-                ).permitAll()
 
-                .requestMatchers("/jobseeker/**").hasRole("JOBSEEKER")
-                .requestMatchers("/employer/**").hasRole("EMPLOYER")
+            	    // Public pages
+            	    .requestMatchers("/auth/login", "/auth/forgot-password", "/auth/register").permitAll()
 
-                .anyRequest().authenticated()
-            )
+            	    // Role-specific pages
+            	    .requestMatchers("/jobseeker/**").hasRole("JOBSEEKER")
+            	    .requestMatchers("/employer/**").hasRole("EMPLOYER")
+
+            	    // Everything else requires authentication
+            	    .anyRequest().authenticated()
+            	)
 
             // ✅ AUTH PROVIDER
             .authenticationProvider(authenticationProvider())

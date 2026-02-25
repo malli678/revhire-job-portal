@@ -41,7 +41,7 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     List<Job> findByStatus(String status);
 
     // ===================================
-    // GET JOBS BY EMPLOYER (VERY IMPORTANT)
+    // GET JOBS BY EMPLOYER
     // ===================================
     List<Job> findByEmployer(Employer employer);
 }

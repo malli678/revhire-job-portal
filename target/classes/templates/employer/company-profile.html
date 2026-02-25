@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+<title>Company Profile</title>
+
+<style>
+
+body{
+    font-family:Arial;
+    background:#f4f4f4;
+    margin:0;
+}
+
+.container{
+    max-width:700px;
+    margin:50px auto;
+}
+
+.card{
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.1);
+}
+
+h2{
+    margin-top:0;
+    color:#333;
+}
+
+.label{
+    font-weight:bold;
+    color:#555;
+}
+
+.value{
+    margin-bottom:15px;
+    color:#222;
+}
+
+.back{
+    display:inline-block;
+    margin-top:20px;
+    background:#6c757d;
+    color:white;
+    padding:10px 16px;
+    border-radius:6px;
+    text-decoration:none;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<h2>🏢 Company Profile</h2>
+
+<div class="label">Name:</div>
+<div class="value" th:text="${user.companyName}"></div>
+
+<div class="label">Industry:</div>
+<div class="value" th:text="${user.industry}"></div>
+
+<div class="label">Website:</div>
+<div class="value" th:text="${user.companyWebsite}"></div>
+
+<div class="label">Description:</div>
+<div class="value" th:text="${user.companyDescription}"></div>
+
+<a href="/employer/dashboard" class="back">
+⬅ Back to Dashboard
+</a>
+
+</div>
+
+</div>
+
+</body>
+</html>

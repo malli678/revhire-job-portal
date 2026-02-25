@@ -7,7 +7,7 @@ public class ResumeDto {
     private String year;
     private String skills;
 
-    // ✅ Getters & Setters
+    // Getters & Setters
 
     public String getObjective() {
         return objective;

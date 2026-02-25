@@ -3,13 +3,18 @@ package com.revhire.controller;
 import com.revhire.dto.ResumeDto;
 import com.revhire.exception.UnauthorizedException;
 import com.revhire.model.*;
-import com.revhire.repository.ResumeRepository;
+import com.revhire.repository.ApplicationRepository;
+import com.revhire.repository.JobRepository;
 import com.revhire.service.*;
+import java.util.List;
 
 import jakarta.servlet.http.HttpSession;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
@@ -26,19 +31,22 @@ public class JobSeekerController {
     private final JobSeekerService jobSeekerService;
     private final EducationService educationService;
     private final UserService userService;
-    private final ResumeRepository resumeRepository;
+    private final ApplicationRepository applicationRepository;
+    private final JobRepository jobRepository;
 
     public JobSeekerController(ResumeService resumeService,
                                JobSeekerService jobSeekerService,
                                EducationService educationService,
                                UserService userService,
-                               ResumeRepository resumeRepository) {
+                               ApplicationRepository applicationRepository,
+                               JobRepository jobRepository) {
 
         this.resumeService = resumeService;
         this.jobSeekerService = jobSeekerService;
         this.educationService = educationService;
         this.userService = userService;
-        this.resumeRepository = resumeRepository;
+        this.applicationRepository = applicationRepository;
+        this.jobRepository = jobRepository;
     }
 
     // =========================
@@ -51,6 +59,7 @@ public class JobSeekerController {
 
         session.setAttribute("userId", user.getUserId());
         session.setAttribute("userName", user.getFullName());
+        session.setAttribute("userRole", user.getRole().name());
 
         Long userId = user.getUserId();
 
@@ -86,7 +95,6 @@ public class JobSeekerController {
     public String savedJobs(Model model, HttpSession session) {
 
         Long userId = validateSession(session);
-
         model.addAttribute("savedJobs", jobSeekerService.getSavedJobsList(userId));
 
         return "jobseeker/saved-jobs";
@@ -97,23 +105,38 @@ public class JobSeekerController {
     // =========================
     @PostMapping("/applyJob/{jobId}")
     @ResponseBody
-    public ResponseEntity<?> applyJob(@PathVariable Long jobId,
-                                      HttpSession session) {
+    public ResponseEntity<String> applyJob(@PathVariable Long jobId,
+                                           HttpSession session) {
 
         Long userId = validateSession(session);
 
         return jobSeekerService.applyJob(userId, jobId);
+    }
+    // =========================
+    // WITHDRAW APPLICATION 
+    // =========================
+    @PostMapping("/withdraw/{applicationId}")
+    public String withdrawApplication(@PathVariable Long applicationId,
+                                      @RequestParam String notes,
+                                      HttpSession session) {
+
+        validateSession(session);
+        jobSeekerService.withdrawApplication(applicationId, notes);
+
+        return "redirect:/jobseeker/applications";
     }
 
     // =========================
     // APPLICATIONS PAGE
     // =========================
     @GetMapping("/applications")
-    public String applications(Model model, HttpSession session) {
+    public String viewApplications(Model model,
+                                   HttpSession session) {
 
         Long userId = validateSession(session);
 
-        model.addAttribute("applications", jobSeekerService.getApplicationsList(userId));
+        model.addAttribute("applications",
+                jobSeekerService.getApplicationsList(userId));
 
         return "jobseeker/applications";
     }
@@ -122,24 +145,19 @@ public class JobSeekerController {
     // JOB DETAILS
     // =========================
     @GetMapping("/job/{id}")
-    public String jobDetails(@PathVariable Long id,
-                             Model model,
-                             HttpSession session) {
+    public String jobDetails(@PathVariable Long id, Model model, HttpSession session) {
 
         validateSession(session);
-
         model.addAttribute("job", jobSeekerService.getJobById(id));
 
-        return "jobseeker/job_details";
+        return "jobseeker/job-details"; // use consistent template name
     }
 
     // =========================
     // RESUME PAGE
     // =========================
     @GetMapping("/resume")
-    public String resumePage(Model model,
-                             Principal principal,
-                             HttpSession session) {
+    public String resumePage(Model model, Principal principal, HttpSession session) {
 
         validateSession(session);
 
@@ -168,12 +186,9 @@ public class JobSeekerController {
     public String profile(Model model, HttpSession session) {
 
         Long userId = validateSession(session);
-
         User user = userService.getUserById(userId);
-
         model.addAttribute("user", user);
 
-        // 🔥 IMPORTANT FIX ⭐⭐⭐
         if (user instanceof JobSeeker js) {
             model.addAttribute("completion", js.calculateProfileCompletion());
         }
@@ -191,11 +206,10 @@ public class JobSeekerController {
 
         validateSession(session);
 
-        resumeService.uploadResume(file, principal.getName());
+        resumeService.uploadResume(file, principal.getName());  // Must match service method
 
         return "redirect:/jobseeker/resume?success";
     }
-
     // =========================
     // SAVE RESUME DETAILS
     // =========================
@@ -206,9 +220,7 @@ public class JobSeekerController {
 
         resumeService.save(dto, principal.getName());
 
-        // ✅ SUCCESS MESSAGE ⭐⭐⭐
-        redirectAttributes.addFlashAttribute("successMsg",
-                "Resume details saved successfully ✅");
+        redirectAttributes.addFlashAttribute("successMsg", "Resume details saved successfully ✅");
 
         return "redirect:/jobseeker/resume";
     }
@@ -218,11 +230,9 @@ public class JobSeekerController {
     // =========================
     @PostMapping("/saveJob/{jobId}")
     @ResponseBody
-    public ResponseEntity<?> saveJob(@PathVariable Long jobId,
-                                     HttpSession session) {
+    public ResponseEntity<?> saveJob(@PathVariable Long jobId, HttpSession session) {
 
         Long userId = validateSession(session);
-
         return jobSeekerService.saveJob(userId, jobId);
     }
 
@@ -232,11 +242,9 @@ public class JobSeekerController {
     private Long validateSession(HttpSession session) {
 
         Long userId = (Long) session.getAttribute("userId");
-
         if (userId == null) {
             throw new UnauthorizedException("Session expired. Please login again.");
         }
-
         return userId;
     }
 }

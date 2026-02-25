@@ -1,23 +1,32 @@
 package com.revhire.controller;
 
+import com.revhire.model.Application;
 import com.revhire.model.Employer;
 import com.revhire.model.Job;
 import com.revhire.model.User;
+import com.revhire.service.ApplicationService;
 import com.revhire.service.EmployerService;
-import com.revhire.service.UserService;
 import com.revhire.service.JobService;
+import com.revhire.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Controller
 @RequestMapping("/employer")
 public class EmployerController {
+
+    @Autowired
+    private ApplicationService applicationService;
 
     private final UserService userService;
     private final JobService jobService;
@@ -36,15 +45,15 @@ public class EmployerController {
     // =========================
     @GetMapping("/dashboard")
     public String dashboard(Model model,
-                            HttpSession session,
-                            Authentication authentication) {
+                            Authentication authentication,
+                            HttpSession session) {
 
         if (authentication == null) {
             return "redirect:/auth/login";
         }
 
-        User user = userService.findByEmail(authentication.getName());
-
+        String email = authentication.getName();
+        User user = userService.findByEmail(email);
         if (user == null) {
             return "redirect:/auth/login";
         }
@@ -55,48 +64,64 @@ public class EmployerController {
 
         model.addAttribute("user", user);
 
-        Employer employer =
-                employerService.getEmployerByEmail(authentication.getName());
+        Employer employer = employerService.getEmployerByEmail(email);
+        if (employer == null) {
+            return "redirect:/auth/login";
+        }
 
-        List<Job> employerJobs =
-                jobService.getJobsByEmployer(employer);
+        // Get employer jobs
+        List<Job> jobs = jobService.getJobsByEmployer(employer);
 
-        long activeJobs =
-                employerJobs.stream()
-                        .filter(j -> "ACTIVE".equals(j.getStatus()))
-                        .count();
+        // Collect all applications
+        List<Application> allApplications = new ArrayList<>();
+        for (Job job : jobs) {
+            List<Application> jobApplications = applicationService.getApplicationsByJob(job.getJobId());
+            if (jobApplications != null) {
+                allApplications.addAll(jobApplications);
+            }
+        }
 
+        // Send to frontend
+        model.addAttribute("applications", allApplications);
+
+        // Active jobs count
+        long activeJobs = jobs.stream()
+                .filter(j -> "ACTIVE".equals(j.getStatus()))
+                .count();
         model.addAttribute("activeJobs", activeJobs);
-        model.addAttribute("totalApplicants", 0);
-        model.addAttribute("shortlisted", 0);
+
+        // Total applicants
+        model.addAttribute("totalApplicants", allApplications.size());
+
+        // Shortlisted count
+        long shortlistedCount = allApplications.stream()
+                .filter(app -> app.getStatus() == Application.ApplicationStatus.SHORTLISTED)
+                .count();
+        model.addAttribute("shortlisted", shortlistedCount);
 
         return "employer/dashboard";
     }
 
     // =========================
-    // POST JOB API
+    // SHORTLIST
     // =========================
-    @PostMapping("/post-job")
-    @ResponseBody
-    public Job postJob(@RequestBody Job job,
-                       Authentication auth) {
+    @PostMapping("/shortlist/{applicationId}")
+    public String shortlist(@PathVariable Long applicationId,
+                            @RequestParam String notes) {
 
-        Employer emp =
-                employerService.getEmployerByEmail(auth.getName());
-
-        job.setEmployer(emp);
-
-        return employerService.postJob(job, emp);
+        applicationService.shortlistCandidate(applicationId, notes);
+        return "redirect:/employer/dashboard";
     }
 
     // =========================
-    // EDIT JOB API (REST)
+    // REJECT
     // =========================
-    @PutMapping("/job/{id}")
-    @ResponseBody
-    public Job editJob(@PathVariable Long id,
-                       @RequestBody Job job) {
-        return employerService.updateJob(id, job);
+    @PostMapping("/reject/{applicationId}")
+    public String reject(@PathVariable Long applicationId,
+                         @RequestParam String notes) {
+
+        applicationService.rejectCandidate(applicationId, notes);
+        return "redirect:/employer/dashboard";
     }
 
     // =========================
@@ -140,49 +165,29 @@ public class EmployerController {
     // MANAGE JOBS PAGE
     // =========================
     @GetMapping("/manage-jobs")
-    public String manageJobs(Model model,
-                             Authentication auth) {
-
-        Employer employer =
-                employerService.getEmployerByEmail(auth.getName());
-
-        model.addAttribute("jobs",
-                jobService.getJobsByEmployer(employer));
-
+    public String manageJobs(Model model, Authentication authentication) {
+        Employer employer = employerService.getEmployerByEmail(authentication.getName());
+        model.addAttribute("jobs", jobService.getJobsByEmployer(employer));
         return "employer/manage-jobs";
     }
 
     // =========================
-    // SEARCH JOBS PAGE
+    // SEARCH JOBS PAGE (FOR EMPLOYER)
     // =========================
     @GetMapping("/search-jobs")
     public String searchJobs(Model model) {
-
         model.addAttribute("jobs", jobService.getAllJobs());
         model.addAttribute("role", "EMPLOYER");
-
         return "jobseeker/search-jobs";
-    }
-
-    // =========================
-    // POST JOB PAGE
-    // =========================
-    @GetMapping("/post-job-page")
-    public String postJobPage() {
-        return "employer/post-job";
     }
 
     // =========================
     // COMPANY PROFILE
     // =========================
     @GetMapping("/company-profile")
-    public String companyProfile(Model model, Authentication auth) {
-
-        Employer employer =
-                employerService.getEmployerByEmail(auth.getName());
-
+    public String companyProfile(Model model, Authentication authentication) {
+        Employer employer = employerService.getEmployerByEmail(authentication.getName());
         model.addAttribute("user", employer);
-
         return "employer/company-profile";
     }
 
@@ -191,23 +196,19 @@ public class EmployerController {
     // =========================
     @GetMapping("/job/{id}")
     public String viewJob(@PathVariable Long id, Model model) {
-
-        model.addAttribute("job", jobService.getJobById(id));
-
+        Job job = jobService.getJobById(id);
+        model.addAttribute("job", job);
         return "employer/job-details";
     }
 
     // =========================
-    // OPEN EDIT PAGE
+    // OPEN EDIT JOB PAGE
     // =========================
     @GetMapping("/job/edit/{id}")
     public String openEditJob(@PathVariable Long id, Model model) {
-
         Job job = jobService.getJobById(id);
-
         model.addAttribute("job", job);
         model.addAttribute("jobDto", job);
-
         return "employer/edit-job";
     }
 
@@ -217,9 +218,33 @@ public class EmployerController {
     @PostMapping("/job/update/{id}")
     public String updateJobFromForm(@PathVariable Long id,
                                     @ModelAttribute Job job) {
-
         employerService.updateJob(id, job);
-
         return "redirect:/employer/manage-jobs";
+    }
+
+    // =========================
+    // BULK UPDATE APPLICATIONS
+    // =========================
+    @PostMapping("/bulk-update")
+    public String bulkUpdate(@RequestParam(value = "applicationIds", required = false) List<Long> applicationIds,
+                             @RequestParam(value = "status", required = false) String status,
+                             @RequestParam(value = "bulkNote", required = false) String bulkNote,
+                             RedirectAttributes redirectAttributes) {
+
+        if (status == null || status.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please select bulk action.");
+            return "redirect:/employer/dashboard";
+        }
+
+        if (applicationIds == null || applicationIds.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please select at least one applicant.");
+            return "redirect:/employer/dashboard";
+        }
+
+        Application.ApplicationStatus newStatus = Application.ApplicationStatus.valueOf(status);
+        applicationService.bulkUpdateStatus(applicationIds, newStatus, bulkNote);
+
+        redirectAttributes.addFlashAttribute("successMessage", "Bulk update successful.");
+        return "redirect:/employer/dashboard";
     }
 }
