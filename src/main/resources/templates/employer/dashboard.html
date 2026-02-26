@@ -93,6 +93,79 @@
             background: #007bff;
             color: white;
         }
+		.bulk-section{
+		    margin-top:20px;
+		    background:white;
+		    padding:14px;
+		    border-radius:12px;
+		    box-shadow:0 4px 12px rgba(0,0,0,0.06);
+		    width:fit-content;
+		}
+
+		/* Controls Row */
+		.bulk-controls{
+		    display:flex;
+		    align-items:center;
+		    gap:10px;
+		}
+
+		/* Dropdown */
+		.bulk-select{
+		    padding:8px 14px;
+		    border-radius:8px;
+		    border:1px solid #ddd;
+		    font-size:13px;
+		    cursor:pointer;
+		    transition:0.2s;
+		}
+
+		.bulk-select:focus{
+		    outline:none;
+		    border-color:#007bff;
+		    box-shadow:0 0 0 2px rgba(0,123,255,0.15);
+		}
+
+		/* Button */
+		.bulk-btn{
+		    background:#007bff;
+		    color:white;
+		    border:none;
+		    padding:8px 16px;
+		    border-radius:8px;
+		    font-size:13px;
+		    font-weight:500;
+		    cursor:pointer;
+		    transition:0.2s;
+		}
+
+		.bulk-btn:hover{
+		    background:#0069d9;
+		    transform:translateY(-1px);
+		    box-shadow:0 3px 10px rgba(0,0,0,0.15);
+		}
+
+		/* Textarea Container */
+		.bulk-note{
+		    margin-top:10px;
+		    display:none;
+		    animation:fadeIn 0.2s ease-in-out;
+		}
+
+		.bulk-note textarea{
+		    width:280px;
+		    height:60px;
+		    padding:8px;
+		    border-radius:8px;
+		    border:1px solid #ddd;
+		    font-size:12px;
+		    resize:none;
+		}
+
+		/* Smooth reveal animation */
+		@keyframes fadeIn{
+		    from { opacity:0; transform:translateY(-3px); }
+		    to { opacity:1; transform:translateY(0); }
+		}
 
         .shortlist-btn {
             background: #28a745;
@@ -297,29 +370,37 @@
                 </tr>
             </table>
 
-            <!-- Bulk Update Section -->
+			<!-- Bulk Update Section -->
 			<div class="bulk-section">
 
-			    <select name="status" id="bulkStatus"
-			            onchange="toggleBulkNote()">
-			        <option value="">Select Bulk Action</option>
-			        <option value="SHORTLISTED">Shortlist Selected</option>
-			        <option value="REJECTED">Reject Selected</option>
-			    </select>
+			    <div class="bulk-controls">
 
-			    <!-- Note textarea (hidden initially) -->
-			    <div id="bulkNoteDiv" style="display:none; margin-top:10px;">
-			        <textarea name="bulkNote"
-			                  placeholder="Enter rejection reason"
-			                  style="width:300px; height:60px;"></textarea>
+			        <select name="status"
+			                id="bulkStatus"
+			                class="bulk-select"
+			                onchange="toggleBulkNote()">
+
+			            <option value="">Bulk Action</option>
+			            <option value="SHORTLISTED">Shortlist Selected</option>
+			            <option value="REJECTED">Reject Selected</option>
+
+			        </select>
+
+			        <button type="submit" class="bulk-btn">
+			            Update Selected
+			        </button>
+
 			    </div>
 
-			    <button type="submit"
-			            class="btn"
-			            onclick="return validateBulkForm();">
-			        Update Selected
-			    </button>
+			    <!-- Note textarea -->
+			    <div id="bulkNoteDiv" class="bulk-note">
+			        <textarea name="bulkNote"
+			                  placeholder="Enter rejection reason"></textarea>
+			    </div>
 
+			</div>
+
+			   
 			    <div id="bulkError"
 			         style="color:red; margin-top:8px; font-weight:bold;"></div>
 

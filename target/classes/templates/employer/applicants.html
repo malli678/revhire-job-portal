@@ -4,178 +4,202 @@
     <title>Applicants - RevHire</title>
     <meta charset="UTF-8">
 
-    <style>
+	<style>
 
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            padding: 35px;
-            background: #f4f6f9;
-            color: #2d3748;
-        }
+	body {
+	    font-family: 'Segoe UI', Arial, sans-serif;
+	    padding: 35px;
+	    background: #f4f6f9;
+	    color: #2d3748;
+	}
 
-        h2 {
-            margin-bottom: 20px;
-        }
+	/* PAGE TITLE */
+	h2 {
+	    margin-bottom: 18px;
+	    font-weight: 600;
+	}
 
-        /* BACK BUTTON ⭐⭐⭐ */
-        .top-bar {
-            margin-bottom: 15px;
-        }
+	/* TOP BAR */
+	.top-bar {
+	    margin-bottom: 10px;
+	}
 
-        .back-btn {
-            text-decoration: none;
-            background: #28a745;
-            color: white;
-            padding: 8px 14px;
-            border-radius: 6px;
-            font-size: 13px;
-        }
+	.back-btn {
+	    text-decoration: none;
+	    background: #28a745;
+	    color: white;
+	    padding: 8px 16px;
+	    border-radius: 8px;
+	    font-size: 13px;
+	    font-weight: 500;
+	    transition: 0.2s;
+	}
 
-        .back-btn:hover {
-            background: #218838;
-        }
+	.back-btn:hover {
+	    background: #218838;
+	    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+	}
 
-        /* FILTER PANEL ⭐⭐⭐⭐⭐ */
-        .filters {
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
-        }
+	/* FILTER PANEL ⭐⭐⭐⭐⭐ */
+	.filters {
+	    background: white;
+	    padding: 16px;
+	    border-radius: 14px;
+	    margin-bottom: 22px;
+	    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+	    display: flex;
+	    flex-wrap: wrap;
+	    gap: 10px;
+	    align-items: center;
+	}
 
-        .filters input,
-        .filters select {
-            padding: 7px 10px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            font-size: 13px;
-        }
+	.filters input,
+	.filters select {
+	    padding: 8px 12px;
+	    border-radius: 8px;
+	    border: 1px solid #ddd;
+	    font-size: 13px;
+	    transition: 0.2s;
+	}
 
-        .filters button {
-            padding: 7px 16px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-        }
+	.filters input:focus,
+	.filters select:focus {
+	    outline: none;
+	    border-color: #007bff;
+	    box-shadow: 0 0 0 2px rgba(0,123,255,0.15);
+	}
 
-        .filters button:hover {
-            background: #0069d9;
-        }
+	.filters button {
+	    padding: 8px 18px;
+	    background: #007bff;
+	    color: white;
+	    border: none;
+	    border-radius: 8px;
+	    cursor: pointer;
+	    font-size: 13px;
+	    font-weight: 500;
+	    transition: 0.2s;
+	}
 
-        /* TABLE ⭐⭐⭐⭐⭐ */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
-        }
+	.filters button:hover {
+	    background: #0069d9;
+	    transform: translateY(-1px);
+	    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+	}
 
-        th {
-            background: #007bff;
-            color: white;
-            padding: 12px;
-            font-size: 13px;
-            text-align: left;
-        }
+	/* TABLE ⭐⭐⭐⭐⭐ */
+	table {
+	    width: 100%;
+	    border-collapse: collapse;
+	    background: white;
+	    border-radius: 14px;
+	    overflow: hidden;
+	    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+	}
 
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #eee;
-            font-size: 13px;
-        }
+	th {
+	    background: #007bff;
+	    color: white;
+	    padding: 14px;
+	    font-size: 13px;
+	    font-weight: 600;
+	    text-align: left;
+	}
 
-        tr:hover {
-            background: #f8f9fa;
-        }
+	td {
+	    padding: 14px;
+	    border-bottom: 1px solid #f1f1f1;
+	    font-size: 13px;
+	}
 
-        /* STATUS BADGES ⭐⭐⭐⭐⭐ */
-        .badge {
-            padding: 5px 12px;
-            border-radius: 20px;
-            color: white;
-            font-size: 11px;
-            font-weight: 600;
-            display: inline-block;
-        }
+	tr:hover {
+	    background: #f9fbff;
+	}
 
-        .APPLIED { background: #6c757d; }
-        .SHORTLISTED { background: #28a745; }
-        .REJECTED { background: #dc3545; }
-        .WITHDRAWN { background: #343a40; }
+	/* STATUS BADGES ⭐⭐⭐⭐⭐ */
+	.badge {
+	    padding: 6px 14px;
+	    border-radius: 20px;
+	    color: white;
+	    font-size: 11px;
+	    font-weight: 600;
+	    display: inline-block;
+	    letter-spacing: 0.3px;
+	}
 
-        /* ACTION BUTTONS ⭐⭐⭐⭐⭐ */
-        .action-buttons {
-            display: flex;
-            gap: 6px;
-        }
+	.APPLIED { background: #6c757d; }
+	.SHORTLISTED { background: #28a745; }
+	.REJECTED { background: #dc3545; }
+	.WITHDRAWN { background: #f0ad4e; }
 
-        button {
-            padding: 6px 10px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 12px;
-        }
+	/* ACTION BUTTONS ⭐⭐⭐⭐⭐ */
+	.action-buttons {
+	    display: flex;
+	    gap: 8px;
+	}
 
-        .shortlist {
-            background: #28a745;
-            color: white;
-        }
+	button {
+	    padding: 7px 14px;
+	    border: none;
+	    border-radius: 8px;
+	    cursor: pointer;
+	    font-size: 12px;
+	    font-weight: 500;
+	    transition: 0.2s;
+	}
 
-        .reject {
-            background: #dc3545;
-            color: white;
-        }
+	.shortlist {
+	    background: #28a745;
+	    color: white;
+	}
 
-        .save {
-            background: #17a2b8;
-            color: white;
-        }
+	.reject {
+	    background: #dc3545;
+	    color: white;
+	}
 
-        button:hover {
-            opacity: 0.9;
-        }
+	.save {
+	    background: #17a2b8;
+	    color: white;
+	}
 
-        button:disabled {
-            background: #cccccc;
-            cursor: not-allowed;
-        }
+	button:hover {
+	    transform: translateY(-1px);
+	    box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+	}
 
-        /* NOTES ⭐⭐⭐⭐⭐ */
-        .notes-form {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-        }
+	button:disabled {
+	    background: #d6d6d6;
+	    cursor: not-allowed;
+	    box-shadow: none;
+	    transform: none;
+	}
 
-        .notes-input {
-            width: 150px;
-            padding: 6px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
-            font-size: 12px;
-        }
+	/* NOTES */
+	.notes-form {
+	    display: flex;
+	    gap: 8px;
+	    align-items: center;
+	}
 
-        /* EMPTY STATE ⭐⭐⭐⭐⭐ */
-        .empty-row {
-            text-align: center;
-            padding: 30px;
-            color: #718096;
-            font-size: 14px;
-            font-weight: 500;
-        }
+	.notes-input {
+	    width: 170px;
+	    padding: 8px 10px;
+	    border-radius: 8px;
+	    border: 1px solid #ddd;
+	    font-size: 12px;
+	}
 
-    </style>
+	/* EMPTY STATE ⭐⭐⭐⭐⭐ */
+	.empty-row {
+	    text-align: center;
+	    padding: 35px;
+	    color: #718096;
+	    font-size: 14px;
+	    font-weight: 500;
+	}
+
+	</style>
 </head>
 
 <body>

@@ -17,7 +17,15 @@ public class JobSeeker extends User {
     private Integer totalExperienceYears;
     private String resumePath;
     private String resumeText;
-    private String profileSummary;
+    private String resumeFile;
+    public String getResumeFile() {
+		return resumeFile;
+	}
+
+	public void setResumeFile(String resumeFile) {
+		this.resumeFile = resumeFile;
+	}
+	private String profileSummary;
     private String linkedInProfile;
     private String portfolioUrl;
     private String objective;
@@ -49,6 +57,14 @@ public class JobSeeker extends User {
     @OneToMany(mappedBy = "jobSeeker")
     private List<SavedJob> savedJobs = new ArrayList<>();
     
+    @OneToMany(mappedBy = "jobSeeker", cascade = CascadeType.ALL)
+    private List<Skill> skillEntities;
+
+    @OneToMany(mappedBy = "jobSeeker", cascade = CascadeType.ALL)
+    private List<Education> educationEntities;
+
+    @OneToMany(mappedBy = "jobSeeker", cascade = CascadeType.ALL)
+    private List<Certification> certificationEntities;
     // Constructors
     public JobSeeker() {
         this.setRole(Role.JOBSEEKER);
@@ -174,7 +190,29 @@ public class JobSeeker extends User {
     public void setApplications(List<Application> applications) {
         this.applications = applications;
     }
-    
+    public List<Skill> getSkillEntities() {
+        return skillEntities;
+    }
+
+    public void setSkillEntities(List<Skill> skillEntities) {
+        this.skillEntities = skillEntities;
+    }
+
+    public List<Education> getEducationEntities() {
+        return educationEntities;
+    }
+
+    public void setEducationEntities(List<Education> educationEntities) {
+        this.educationEntities = educationEntities;
+    }
+
+    public List<Certification> getCertificationEntities() {
+        return certificationEntities;
+    }
+
+    public void setCertificationEntities(List<Certification> certificationEntities) {
+        this.certificationEntities = certificationEntities;
+    }
     public List<SavedJob> getSavedJobs() {
         return savedJobs;
     }

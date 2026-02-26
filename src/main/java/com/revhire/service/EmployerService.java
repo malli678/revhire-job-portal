@@ -3,6 +3,7 @@ package com.revhire.service;
 import com.revhire.dto.CompanyProfileUpdateDto;
 import com.revhire.model.Application;
 import com.revhire.model.Employer;
+import com.revhire.model.Job;
 import com.revhire.repository.ApplicationRepository;
 import com.revhire.repository.EmployerRepository;
 import com.revhire.repository.JobRepository;
@@ -199,4 +200,34 @@ employerRepository.save(employer);
      return applicationRepository
              .findByJob_Employer_UserId(employerId);
  }
+               // ⭐⭐⭐ MISSING IN YOUR CODE
+	
+ public void closeJob(Long jobId) {
+
+	    Job job = jobRepository.findById(jobId)
+	            .orElseThrow(() -> new RuntimeException("Job not found"));
+
+	    job.setStatus("CLOSED");   // ✅ STRING VALUE
+
+	    jobRepository.save(job);
+	}
+	
+public void reopenJob(Long jobId) {
+
+    Job job = jobRepository.findById(jobId)
+            .orElseThrow(() -> new RuntimeException("Job not found"));
+
+    job.setStatus("ACTIVE");   // ✅ STRING VALUE
+
+    jobRepository.save(job);
+}
+public void deleteJob(Long jobId) {
+
+    Job job = jobRepository.findById(jobId)
+            .orElseThrow(() -> new RuntimeException("Job not found"));
+
+    job.setStatus("DELETED");   // ✅ SAFE APPROACH
+
+    jobRepository.save(job);
+}
 }

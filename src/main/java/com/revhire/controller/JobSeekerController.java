@@ -5,11 +5,19 @@ import com.revhire.exception.UnauthorizedException;
 import com.revhire.model.*;
 import com.revhire.repository.ApplicationRepository;
 import com.revhire.repository.JobRepository;
+import com.revhire.repository.JobSeekerRepository;
 import com.revhire.service.*;
 import java.util.List;
 
+import org.springframework.core.io.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
+import java.nio.file.*;
 import jakarta.servlet.http.HttpSession;
 
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -26,6 +34,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/jobseeker")
 public class JobSeekerController {
+	@Autowired
+	private FileStorageService fileStorageService;
+	@Autowired
+	private JobSeekerRepository jobSeekerRepository;
+	@Autowired
+	private JobService jobService;
 
     private final ResumeService resumeService;
     private final JobSeekerService jobSeekerService;
@@ -99,6 +113,16 @@ public class JobSeekerController {
 
         return "jobseeker/saved-jobs";
     }
+    // REMOVE SAVED JOB
+    // =========================
+    @PostMapping("/removeSaved/{jobId}")
+    @ResponseBody
+    public ResponseEntity<?> removeSavedJob(@PathVariable Long jobId,
+                                            HttpSession session) {
+
+        Long userId = validateSession(session);
+        return jobSeekerService.removeSavedJob(userId, jobId);
+    }
 
     // =========================
     // APPLY JOB
@@ -110,17 +134,12 @@ public class JobSeekerController {
 
         try {
 
-            String email = authentication.getName();
-
-            User user = userService.findByEmail(email);
-
-            if (user == null)
-                throw new RuntimeException("User not found");
+            User user = userService.findByEmail(authentication.getName());
 
             return jobSeekerService.applyJob(user.getUserId(), jobId);
 
-        } 
-        catch (RuntimeException e) {
+        } catch (RuntimeException e) {
+
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
@@ -156,13 +175,24 @@ public class JobSeekerController {
     // =========================
     // JOB DETAILS
     // =========================
-    @GetMapping("/job/{id}")
-    public String jobDetails(@PathVariable Long id, Model model, HttpSession session) {
+    @GetMapping("/job/{jobId}")
+    public String jobDetails(@PathVariable Long jobId,
+                             Model model,
+                             Principal principal) {
 
-        validateSession(session);
-        model.addAttribute("job", jobSeekerService.getJobById(id));
+        Job job = jobService.getJobById(jobId);
 
-        return "jobseeker/job-details"; // use consistent template name
+        JobSeeker js = jobSeekerService.getJobSeekerByEmail(principal.getName());
+
+        boolean alreadyApplied =
+                applicationRepository.findByJobAndJobSeeker(job, js).isPresent();
+
+        model.addAttribute("job", job);
+
+        // ⭐⭐⭐ IMPORTANT
+        model.addAttribute("alreadyApplied", alreadyApplied);
+
+        return "jobseeker/job-details";
     }
 
     // =========================
@@ -174,23 +204,50 @@ public class JobSeekerController {
         validateSession(session);
 
         User user = userService.findByEmail(principal.getName());
-        JobSeeker js = (JobSeeker) user;
+        if (!(user instanceof JobSeeker js)) {
+            throw new RuntimeException("Invalid user role");
+        }
 
         ResumeDto preview = new ResumeDto();
         preview.setObjective(js.getObjective());
         preview.setDegree(js.getDegree());
         preview.setYear(js.getYear());
 
-        if(js.getSkills() != null) {
-            preview.setSkills(String.join(",", js.getSkills()));
+        if(js.getSkillEntities() != null) {
+
+            preview.setSkills(
+                js.getSkillEntities()
+                  .stream()
+                  .map(Skill::getName)
+                  .reduce((a,b) -> a + "," + b)
+                  .orElse("")
+            );
         }
 
         model.addAttribute("resumeForm", new ResumeDto());   // EMPTY ⭐⭐⭐
         model.addAttribute("resumePreview", preview);        // SAVED ⭐⭐⭐
-
+        model.addAttribute("resumeFile", js.getResumeFile());
         return "jobseeker/resume";
     }
+    @GetMapping("/downloadResume")
+    @ResponseBody
+    public ResponseEntity<Resource> downloadResume(Principal principal) {
 
+        JobSeeker js = jobSeekerService.getJobSeekerByEmail(principal.getName());
+
+        if (js.getResumeFile() == null) {
+            throw new RuntimeException("No resume uploaded");
+        }
+
+        Path path = Paths.get("uploads").resolve(js.getResumeFile());
+
+        Resource resource = new FileSystemResource(path);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + js.getResumeFile() + "\"")
+                .body(resource);
+    }
     // =========================
     // PROFILE PAGE
     // =========================
@@ -199,28 +256,108 @@ public class JobSeekerController {
 
         Long userId = validateSession(session);
         User user = userService.getUserById(userId);
-        model.addAttribute("user", user);
 
-        if (user instanceof JobSeeker js) {
-            model.addAttribute("completion", js.calculateProfileCompletion());
+        if (!(user instanceof JobSeeker js)) {
+            throw new RuntimeException("Invalid user role");
         }
+
+        model.addAttribute("user", js);
+
+        // ✅ REQUIRED ⭐⭐⭐
+        model.addAttribute("skills", js.getSkillEntities());
+        model.addAttribute("education", js.getEducationEntities());
+        model.addAttribute("certifications", js.getCertificationEntities());
+
+        model.addAttribute("completion", js.calculateProfileCompletion());
 
         return "jobseeker/profile";
     }
+    @PostMapping("/profile/skill/add")
+    public String addSkill(Authentication auth,
+                           @RequestParam String skillName) {
 
+        JobSeeker js = jobSeekerService.getJobSeekerByEmail(auth.getName());
+
+        jobSeekerService.addSkill(js.getUserId(), skillName);
+
+        return "redirect:/jobseeker/profile";
+    }
+    @PostMapping("/profile/skill/delete/{id}")
+    public String deleteSkill(@PathVariable Long id) {
+
+        jobSeekerService.deleteSkill(id);
+
+        return "redirect:/jobseeker/profile";
+    }
+    @PostMapping("/profile/education/add")
+    public String addEducation(Authentication auth,
+                               @RequestParam String degree,
+                               @RequestParam String institution) {
+
+        JobSeeker js = jobSeekerService.getJobSeekerByEmail(auth.getName());
+
+        jobSeekerService.addEducation(js.getUserId(), degree, institution);
+
+        return "redirect:/jobseeker/profile";
+    }
+    @PostMapping("/profile/education/delete/{id}")
+    public String deleteEducation(@PathVariable Long id) {
+
+        jobSeekerService.deleteEducation(id);
+
+        return "redirect:/jobseeker/profile";
+    }
+    @PostMapping("/profile/certification/add")
+    public String addCertification(Authentication auth,
+                                   @RequestParam String name,
+                                   @RequestParam String issuer,
+                                   @RequestParam String year) {
+
+        JobSeeker js = jobSeekerService.getJobSeekerByEmail(auth.getName());
+
+        jobSeekerService.addCertification(js.getUserId(), name, issuer, year);
+
+        return "redirect:/jobseeker/profile";
+    }
+    @PostMapping("/profile/certification/delete/{id}")
+    public String deleteCertification(@PathVariable Long id) {
+
+        jobSeekerService.deleteCertification(id);
+
+        return "redirect:/jobseeker/profile";
+    }
     // =========================
     // UPLOAD RESUME
     // =========================
     @PostMapping("/uploadResume")
     public String uploadResume(@RequestParam MultipartFile file,
                                Principal principal,
+                               RedirectAttributes ra,
                                HttpSession session) {
 
         validateSession(session);
 
-        resumeService.uploadResume(file, principal.getName());  // Must match service method
+        try {
 
-        return "redirect:/jobseeker/resume?success";
+            // ✅ Save file to uploads folder
+            String fileName = fileStorageService.storeFile(file);
+
+            // ✅ Get logged-in jobseeker
+            JobSeeker js = jobSeekerService.getJobSeekerByEmail(principal.getName());
+
+            // ✅ Save filename into DB
+            js.setResumeFile(fileName);
+
+            jobSeekerRepository.save(js);
+
+            ra.addFlashAttribute("successMsg", "Resume uploaded successfully ✅");
+
+        } catch (Exception e) {
+
+            ra.addFlashAttribute("errorMsg", e.getMessage());
+        }
+
+        return "redirect:/jobseeker/resume";
     }
     // =========================
     // SAVE RESUME DETAILS

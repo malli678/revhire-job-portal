@@ -57,9 +57,18 @@ public class SecurityConfig {
         http
 
             // ✅ CSRF CONFIG
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/api/**")
-            )
+        .csrf(csrf -> csrf
+        	    .ignoringRequestMatchers(
+
+        	        "/api/**",
+
+        	        // ✅ AJAX / FETCH ENDPOINTS ⭐⭐⭐
+        	        "/jobseeker/applyJob/**",
+        	        "/jobseeker/saveJob/**",
+        	        "/jobseeker/removeSaved/**"
+
+        	    )
+        	)
 
             // ✅ SESSION MANAGEMENT
             .sessionManagement(session -> session

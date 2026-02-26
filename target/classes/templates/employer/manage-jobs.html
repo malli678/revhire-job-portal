@@ -3,7 +3,8 @@
 
 <head>
 <title>Manage Jobs - RevHire</title>
-
+<meta name="_csrf" th:content="${_csrf.token}"/>
+   <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
 <style>
 body{
     font-family: Arial, sans-serif;
@@ -173,10 +174,19 @@ Delete
 
 <script>
 
+const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+
 function deleteJob(id){
-    fetch('/jobs/' + id, { method:'DELETE' })
-        .then(() => location.reload())
-        .catch(err => console.error(err));
+
+    fetch('/employer/job/delete/' + id, {
+        method:'POST',
+        headers:{
+            [csrfHeader]: csrfToken
+        }
+    })
+    .then(() => location.reload())
+    .catch(err => console.error(err));
 }
 
 function updateStatus(id, status){
@@ -184,17 +194,22 @@ function updateStatus(id, status){
     let url;
 
     if(status === 'CLOSED')
-        url = `/jobs/${id}/close`;
+        url = `/employer/job/close/${id}`;
 
     if(status === 'ACTIVE')
-        url = `/jobs/${id}/reopen`;
+        url = `/employer/job/reopen/${id}`;
 
     if(status === 'FILLED')
-        url = `/jobs/${id}/filled`;
+        url = `/employer/job/filled/${id}`;
 
-    fetch(url,{method:'PUT'})
-        .then(() => location.reload())
-        .catch(err => console.error(err));
+    fetch(url,{
+        method:'POST',
+        headers:{
+            [csrfHeader]: csrfToken
+        }
+    })
+    .then(() => location.reload())
+    .catch(err => console.error(err));
 }
 
 </script>

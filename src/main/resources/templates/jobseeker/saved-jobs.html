@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
+	<meta name="_csrf" th:content="${_csrf.token}"/>
+	<meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Saved Jobs - RevHire</title>
 
     <style>
@@ -176,10 +178,12 @@
                 Apply
             </button>
 
-            <button class="btn btn-danger"
-                    th:attr="onclick=|removeSaved(${saved.job.jobId})|">
-                Remove
-            </button>
+			<button type="button"
+			        class="btn btn-danger"
+			        th:attr="onclick=|removeSaved(${saved.job.jobId})|">
+			    Remove
+			</button>
+			
         </div>
 
     </div>
@@ -187,18 +191,52 @@
 </div>
 
 <script>
+
+function getCsrfHeaders() {
+
+    const tokenMeta = document.querySelector("meta[name='_csrf']");
+    const headerMeta = document.querySelector("meta[name='_csrf_header']");
+
+    if (!tokenMeta || !headerMeta) {
+        console.warn("CSRF meta tags missing");
+        return {};
+    }
+
+    const token = tokenMeta.content;
+    const header = headerMeta.content;
+
+    return { [header]: token };
+}
+
+// ✅ APPLY JOB
 function applyJob(id){
     fetch('/jobseeker/applyJob/' + id,{method:'POST'})
         .then(r=>r.text())
         .then(alert);
 }
 
-/* Optional remove API if you add later */
-function removeSaved(id){
-    fetch('/jobseeker/removeSaved/' + id,{method:'POST'})
-        .then(r=>r.text())
-        .then(alert);
+// ✅ REMOVE SAVED JOB
+function removeSaved(jobId) {
+
+    console.log("Removing job:", jobId);
+
+    fetch('/jobseeker/removeSaved/' + jobId, {
+        method: 'POST',
+        headers: getCsrfHeaders(),
+        credentials: 'same-origin'
+    })
+    .then(response => response.text())
+    .then(message => {
+
+        console.log("SUCCESS:", message);
+        location.reload();
+    })
+    .catch(err => {
+
+        console.error("REMOVE ERROR:", err);
+    });
 }
+
 </script>
 
 </body>

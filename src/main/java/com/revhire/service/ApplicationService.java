@@ -2,12 +2,14 @@ package com.revhire.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.revhire.repository.ApplicationRepository;
 import com.revhire.repository.JobRepository;
 import com.revhire.repository.JobSeekerRepository;
 
 import com.revhire.model.Application;
+import com.revhire.model.Application.ApplicationStatus;
 import com.revhire.model.Employer;
 import com.revhire.model.Job;
 import com.revhire.model.JobSeeker;
@@ -26,6 +28,8 @@ public class ApplicationService {
 
 	@Autowired
 	private JobSeekerRepository jobSeekerRepository;
+	@Autowired
+	private FileStorageService fileStorageService;
 
 	// APPLY JOB
 	public void applyJob(Long jobId, Long jobSeekerId) {
@@ -214,4 +218,31 @@ public class ApplicationService {
 	            .filter(app -> app.getAppliedDate().isAfter(date))
 	            .toList();
 	}
+	public void apply(Long jobId,
+            MultipartFile resume,
+            String coverLetter,
+            String email){
+
+Job job = jobRepository.findById(jobId)
+.orElseThrow(() -> new RuntimeException("Job not found"));
+
+JobSeeker jobSeeker = jobSeekerRepository.findByEmail(email)
+.orElseThrow(() -> new RuntimeException("JobSeeker not found"));
+
+if (applicationRepository.findByJobAndJobSeeker(job, jobSeeker).isPresent()) {
+throw new RuntimeException("Already applied");
+}
+
+// ✅ SAVE FILE
+String resumeFileName = fileStorageService.storeFile(resume);
+
+Application app = new Application();
+app.setJob(job);
+app.setJobSeeker(jobSeeker);
+app.setResumePath(resumeFileName);   // store filename
+app.setStatus(Application.ApplicationStatus.APPLIED);
+app.setAppliedDate(LocalDateTime.now());
+
+applicationRepository.save(app);
+}
 }

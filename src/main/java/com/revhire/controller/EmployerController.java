@@ -218,7 +218,31 @@ public class EmployerController {
 
         return "employer/edit-job";
     }
+    @PostMapping("/job/close/{jobId}")
+    public String closeJob(@PathVariable Long jobId) {
 
+        System.out.println("CLOSE CLICKED → " + jobId);
+
+        jobService.closeJob(jobId);
+        return "redirect:/employer/manage-jobs";
+    }
+    @PostMapping("/job/delete/{jobId}")
+    public String deleteJob(@PathVariable Long jobId) {
+
+        System.out.println("DELETE CLICKED → " + jobId);
+
+        jobService.deleteJob(jobId);
+        return "redirect:/employer/manage-jobs";
+    }
+    @PostMapping("/job/reopen/{jobId}")
+    public String reopenJob(@PathVariable Long jobId) {
+
+        System.out.println("REOPEN CLICKED → " + jobId);
+
+        jobService.reopenJob(jobId);
+
+        return "redirect:/employer/manage-jobs";
+    }
     // =========================
     // UPDATE JOB
     // =========================

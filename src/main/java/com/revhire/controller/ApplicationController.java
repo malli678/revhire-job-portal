@@ -3,11 +3,15 @@ package com.revhire.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.revhire.service.ApplicationService;
+import com.revhire.service.JobService;
 import com.revhire.model.Application;
+import com.revhire.model.Job;
 
+import java.security.Principal;
 import java.util.List;
 
 import org.springframework.ui.Model;
@@ -20,6 +24,8 @@ public class ApplicationController {
 
     @Autowired
     private ApplicationService applicationService;
+    @Autowired
+    private JobService jobService;
 
     // ================= APPLY =================
     @PostMapping("/apply")
@@ -142,5 +148,25 @@ public class ApplicationController {
         model.addAttribute("jobId", jobId);
 
         return "employer/applicants";
+    }
+    @GetMapping("/apply/{jobId}")
+    public String showApplyPage(@PathVariable Long jobId, Model model) {
+
+        Job job = jobService.getJobById(jobId);
+
+        model.addAttribute("job", job);
+
+        return "jobseeker/apply-job";
+    }
+    @PostMapping("/submit")
+    public String submitApplication(
+            @RequestParam Long jobId,
+            @RequestParam("resume") MultipartFile resume,
+            @RequestParam(required = false) String coverLetter,
+            Principal principal) {
+
+        applicationService.apply(jobId, resume, coverLetter, principal.getName());
+
+        return "redirect:/jobseeker/dashboard?applied";
     }
 }
