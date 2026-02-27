@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Notifications - RevHire</title>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .header h1 {
+            color: white;
+            font-size: 28px;
+        }
+        
+        .back-btn {
+            background: white;
+            color: #667eea;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,255,255,0.3);
+        }
+        
+        .notification-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: 0.2s;
+            border-left: 4px solid transparent;
+        }
+        
+        .notification-card.unread {
+            border-left-color: #667eea;
+            background: #f0f3ff;
+        }
+        
+        .notification-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .notification-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .notification-type {
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: #e2e8f0;
+            color: #4a5568;
+            font-weight: 500;
+        }
+        
+        .notification-type.APPLICATION_UPDATE {
+            background: #c3dafe;
+            color: #434190;
+        }
+        
+        .notification-type.JOB_RECOMMENDATION {
+            background: #c6f6d5;
+            color: #276749;
+        }
+        
+        .notification-message {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .notification-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            color: #718096;
+        }
+        
+        .notification-link {
+            background: #667eea;
+            color: white;
+            padding: 6px 14px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+        
+        .notification-link:hover {
+            background: #5a67d8;
+        }
+        
+        .mark-read {
+            background: none;
+            border: 1px solid #cbd5e0;
+            color: #718096;
+            padding: 4px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: 0.2s;
+        }
+        
+        .mark-read:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .empty-state {
+            text-align: center;
+            background: white;
+            padding: 50px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .empty-state h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .empty-state p {
+            color: #718096;
+            margin-bottom: 20px;
+        }
+        
+        .mark-all-read {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-bottom: 20px;
+        }
+        
+        .mark-all-read:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .unread-badge {
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
+        
+        @keyframes fadeOut {
+            from { opacity: 1; transform: translateY(0); }
+            to { opacity: 0; transform: translateY(-10px); }
+        }
+        
+        .fade-out {
+            animation: fadeOut 0.3s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔔 Notifications <span th:if="${unreadCount > 0}" 
+                  class="unread-badge" th:text="${unreadCount}"></span></h1>
+            <a th:href="@{/dashboard}" class="back-btn">← Back to Dashboard</a>
+        </div>
+        
+        <div th:if="${unreadCount > 0}" style="text-align: right;">
+            <button class="mark-all-read" onclick="markAllAsRead()">
+                ✓ Mark All as Read
+            </button>
+        </div>
+        
+        <div th:if="${#lists.isEmpty(notifications)}" class="empty-state">
+            <h3>No Notifications</h3>
+            <p>You're all caught up! Check back later for updates.</p>
+            <a th:href="@{/dashboard}" class="back-btn">Go to Dashboard</a>
+        </div>
+        
+        <div th:each="notif : ${notifications}" 
+             th:class="'notification-card ' + (${notif.read} ? '' : 'unread')"
+             th:id="'notif-' + ${notif.notificationId}">
+            
+            <div class="notification-header">
+                <span class="notification-title" th:text="${notif.title}"></span>
+                <span th:class="'notification-type ' + ${notif.notificationType}"
+                      th:text="${notif.notificationType.replace('_', ' ')}"></span>
+            </div>
+            
+            <div class="notification-message" th:text="${notif.message}"></div>
+            
+            <div class="notification-footer">
+                <span th:text="${#temporals.format(notif.createdAt, 'dd MMM yyyy, HH:mm')}"></span>
+                
+                <div>
+                    <a th:if="${notif.link != null}" 
+                       th:href="@{${notif.link}}" 
+                       class="notification-link">
+                        View Details →
+                    </a>
+                    
+                    <button th:if="${!notif.read}"
+                            class="mark-read"
+                            th:onclick="'markAsRead(' + ${notif.notificationId} + ')'">
+                        ✓ Mark as Read
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
+        
+        function markAsRead(id) {
+            fetch('/notifications/' + id + '/read', {
+                method: 'POST',
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const notif = document.getElementById('notif-' + id);
+                    notif.classList.remove('unread');
+                    
+                    const badge = document.querySelector('.unread-badge');
+                    if (badge) {
+                        let count = parseInt(badge.innerText) - 1;
+                        if (count > 0) {
+                            badge.innerText = count;
+                        } else {
+                            badge.remove();
+                        }
+                    }
+                    
+                    const button = notif.querySelector('.mark-read');
+                    if (button) button.remove();
+                }
+            })
+            .catch(err => console.error(err));
+        }
+        
+        function markAllAsRead() {
+            fetch('/notifications/read-all', {
+                method: 'POST',
+                headers: {
+                    [csrfHeader]: csrfToken
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelectorAll('.notification-card.unread').forEach(el => {
+                        el.classList.remove('unread');
+                        const btn = el.querySelector('.mark-read');
+                        if (btn) btn.remove();
+                    });
+                    
+                    const badge = document.querySelector('.unread-badge');
+                    if (badge) badge.remove();
+                    
+                    const markAllBtn = document.querySelector('.mark-all-read');
+                    if (markAllBtn) markAllBtn.remove();
+                }
+            })
+            .catch(err => console.error(err));
+        }
+    </script>
+</body>
+</html>

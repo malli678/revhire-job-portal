@@ -85,6 +85,13 @@
     <div class="company"
          th:text="${job.employer.companyName}">
     </div>
+	<div class="company">
+	    <span th:text="${job.employer.companyName}"></span>
+	    <a th:href="@{'/employer/public/' + ${job.employer.userId}}" 
+	       style="font-size: 13px; margin-left: 10px; color: #667eea;">
+	        View Company Profile →
+	    </a>
+	</div>
 
     <div class="info">
         📍 <span th:text="${job.location}">Location</span>

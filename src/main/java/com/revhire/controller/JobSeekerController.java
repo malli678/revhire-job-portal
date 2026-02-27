@@ -40,6 +40,8 @@ public class JobSeekerController {
 	private JobSeekerRepository jobSeekerRepository;
 	@Autowired
 	private JobService jobService;
+	@Autowired
+	private RecommendationService recommendationService;
 
     private final ResumeService resumeService;
     private final JobSeekerService jobSeekerService;
@@ -395,5 +397,18 @@ public class JobSeekerController {
             throw new UnauthorizedException("Session expired. Please login again.");
         }
         return userId;
+    }
+    
+    @GetMapping("/recommendations")
+    public String viewRecommendations(Model model, Authentication authentication) {
+        User user = userService.findByEmail(authentication.getName());
+        JobSeeker jobSeeker = (JobSeeker) user;
+        
+        List<Job> recommendedJobs = recommendationService.getRecommendedJobs(
+            jobSeeker.getUserId(), 10);
+        
+        model.addAttribute("recommendedJobs", recommendedJobs);
+        
+        return "jobseeker/recommendations";
     }
 }

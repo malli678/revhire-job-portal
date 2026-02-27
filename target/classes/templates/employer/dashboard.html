@@ -203,13 +203,26 @@
 	    <span th:text="${errorMessage}"></span>
 	</div>
 
-<div class="header">
-    <h1>RevHire - Employer</h1>
-    <div class="nav-links">
-        <span th:text="${session.userName}">User</span>
-        <a href="/auth/logout">Logout</a>
-    </div>
-</div>
+	<div class="header">
+	    <h1>RevHire - Employer</h1>
+	    <div class="nav-links" style="display: flex; align-items: center; gap: 20px;">
+	        
+	        <!-- ✅ NOTIFICATION BELL -->
+	        <div class="notification-container" style="position: relative;">
+	            <a href="/notifications" class="notification-bell" style="position: relative; text-decoration: none; color: white;">
+	                <span style="font-size: 24px;">🔔</span>
+	                <span id="notificationBadge" class="notification-badge" 
+	                      style="display: none; position: absolute; top: -5px; right: -5px; 
+	                             background: #dc3545; color: white; border-radius: 50%; 
+	                             padding: 2px 6px; font-size: 11px; min-width: 18px; 
+	                             text-align: center;">0</span>
+	            </a>
+	        </div>
+	        
+	        <span th:text="${session.userName}">User</span>
+	        <a href="/auth/logout">Logout</a>
+	    </div>
+	</div>
 
 <div class="container">
 
@@ -424,6 +437,8 @@
 	        noteDiv.style.display = "none";
 	    }
 	}
+	
+	//Notification
 
 	function validateBulkForm() {
 
@@ -459,6 +474,29 @@
 
 	    return true;
 	}
+	
+	function updateNotificationBadge() {
+	        fetch('/notifications/unread/count', {
+	            method: 'GET',
+	            headers: {
+	                'Content-Type': 'application/json'
+	            }
+	        })
+	        .then(response => response.json())
+	        .then(data => {
+	            const badge = document.getElementById('notificationBadge');
+	            if (data.count > 0) {
+	                badge.style.display = 'inline';
+	                badge.textContent = data.count > 99 ? '99+' : data.count;
+	            } else {
+	                badge.style.display = 'none';
+	            }
+	        })
+	        .catch(err => console.error('Error fetching notifications:', err));
+	    }
+	    
+	    document.addEventListener('DOMContentLoaded', updateNotificationBadge);
+	    setInterval(updateNotificationBadge, 30000);
 	</script>
 
 </body>

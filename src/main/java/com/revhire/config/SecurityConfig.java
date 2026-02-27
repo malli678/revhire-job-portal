@@ -83,17 +83,21 @@ public class SecurityConfig {
             )
 
             // ✅ AUTHORIZATION RULES ⭐⭐⭐
+
             .authorizeHttpRequests(authz -> authz
 
-                // ✅ PUBLIC ROUTES ⭐⭐⭐⭐⭐
+                // ✅ PUBLIC ROUTES
                 .requestMatchers(
                     "/auth/login",
                     "/auth/forgot-password",
                     "/auth/reset-password",
-                    "/auth/register/**",   // ⭐⭐⭐ FIXES YOUR BUG
+                    "/auth/register/**",
                     "/css/**",
                     "/js/**",
-                    "/images/**"
+                    "/images/**",
+                    "/employer/public/**",    // ✅ ADD THIS - Allow public company profiles
+                    "/jobs/all",               // ✅ OPTIONAL: Allow public job listing API
+                    "/jobs/view/**"            // ✅ OPTIONAL: Allow public job view
                 ).permitAll()
 
                 // ✅ ROLE-BASED ACCESS

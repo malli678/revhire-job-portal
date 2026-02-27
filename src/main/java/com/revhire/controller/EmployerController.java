@@ -346,4 +346,15 @@ public class EmployerController {
 
         return "employer/applicants";
     }
+    
+    @GetMapping("/public/{id}")
+    public String viewPublicCompanyProfile(@PathVariable Long id, Model model) {
+        Employer employer = employerService.getEmployerById(id);
+        model.addAttribute("company", employer);
+        model.addAttribute("activeJobs", jobService.getJobsByEmployer(employer)
+                .stream()
+                .filter(j -> "ACTIVE".equals(j.getStatus()))
+                .count());
+        return "employer/public-profile";
+    }
 }

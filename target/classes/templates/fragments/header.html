@@ -1,0 +1,98 @@
+<div th:fragment="header">
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-4 shadow-sm">
+
+    <!-- Left -->
+    <a class="navbar-brand fw-bold text-primary" href="/">RevHire</a>
+
+    <!-- Right -->
+    <div class="ms-auto d-flex align-items-center gap-3">
+
+        <!-- 🔔 Yellow Notification Bell -->
+        <div class="dropdown">
+
+            <button class="btn position-relative"
+                    data-bs-toggle="dropdown"
+                    style="font-size:20px; color:#ffc107;">
+
+                🔔
+
+                <span id="notifCount"
+                      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                </span>
+
+            </button>
+
+            <ul class="dropdown-menu dropdown-menu-end shadow"
+                id="notifList"
+                style="min-width:300px;">
+
+                <li class="dropdown-item text-muted">
+                    Loading notifications...
+                </li>
+
+            </ul>
+
+        </div>
+
+        <!-- 👤 User Name -->
+        <span class="fw-semibold">
+            Hi, <span th:text="${session.userName}">User</span>
+        </span>
+
+        <!-- Logout -->
+        <a class="btn btn-primary btn-sm" href="/auth/logout">Logout</a>
+
+    </div>
+
+</nav>
+
+
+<script>
+
+function loadNotifications(){
+
+fetch('/notifications/count')
+.then(r=>r.text())
+.then(c=>{
+   document.getElementById('notifCount').innerText=c;
+});
+
+fetch('/notifications')
+.then(r=>r.json())
+.then(data=>{
+
+ let list=document.getElementById('notifList');
+ list.innerHTML='';
+
+ if(data.length===0){
+   list.innerHTML='<li class="dropdown-item text-muted">No Notifications</li>';
+   return;
+ }
+
+ data.forEach(n=>{
+   list.innerHTML += `
+   <li>
+     <a class="dropdown-item"
+        href="${n.link}"
+        onclick="markRead(${n.notificationId})">
+
+        <strong>${n.title}</strong><br/>
+        <small>${n.message}</small>
+
+     </a>
+   </li>`;
+ });
+
+});
+}
+
+function markRead(id){
+fetch('/notifications/read/'+id,{method:'POST'});
+}
+
+loadNotifications();
+
+</script>
+
+</div>

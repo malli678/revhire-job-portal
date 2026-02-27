@@ -102,10 +102,12 @@ public class Job {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+    
 
     public Employer getEmployer() { return employer; }
     public void setEmployer(Employer employer) { this.employer = employer; }
 
     public List<Application> getApplications() { return applications; }
     public void setApplications(List<Application> applications) { this.applications = applications; }
+    
 }

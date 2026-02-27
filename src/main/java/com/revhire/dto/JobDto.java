@@ -11,7 +11,8 @@ public class JobDto {
     private String experienceRequired;
     private Double salaryMin;
     private Double salaryMax;
-    private LocalDateTime deadline; // keep this from HEAD
+    private LocalDateTime deadline;
+    private Integer numberOfOpenings;  // ✅ ADD THIS FIELD
 
     // Getters & Setters
     public String getTitle() { return title; }
@@ -37,4 +38,8 @@ public class JobDto {
 
     public LocalDateTime getDeadline() { return deadline; }
     public void setDeadline(LocalDateTime deadline) { this.deadline = deadline; }
+    
+    // ✅ ADD GETTER/SETTER
+    public Integer getNumberOfOpenings() { return numberOfOpenings; }
+    public void setNumberOfOpenings(Integer numberOfOpenings) { this.numberOfOpenings = numberOfOpenings; }
 }
