@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class JobService {
@@ -159,5 +160,40 @@ public class JobService {
         job.setSalaryMax(updatedJob.getSalaryMax());
 
         return jobRepository.save(job);
+    }
+    
+ // Add this method to JobService.java
+
+    public List<Job> advancedSearch(String title, String location, String company, 
+                                     String jobType, Double minSalary, Double maxSalary,
+                                     Integer daysPosted, Integer minExp, Integer maxExp) {
+        
+        List<Job> results = jobRepository.advancedSearch(title, location, company, 
+                                                         jobType, minSalary, maxSalary);
+        
+        // Filter by date posted
+        if (daysPosted != null && daysPosted > 0) {
+            LocalDateTime cutoffDate = LocalDateTime.now().minusDays(daysPosted);
+            results = results.stream()
+                    .filter(j -> j.getPostedDate() != null && j.getPostedDate().isAfter(cutoffDate))
+                    .collect(Collectors.toList());
+        }
+        
+        // Filter by experience range
+        if (minExp != null || maxExp != null) {
+            results = results.stream()
+                    .filter(j -> {
+                        try {
+                            int exp = Integer.parseInt(j.getExperienceRequired().replaceAll("[^0-9]", ""));
+                            return (minExp == null || exp >= minExp) && 
+                                   (maxExp == null || exp <= maxExp);
+                        } catch (Exception e) {
+                            return false;
+                        }
+                    })
+                    .collect(Collectors.toList());
+        }
+        
+        return results;
     }
 }

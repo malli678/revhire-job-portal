@@ -159,6 +159,21 @@
             background:white;
             border-radius:10px;
         }
+		
+		.notification-bell {
+		        position: relative;
+		        cursor: pointer;
+		    }
+		    
+		    .notification-badge {
+		        animation: pulse 1.5s infinite;
+		    }
+		    
+		    @keyframes pulse {
+		        0% { transform: scale(1); }
+		        50% { transform: scale(1.1); }
+		        100% { transform: scale(1); }
+		    }
     </style>
 </head>
 
@@ -166,8 +181,22 @@
 
 <!-- HEADER -->
 <div class="header">
-<a th:href="@{/jobseeker/dashboard}" class="logo">RevHire</a>
-    <div class="header-right">
+    <a th:href="@{/jobseeker/dashboard}" class="logo">RevHire</a>
+    
+    <div class="header-right" style="display: flex; align-items: center; gap: 20px;">
+        
+        <!-- ✅ NOTIFICATION BELL -->
+        <div class="notification-container" style="position: relative;">
+            <a href="/notifications" class="notification-bell" style="position: relative; text-decoration: none;">
+                <span style="font-size: 24px;">🔔</span>
+                <span id="notificationBadge" class="notification-badge" 
+                      style="display: none; position: absolute; top: -5px; right: -5px; 
+                             background: #dc3545; color: white; border-radius: 50%; 
+                             padding: 2px 6px; font-size: 11px; min-width: 18px; 
+                             text-align: center;">0</span>
+            </a>
+        </div>
+        
         <span>Hi, <span th:text="${session.userName}">User</span></span>
         <a th:href="@{/auth/logout}" class="logout">Logout</a>
     </div>
@@ -212,6 +241,10 @@
         <a th:href="@{/jobseeker/resume}">
             📎 Resume
         </a>
+		
+		<a th:href="@{/jobseeker/recommendations}" class="primary">
+		    🎯 Recommended Jobs
+		</a>
 
     </div>
 
@@ -242,6 +275,35 @@
     </div>
 
 </div>
-
+<script>
+    // Fetch unread notification count
+    function updateNotificationBadge() {
+        fetch('/notifications/unread/count', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            const badge = document.getElementById('notificationBadge');
+            if (data.count > 0) {
+                badge.style.display = 'inline';
+                badge.textContent = data.count > 99 ? '99+' : data.count;
+            } else {
+                badge.style.display = 'none';
+            }
+        })
+        .catch(err => console.error('Error fetching notifications:', err));
+    }
+    
+    // Update on page load
+    document.addEventListener('DOMContentLoaded', updateNotificationBadge);
+    
+    // Update every 30 seconds
+    setInterval(updateNotificationBadge, 30000);
+</script>
 </body>
+
+
 </html>

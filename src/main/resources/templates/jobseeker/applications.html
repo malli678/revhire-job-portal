@@ -174,46 +174,71 @@
 </div>
 
 <!-- ✅ WITHDRAW MODAL ⭐⭐⭐⭐⭐ -->
-<div id="withdrawModal">
-
-    <div class="modal-box">
-
-        <h3>Withdraw Application</h3>
-        <p>Are you sure you want to withdraw?</p>
-
-        <button class="modal-btn confirm-btn"
-                onclick="confirmWithdrawAction()">
-            Yes, Withdraw
-        </button>
-
-        <button class="modal-btn cancel-btn"
-                onclick="closeWithdrawModal()">
-            Cancel
-        </button>
-
+<div id="withdrawModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; 
+     background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000;">
+    
+    <div class="modal-box" style="background:white; padding:30px; border-radius:12px; width:400px;">
+        
+        <h3 style="margin-bottom:15px; color:#dc3545;">⚠️ Withdraw Application</h3>
+        
+        <p style="margin-bottom:20px; color:#666;">
+            Are you sure you want to withdraw your application? This action cannot be undone.
+        </p>
+        
+        <div style="margin-bottom:20px;">
+            <label style="display:block; margin-bottom:8px; font-weight:600; color:#333;">
+                Reason for withdrawal (Optional):
+            </label>
+            <textarea id="withdrawReason" 
+                      style="width:100%; padding:10px; border:2px solid #e1e1e1; 
+                             border-radius:6px; resize:none;"
+                      placeholder="e.g. Accepted another offer, Not interested, etc."
+                      rows="3"></textarea>
+        </div>
+        
+        <div style="display:flex; gap:10px; justify-content:flex-end;">
+            <button class="modal-btn cancel-btn" 
+                    style="padding:10px 20px; border:none; border-radius:6px; 
+                           background:#6c757d; color:white; cursor:pointer;"
+                    onclick="closeWithdrawModal()">
+                Cancel
+            </button>
+            
+            <button class="modal-btn confirm-btn" 
+                    style="padding:10px 20px; border:none; border-radius:6px; 
+                           background:#dc3545; color:white; cursor:pointer;"
+                    onclick="confirmWithdrawWithReason()">
+                Yes, Withdraw
+            </button>
+        </div>
+        
     </div>
 </div>
 
 <!-- ✅ SCRIPT ⭐⭐⭐⭐⭐ -->
 <script>
-
-let withdrawForm = null;
+let currentWithdrawForm = null;
 
 function openWithdrawModal(button) {
-    withdrawForm = button.closest("form");
+    currentWithdrawForm = button.closest("form");
     document.getElementById("withdrawModal").style.display = "flex";
 }
 
 function closeWithdrawModal() {
     document.getElementById("withdrawModal").style.display = "none";
+    document.getElementById("withdrawReason").value = "";
 }
 
-function confirmWithdrawAction() {
-    if (withdrawForm) {
-        withdrawForm.submit();
+function confirmWithdrawWithReason() {
+    if (currentWithdrawForm) {
+        const reason = document.getElementById("withdrawReason").value;
+        const notesInput = currentWithdrawForm.querySelector("input[name='notes']");
+        if (notesInput) {
+            notesInput.value = reason;
+        }
+        currentWithdrawForm.submit();
     }
 }
-
 </script>
 
 </body>

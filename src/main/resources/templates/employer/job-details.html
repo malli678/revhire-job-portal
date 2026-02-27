@@ -52,6 +52,52 @@ h2{margin-top:0;}
 <a href="/employer/manage-jobs" class="back">⬅ Back</a>
 
 </div>
+<script>
+    function getCsrfHeaders() {
+        const tokenMeta = document.querySelector("meta[name='_csrf']");
+        const headerMeta = document.querySelector("meta[name='_csrf_header']");
+        
+        if (!tokenMeta || !headerMeta) {
+            console.warn("CSRF meta tags missing");
+            return {};
+        }
+        
+        return { [headerMeta.content]: tokenMeta.content };
+    }
 
+    function saveJob(jobId) {
+        console.log("Saving job:", jobId);
+        
+        fetch('/jobseeker/saveJob/' + jobId, {
+            method: 'POST',
+            headers: {
+                ...getCsrfHeaders(),
+                'Content-Type': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+        .then(async response => {
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(text || 'Failed to save job');
+            }
+            return response.text();
+        })
+        .then(message => {
+            alert(message);
+            // Optionally change button state
+            const saveBtn = document.querySelector('.btn-save');
+            if (saveBtn) {
+                saveBtn.textContent = 'Saved ✓';
+                saveBtn.disabled = true;
+                saveBtn.style.background = '#6c757d';
+            }
+        })
+        .catch(err => {
+            console.error("Save Job Error:", err);
+            alert("Failed to save job: " + err.message);
+        });
+    }
+</script>
 </body>
 </html>

@@ -28,12 +28,16 @@ public class ApplicationService {
 
 	@Autowired
 	private JobSeekerRepository jobSeekerRepository;
+	
 	@Autowired
 	private FileStorageService fileStorageService;
+	
+	// ✅ ADD THIS - Inject NotificationService
+	@Autowired
+	private NotificationService notificationService;
 
 	// APPLY JOB
 	public void applyJob(Long jobId, Long jobSeekerId) {
-
 	    System.out.println("JOB ID = " + jobId);
 	    System.out.println("JOB SEEKER ID = " + jobSeekerId);
 
@@ -58,26 +62,42 @@ public class ApplicationService {
 	    application.setAppliedDate(LocalDateTime.now());
 
 	    applicationRepository.save(application);
+	    
+	    // ✅ Create notifications
+	    notificationService.createNotification(
+	        jobSeeker.getUserId(), 
+	        "Application Submitted",
+	        "Your application for " + job.getTitle() + " has been submitted successfully.",
+	        "/jobseeker/applications"
+	    );
+	    
+	    notificationService.createNotification(
+	        job.getEmployer().getUserId(), 
+	        "New Application Received",
+	        jobSeeker.getFullName() + " applied for " + job.getTitle(),
+	        "/employer/dashboard"
+	    );
 
 	    System.out.println("APPLICATION SAVED ✅");
 	}
 
-
 	// WITHDRAW
 	public void withdrawApplication(Long applicationId, String notes) {
-
 	    Application application = applicationRepository.findById(applicationId)
 	            .orElseThrow(() -> new RuntimeException("Application not found"));
 
 	    if (application.getStatus() == Application.ApplicationStatus.APPLIED) {
-
 	        application.setStatus(Application.ApplicationStatus.WITHDRAWN);
-
-	        // ✅ SAVE REASON ⭐⭐⭐
 	        application.setNotes(notes);
-
 	        applicationRepository.save(application);
-
+	        
+	        // ✅ Create notification for withdrawal
+	        notificationService.createNotification(
+	            application.getJobSeeker().getUserId(),
+	            "Application Withdrawn",
+	            "You have withdrawn your application for " + application.getJob().getTitle(),
+	            "/jobseeker/applications"
+	        );
 	    } else {
 	        throw new RuntimeException("Cannot withdraw");
 	    }
@@ -85,59 +105,88 @@ public class ApplicationService {
 
 	// SHORTLIST
 	public void shortlistCandidate(Long applicationId, String note) {
-
 		Application app = applicationRepository.findById(applicationId).orElseThrow();
-
 		app.setStatus(Application.ApplicationStatus.SHORTLISTED);
 		app.setNotes(note);
-
 		applicationRepository.save(app);
+		
+		// ✅ Create notification for shortlist
+		notificationService.createNotification(
+		    app.getJobSeeker().getUserId(),
+		    "Application Shortlisted",
+		    "Congratulations! Your application for " + app.getJob().getTitle() + " has been shortlisted." +
+		    (note != null && !note.isEmpty() ? " Note: " + note : ""),
+		    "/jobseeker/applications"
+		);
 	}
 
 	// REJECT
 	public void rejectCandidate(Long applicationId, String notes) {
-
 		Application app = applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));
 
 		app.setStatus(Application.ApplicationStatus.REJECTED);
 		app.setNotes(notes);
-
 		applicationRepository.save(app);
+		
+		// ✅ Create notification for rejection
+		notificationService.createNotification(
+		    app.getJobSeeker().getUserId(),
+		    "Application Update",
+		    "Your application for " + app.getJob().getTitle() + " has been reviewed." +
+		    (notes != null && !notes.isEmpty() ? " Feedback: " + notes : ""),
+		    "/jobseeker/applications"
+		);
 	}
 
 	// UPDATE STATUS
 	public void updateApplicationStatus(Long applicationId, Application.ApplicationStatus status) {
-
 		Application application = applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));
 
+		Application.ApplicationStatus oldStatus = application.getStatus();
 		application.setStatus(status);
 		applicationRepository.save(application);
+		
+		// ✅ Create notification for status change
+		notificationService.createNotification(
+		    application.getJobSeeker().getUserId(),
+		    "Application Status Updated",
+		    "Your application for " + application.getJob().getTitle() + 
+		    " has been updated from " + oldStatus + " to " + status,
+		    "/jobseeker/applications"
+		);
 	}
 
 	// BULK UPDATE
 	public void bulkUpdate(List<Long> applicationIds, String action) {
-
 		List<Application> applications = applicationRepository.findAllById(applicationIds);
 
 		for (Application app : applications) {
-
+			Application.ApplicationStatus oldStatus = app.getStatus();
+			
 			if ("SHORTLIST".equalsIgnoreCase(action)) {
 				app.setStatus(Application.ApplicationStatus.SHORTLISTED);
 			}
-
 			if ("REJECT".equalsIgnoreCase(action)) {
 				app.setStatus(Application.ApplicationStatus.REJECTED);
 			}
+			
+			applicationRepository.save(app);
+			
+			// ✅ Create notification for bulk update
+			notificationService.createNotification(
+			    app.getJobSeeker().getUserId(),
+			    "Application Status Updated",
+			    "Your application for " + app.getJob().getTitle() + 
+			    " has been updated from " + oldStatus + " to " + app.getStatus(),
+			    "/jobseeker/applications"
+			);
 		}
-
-		applicationRepository.saveAll(applications);
 	}
 
 	// ADD NOTES
 	public void addNotes(Long applicationId, String notes) {
-
 		Application application = applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));
 
@@ -164,21 +213,29 @@ public class ApplicationService {
 
 	// bulk update status
 	public void bulkUpdateStatus(List<Long> applicationIds, Application.ApplicationStatus newStatus, String note) {
-
 		List<Application> applications = applicationRepository.findAllById(applicationIds);
 
 		for (Application app : applications) {
-
+			Application.ApplicationStatus oldStatus = app.getStatus();
 			app.setStatus(newStatus);
-
 			if (newStatus == Application.ApplicationStatus.REJECTED) {
 				app.setNotes(note);
 			}
+			applicationRepository.save(app);
+			
+			// ✅ Create notification for status change
+			notificationService.createNotification(
+			    app.getJobSeeker().getUserId(),
+			    "Application Status Updated",
+			    "Your application for " + app.getJob().getTitle() + 
+			    " has been updated from " + oldStatus + " to " + newStatus +
+			    (note != null && !note.isEmpty() ? " Note: " + note : ""),
+			    "/jobseeker/applications"
+			);
 		}
-
-		applicationRepository.saveAll(applications);
 	}
-	//filter and count
+	
+	// filter and count
 	public List<Application> getApplicationsForEmployer(Employer employer) {
 	    return applicationRepository.findAll()
 	            .stream()
@@ -189,10 +246,10 @@ public class ApplicationService {
 	public List<Application> filterByStatus(Employer employer,
 	                                        Application.ApplicationStatus status) {
 	    return applicationRepository.findAll()
-        .stream()
-        .filter(app -> app.getJob().getEmployer().equals(employer))
-        .filter(app -> app.getStatus() == status)
-        .toList();
+	        .stream()
+	        .filter(app -> app.getJob().getEmployer().equals(employer))
+	        .filter(app -> app.getStatus() == status)
+	        .toList();
 	}
 
 	public List<Application> filterByExperience(Employer employer, Integer years) {
@@ -218,31 +275,51 @@ public class ApplicationService {
 	            .filter(app -> app.getAppliedDate().isAfter(date))
 	            .toList();
 	}
-	public void apply(Long jobId,
-            MultipartFile resume,
-            String coverLetter,
-            String email){
+	
+	// ✅ FIXED apply method with notification
+	public void apply(Long jobId, MultipartFile resume, String coverLetter, String email) {
+	    Job job = jobRepository.findById(jobId)
+	            .orElseThrow(() -> new RuntimeException("Job not found with id: " + jobId));
 
-Job job = jobRepository.findById(jobId)
-.orElseThrow(() -> new RuntimeException("Job not found"));
+	    JobSeeker jobSeeker = jobSeekerRepository.findByEmail(email)
+	            .orElseThrow(() -> new RuntimeException("JobSeeker not found with email: " + email));
 
-JobSeeker jobSeeker = jobSeekerRepository.findByEmail(email)
-.orElseThrow(() -> new RuntimeException("JobSeeker not found"));
+	    if (applicationRepository.findByJobAndJobSeeker(job, jobSeeker).isPresent()) {
+	        throw new RuntimeException("Already applied");
+	    }
 
-if (applicationRepository.findByJobAndJobSeeker(job, jobSeeker).isPresent()) {
-throw new RuntimeException("Already applied");
-}
+	    // ✅ SAVE FILE
+	    String resumeFileName = fileStorageService.storeFile(resume);
 
-// ✅ SAVE FILE
-String resumeFileName = fileStorageService.storeFile(resume);
+	    Application app = new Application();
+	    app.setJob(job);
+	    app.setJobSeeker(jobSeeker);
+	    
+	    // ✅ CRITICAL: Set the bidirectional relationship
+	    job.getApplications().add(app);  // Add to job's applications list
+	    jobSeeker.getApplications().add(app);  // Add to jobSeeker's applications list
+	    
+	    app.setResumePath(resumeFileName);
+	    app.setCoverLetter(coverLetter);
+	    app.setStatus(Application.ApplicationStatus.APPLIED);
+	    app.setAppliedDate(LocalDateTime.now());
 
-Application app = new Application();
-app.setJob(job);
-app.setJobSeeker(jobSeeker);
-app.setResumePath(resumeFileName);   // store filename
-app.setStatus(Application.ApplicationStatus.APPLIED);
-app.setAppliedDate(LocalDateTime.now());
+	    // ✅ Save with explicit flush to catch any issues
+	    applicationRepository.saveAndFlush(app);
+	    
+	    // Create notifications
+	    notificationService.createNotification(
+	        jobSeeker.getUserId(), 
+	        "Application Submitted",
+	        "Your application for " + job.getTitle() + " has been submitted successfully.",
+	        "/jobseeker/applications"
+	    );
 
-applicationRepository.save(app);
-}
+	    notificationService.createNotification(
+	        job.getEmployer().getUserId(), 
+	        "New Application Received",
+	        jobSeeker.getFullName() + " applied for " + job.getTitle(),
+	        "/employer/dashboard"
+	    );
+	}
 }
