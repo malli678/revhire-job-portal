@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.revhire.exception.ResourceNotFoundException;
 import com.revhire.exception.FileStorageException; // reuse for business validation if needed
@@ -25,6 +26,8 @@ public class JobSeekerService {
 
 	@Autowired
 	private JobSeekerRepository jobSeekerRepository;
+	@Autowired
+	private FileStorageService fileStorageService;
 
 	@Autowired
 	private ApplicationRepository applicationRepository;
@@ -217,4 +220,31 @@ public class JobSeekerService {
 				.filter(js -> js.getResumeText().toLowerCase().contains(keyword.toLowerCase()))
 				.collect(Collectors.toList());
 	}
+	 public void applyJobWithResume(Long userId,
+             Long jobId,
+             MultipartFile resume,
+             String coverLetter) {
+
+JobSeeker js = jobSeekerRepository.findById(userId)
+.orElseThrow(() -> new RuntimeException("JobSeeker not found"));
+
+Job job = jobRepository.findById(jobId)
+.orElseThrow(() -> new RuntimeException("Job not found"));
+
+if (applicationRepository.findByJobAndJobSeeker(job, js).isPresent()) {
+throw new RuntimeException("You have already applied to this job.");
+}
+
+String fileName = fileStorageService.storeFile(resume);
+
+Application app = new Application();
+app.setJob(job);
+app.setJobSeeker(js);
+app.setResumePath(fileName);
+app.setCoverLetter(coverLetter);
+app.setStatus(Application.ApplicationStatus.APPLIED);
+app.setAppliedDate(LocalDateTime.now());
+
+applicationRepository.save(app);
+}
 }

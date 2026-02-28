@@ -21,7 +21,7 @@ import java.nio.file.Paths;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Optional;
-
+import com.revhire.service.ApplicationService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -40,6 +40,8 @@ public class JobSeekerController {
 	private JobSeekerRepository jobSeekerRepository;
 	@Autowired
 	private JobService jobService;
+	@Autowired
+	private ApplicationService applicationService;
 	@Autowired
 	private RecommendationService recommendationService;
 	
@@ -133,20 +135,34 @@ public class JobSeekerController {
     // APPLY JOB
     // =========================
     @PostMapping("/applyJob/{jobId}")
-    @ResponseBody
-    public ResponseEntity<String> applyJob(@PathVariable Long jobId,
-                                           Authentication authentication) {
+    public String applyJob(@PathVariable Long jobId,
+                           @RequestParam("resume") MultipartFile resume,
+                           @RequestParam(required = false) String coverLetter,
+                           Authentication authentication,
+                           RedirectAttributes ra) {
 
         try {
 
-            User user = userService.findByEmail(authentication.getName());
+            JobSeeker js =
+                    jobSeekerService.getJobSeekerByEmail(authentication.getName());
 
-            return jobSeekerService.applyJob(user.getUserId(), jobId);
+            jobSeekerService.applyJobWithResume(
+                    js.getUserId(),
+                    jobId,
+                    resume,
+                    coverLetter
+            );
 
-        } catch (RuntimeException e) {
+            ra.addFlashAttribute("successMsg",
+                    "Application submitted successfully!");
 
-            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+
+            ra.addFlashAttribute("errorMsg",
+                    e.getMessage());
         }
+
+        return "redirect:/jobseeker/job/" + jobId;
     }
     // =========================
     // WITHDRAW APPLICATION 

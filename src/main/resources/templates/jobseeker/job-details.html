@@ -238,6 +238,67 @@
             border-top: 2px solid #e9ecef;
             margin: 25px 0;
         }
+		.apply-container {
+		    display: flex;
+		    justify-content: space-between;
+		    gap: 40px;
+		    margin-top: 30px;
+		}
+
+		form {
+		    flex: 2;
+		}
+
+		.save-box {
+		    flex: 1;
+		    display: flex;
+		    align-items: start;
+		    justify-content: center;
+		}
+
+		.form-group {
+		    margin-bottom: 20px;
+		}
+
+		.form-control {
+		    width: 100%;
+		    padding: 10px;
+		    border-radius: 8px;
+		    border: 1px solid #ddd;
+		    font-size: 14px;
+		}
+
+		.button-group {
+		    display: flex;
+		    gap: 15px;
+		}
+
+		.btn-apply {
+		    background-color: #28a745;
+		    color: white;
+		    padding: 10px 20px;
+		    border-radius: 8px;
+		    border: none;
+		    cursor: pointer;
+		}
+
+		.btn-back {
+		    background-color: #6c757d;
+		    color: white;
+		    padding: 10px 20px;
+		    border-radius: 8px;
+		    text-decoration: none;
+		}
+
+		.btn-save {
+		    background-color: #ffc107;
+		    color: black;
+		    padding: 10px 20px;
+		    border-radius: 8px;
+		    border: none;
+		    font-weight: bold;
+		    cursor: pointer;
+		}
     </style>
 </head>
 
@@ -341,35 +402,57 @@
         
         <hr>
         
-        <!-- Action Buttons -->
-        <div class="action-buttons">
-            
-            <!-- Apply Button -->
-            <button class="btn btn-primary" 
-                    id="applyBtn"
-                    th:classappend="${alreadyApplied ? 'btn-saved' : ''}"
-                    th:disabled="${alreadyApplied}"
-                    th:onclick="!${alreadyApplied} ? 'applyJob(' + ${job.jobId} + ')' : ''">
-                <span th:text="${alreadyApplied} ? '✅ Already Applied' : '📝 Apply Now'"></span>
-            </button>
-            
-            <!-- Save Job Button -->
-            <button class="btn btn-save" 
-                    id="saveBtn"
-                    th:onclick="'saveJob(' + ${job.jobId} + ')'">
-                ⭐ Save Job
-            </button>
-            
-            <!-- Back Button -->
-            <a th:href="@{/jobseeker/search-jobs}" class="btn btn-secondary">
-                ← Back to Search
-            </a>
-            
-        </div>
-        
-    </div>
-    
-</div>
+		<div class="apply-section">
+
+		    <!-- If Already Applied -->
+		    <div th:if="${alreadyApplied}">
+		        <button class="btn btn-apply" 
+		                style="background:#6c757d; cursor:not-allowed;" 
+		                disabled>
+		            ✅ Already Applied
+		        </button>
+		    </div>
+
+		    <!-- If NOT Applied -->
+		    <div th:if="${!alreadyApplied}">
+		        <form th:action="@{/jobseeker/applyJob/{jobId}(jobId=${job.jobId})}"
+		              method="post"
+		              enctype="multipart/form-data">
+
+		            <div class="form-group">
+		                <label>Upload Resume</label>
+		                <input type="file" name="resume" 
+		                       class="form-control" required>
+		            </div>
+
+		            <div class="form-group">
+		                <label>Cover Letter (Optional)</label>
+		                <textarea name="coverLetter" rows="4"
+		                          class="form-control"
+		                          placeholder="Write a short cover letter..."></textarea>
+		            </div>
+
+		            <div class="button-row">
+		                <button type="submit" class="btn btn-apply">
+		                    Apply Now
+		                </button>
+
+		                <button type="button"
+		                        class="btn btn-save"
+		                        th:onclick="'saveJob(' + ${job.jobId} + ')'">
+		                    ⭐ Save Job
+		                </button>
+
+		                <a th:href="@{/jobseeker/search-jobs}"
+		                   class="btn btn-back">
+		                    Back to Search
+		                </a>
+		            </div>
+
+		        </form>
+		    </div>
+
+		</div>
 
 <script>
     // CSRF Token setup
