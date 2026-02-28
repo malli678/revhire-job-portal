@@ -1,314 +1,387 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-
 <head>
-	<title>Search Jobs - RevHire</title>
+    <title>Search Jobs - RevHire</title>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-	<style>
-		* {
-			margin: 0;
-			padding: 0;
-			box-sizing: border-box;
-		}
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
 
-		body {
-			font-family: 'Segoe UI', sans-serif;
-			background: linear-gradient(135deg, #eef2ff, #f8fafc);
-			color: #2d3748;
-		}
+        /* Navigation Bar */
+        .nav-bar {
+            background: white;
+            padding: 15px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-		/* MAIN LAYOUT */
-		.wrapper {
-			max-width: 1200px;
-			margin: auto;
-			padding: 30px 20px;
-			display: grid;
-			grid-template-columns: 300px 1fr;
-			gap: 25px;
-		}
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            text-decoration: none;
+        }
 
-		/* FILTER PANEL */
-		.filters {
-			background: white;
-			padding: 25px;
-			border-radius: 16px;
-			box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-			height: fit-content;
-			position: sticky;
-			top: 20px;
-			transition: 0.3s ease;
-		}
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
 
-		.filters:hover {
-			transform: translateY(-2px);
-		}
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            padding: 5px 10px;
+        }
 
-		.filters h3 {
-			font-size: 20px;
-			margin-bottom: 18px;
-		}
+        .nav-links a:hover {
+            color: #667eea;
+        }
 
-		.filters label {
-			font-size: 13px;
-			color: #718096;
-			display: block;
-			margin-bottom: 6px;
-		}
+        .nav-links a.active {
+            color: #667eea;
+            font-weight: 600;
+            border-bottom: 2px solid #667eea;
+        }
 
-		.filters input {
-			width: 100%;
-			margin-bottom: 14px;
-			padding: 11px 12px;
-			border: 1px solid #e2e8f0;
-			border-radius: 8px;
-			font-size: 14px;
-			transition: 0.2s;
-		}
+        /* Main Layout */
+        .wrapper {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 25px;
+        }
 
-		.filters input:focus {
-			outline: none;
-			border-color: #667eea;
-			box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
-		}
+        /* Filter Panel */
+        .filters {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
 
-		/* BUTTON */
-		.filters button {
-			width: 100%;
-			background: linear-gradient(90deg, #667eea, #5a67d8);
-			color: white;
-			border: none;
-			padding: 11px;
-			border-radius: 10px;
-			font-size: 14px;
-			font-weight: 600;
-			cursor: pointer;
-			transition: 0.2s;
-		}
+        .filters h3 {
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #333;
+        }
 
-		.filters button:hover {
-			transform: translateY(-1px);
-			box-shadow: 0 6px 18px rgba(90, 103, 216, 0.35);
-		}
+        .filters label {
+            font-size: 13px;
+            color: #666;
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
 
-		/* JOB LIST */
-		.jobs {
-			display: flex;
-			flex-direction: column;
-			gap: 18px;
-		}
+        .filters input, .filters select {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 14px;
+        }
 
-		/* JOB CARD */
-		.job-card {
-			background: white;
-			padding: 22px;
-			border-radius: 16px;
-			box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
-			transition: 0.25s ease;
-			border: 1px solid #edf2f7;
-		}
+        .filters input:focus, .filters select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
 
-		.job-card:hover {
-			transform: translateY(-3px);
-			box-shadow: 0 12px 30px rgba(0, 0, 0, 0.10);
-		}
+        .filter-row {
+            display: flex;
+            gap: 10px;
+        }
 
-		/* TITLE */
-		.title {
-			font-size: 20px;
-			font-weight: 600;
-			margin-bottom: 4px;
-		}
+        .filter-row input {
+            width: 50%;
+        }
 
-		/* COMPANY */
-		.company {
-			color: #667eea;
-			font-weight: 600;
-			font-size: 14px;
-			margin-bottom: 12px;
-		}
+        .filters button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin: 10px 0;
+        }
 
-		/* DESCRIPTION */
-		.job-card p {
-			font-size: 14px;
-			color: #4a5568;
-			line-height: 1.6;
-			margin-bottom: 14px;
-		}
+        .filters button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102,126,234,0.4);
+        }
 
-		/* BADGES */
-		.badge {
-			display: inline-block;
-			background: #edf2ff;
-			color: #5a67d8;
-			padding: 5px 12px;
-			border-radius: 20px;
-			font-size: 12px;
-			font-weight: 600;
-			margin-right: 6px;
-			margin-bottom: 10px;
-		}
+        .clear-btn {
+            display: block;
+            text-align: center;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+            margin: 10px 0;
+        }
 
-		/* SALARY */
-		.salary {
-			margin-top: 6px;
-			font-size: 17px;
-			font-weight: 600;
-			color: #2d3748;
-		}
+        .dashboard-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            color: #666;
+            text-decoration: none;
+            border-radius: 8px;
+        }
 
-		/* BUTTON */
-		.btn {
-			display: inline-block;
-			margin-top: 14px;
-			background: #667eea;
-			color: white;
-			padding: 9px 14px;
-			border-radius: 10px;
-			font-size: 13px;
-			text-decoration: none;
-			font-weight: 600;
-			transition: 0.2s;
-		}
+        /* Job List */
+        .jobs {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
 
-		.btn:hover {
-			background: #5a67d8;
-			transform: translateY(-1px);
-		}
+        /* Job Card */
+        .job-card {
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
 
-		/* BACK BUTTON */
-		.back {
-			margin-top: 18px;
-			display: block;
-			text-align: center;
-			background: #edf2f7;
-			color: #4a5568;
-		}
+        .job-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
 
-		.back:hover {
-			background: #e2e8f0;
-		}
+        .job-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
 
-		/* EMPTY STATE */
-		.empty {
-			background: white;
-			padding: 40px;
-			border-radius: 16px;
-			text-align: center;
-			box-shadow: 0 6px 20px rgba(0, 0, 0, 0.05);
-			color: #718096;
-		}
+        .company {
+            color: #667eea;
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
 
-		/* MOBILE */
-		@media(max-width:900px) {
-			.wrapper {
-				grid-template-columns: 1fr;
-			}
+        .description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 15px 0;
+        }
 
-			.filters {
-				position: static;
-			}
-		}
-	</style>
+        .badge-container {
+            margin: 10px 0;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            background: #f0f3ff;
+            color: #667eea;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 5px;
+        }
+
+        .salary {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin: 15px 0;
+        }
+
+        .view-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .view-btn:hover {
+            background: #5a67d8;
+        }
+
+        .empty-state {
+            background: white;
+            padding: 50px;
+            border-radius: 16px;
+            text-align: center;
+            color: #666;
+        }
+
+        @media (max-width: 900px) {
+            .wrapper {
+                grid-template-columns: 1fr;
+            }
+            
+            .filters {
+                position: static;
+            }
+        }
+    </style>
 </head>
-
 <body>
 
-	<div class="wrapper">
+    <!-- Navigation Bar -->
+    <div class="nav-bar">
+        <a th:href="@{/jobseeker/dashboard}" class="logo">RevHire</a>
+        <div class="nav-links">
+            <a th:href="@{/jobseeker/dashboard}">Dashboard</a>
+            <a th:href="@{/jobseeker/search-jobs}" class="active">Search Jobs</a>
+            <a th:href="@{/jobseeker/saved-jobs}">Saved Jobs</a>
+            <a th:href="@{/jobseeker/applications}">Applications</a>
+            <a th:href="@{/jobseeker/profile}">Profile</a>
+            <a th:href="@{/auth/logout}">Logout</a>
+        </div>
+    </div>
 
-		<!-- FILTER PANEL -->
-		<!-- Replace the existing filter panel with this enhanced version -->
-		<form method="get" th:action="@{/jobs/search-page}" class="filters">
+    <!-- Main Content -->
+    <div class="wrapper">
 
-			<h3>Search Filters</h3>
+        <!-- Filter Panel -->
+        <form method="get" th:action="@{/jobs/search-page}" class="filters">
+            <h3>🔍 Advanced Search</h3>
 
-			<label>Job Role</label>
-			<input name="title" placeholder="e.g. Java Developer" th:value="${param.title}" />
+            <label>Job Title/Role</label>
+            <input type="text" name="title" placeholder="e.g. Java Developer" th:value="${param.title}"/>
 
-			<label>Location</label>
-			<input name="location" placeholder="e.g. Chennai" th:value="${param.location}" />
+            <label>Location</label>
+            <input type="text" name="location" placeholder="e.g. Chennai, Bangalore" th:value="${param.location}"/>
 
-			<label>Company Name</label>
-			<input name="company" placeholder="e.g. Google" th:value="${param.company}" />
+            <label>Company Name</label>
+            <input type="text" name="company" placeholder="e.g. Revature, Google" th:value="${param.company}"/>
 
-			<label>Job Type</label>
-			<select name="jobType">
-				<option value="">All Types</option>
-				<option value="Full-time" th:selected="${param.jobType == 'Full-time'}">Full-time</option>
-				<option value="Part-time" th:selected="${param.jobType == 'Part-time'}">Part-time</option>
-				<option value="Contract" th:selected="${param.jobType == 'Contract'}">Contract</option>
-				<option value="Internship" th:selected="${param.jobType == 'Internship'}">Internship</option>
-				<option value="Remote" th:selected="${param.jobType == 'Remote'}">Remote</option>
-			</select>
+            <label>Job Type</label>
+            <select name="jobType">
+                <option value="">All Types</option>
+                <option value="Full-time" th:selected="${param.jobType == 'Full-time'}">Full-time</option>
+                <option value="Part-time" th:selected="${param.jobType == 'Part-time'}">Part-time</option>
+                <option value="Contract" th:selected="${param.jobType == 'Contract'}">Contract</option>
+                <option value="Internship" th:selected="${param.jobType == 'Internship'}">Internship</option>
+                <option value="Remote" th:selected="${param.jobType == 'Remote'}">Remote</option>
+            </select>
 
-			<label>Experience Range (Years)</label>
-			<div style="display: flex; gap: 10px;">
-				<input name="minExp" placeholder="Min" type="number" min="0" th:value="${param.minExp}"
-					style="width: 48%;" />
-				<input name="maxExp" placeholder="Max" type="number" min="0" th:value="${param.maxExp}"
-					style="width: 48%;" />
-			</div>
+            <label>Experience Range (Years)</label>
+            <div class="filter-row">
+                <input type="number" name="minExp" placeholder="Min" min="0" th:value="${param.minExp}"/>
+                <input type="number" name="maxExp" placeholder="Max" min="0" th:value="${param.maxExp}"/>
+            </div>
 
-			<label>Salary Range (₹)</label>
-			<div style="display: flex; gap: 10px;">
-				<input name="minSalary" placeholder="Min" type="number" min="0" th:value="${param.minSalary}"
-					style="width: 48%;" />
-				<input name="maxSalary" placeholder="Max" type="number" min="0" th:value="${param.maxSalary}"
-					style="width: 48%;" />
-			</div>
+            <label>Salary Range (₹ per annum)</label>
+            <div class="filter-row">
+                <input type="number" name="minSalary" placeholder="Min" min="0" step="100000" th:value="${param.minSalary}"/>
+                <input type="number" name="maxSalary" placeholder="Max" min="0" step="100000" th:value="${param.maxSalary}"/>
+            </div>
 
-			<label>Posted Within</label>
-			<select name="daysPosted">
-				<option value="">Anytime</option>
-				<option value="1" th:selected="${param.daysPosted == '1'}">Last 24 hours</option>
-				<option value="7" th:selected="${param.daysPosted == '7'}">Last 7 days</option>
-				<option value="15" th:selected="${param.daysPosted == '15'}">Last 15 days</option>
-				<option value="30" th:selected="${param.daysPosted == '30'}">Last 30 days</option>
-			</select>
+            <label>Posted Within</label>
+            <select name="daysPosted">
+                <option value="">Anytime</option>
+                <option value="1" th:selected="${param.daysPosted == '1'}">Last 24 hours</option>
+                <option value="3" th:selected="${param.daysPosted == '3'}">Last 3 days</option>
+                <option value="7" th:selected="${param.daysPosted == '7'}">Last 7 days</option>
+                <option value="15" th:selected="${param.daysPosted == '15'}">Last 15 days</option>
+                <option value="30" th:selected="${param.daysPosted == '30'}">Last 30 days</option>
+            </select>
 
-			<button type="submit">Search Jobs</button>
+            <button type="submit">🔍 Search Jobs</button>
+            
+            <a th:href="@{/jobseeker/search-jobs}" class="clear-btn">Clear Filters</a>
+            <a th:href="@{/jobseeker/dashboard}" class="dashboard-link">← Back to Dashboard</a>
+        </form>
 
-			<a th:if="${role=='JOBSEEKER'}" href="/jobseeker/dashboard" class="btn back">Back to Dashboard</a>
-		</form>
+        <!-- Job List -->
+        <div class="jobs">
+            
+            <!-- Empty State -->
+            <div th:if="${jobs == null or jobs.isEmpty()}" class="empty-state">
+                <h3>No jobs found</h3>
+                <p>Try adjusting your search filters or check back later.</p>
+            </div>
 
-		<!-- JOB LIST -->
-		<div class="jobs">
+            <!-- Job Cards -->
+            <div th:each="job : ${jobs}" class="job-card">
+                
+                <!-- Title -->
+                <div class="job-title" th:text="${job.title}">Job Title</div>
+                
+                <!-- Company -->
+                <div class="company" th:text="${job.employer != null ? job.employer.companyName : 'Company'}">Company Name</div>
+                
+                <!-- Description -->
+                <div class="description" th:text="${#strings.abbreviate(job.description, 200)}">Description</div>
+                
+                <!-- Badges -->
+                <div class="badge-container">
+                    <span class="badge" th:text="${job.jobType ?: 'Not Specified'}">Job Type</span>
+                    <span class="badge" th:text="${job.experienceRequired ?: 'Fresher'}">Experience</span>
+                    <span class="badge" th:text="${job.location}">Location</span>
+                </div>
+                
+                <!-- Salary - FIXED VERSION -->
+                <div class="salary">
+                    💰 
+                    <span th:if="${job.salaryMin != null and job.salaryMax != null}">
+                        ₹<span th:text="${#numbers.formatInteger(job.salaryMin, 1, 'COMMA')}"></span> - 
+                        ₹<span th:text="${#numbers.formatInteger(job.salaryMax, 1, 'COMMA')}"></span>
+                    </span>
+                    <span th:if="${job.salaryMin != null and job.salaryMax == null}">
+                        ₹<span th:text="${#numbers.formatInteger(job.salaryMin, 1, 'COMMA')}"></span>+
+                    </span>
+                    <span th:if="${job.salaryMin == null and job.salaryMax != null}">
+                        Up to ₹<span th:text="${#numbers.formatInteger(job.salaryMax, 1, 'COMMA')}"></span>
+                    </span>
+                    <span th:if="${job.salaryMin == null and job.salaryMax == null}">
+                        Salary Not Disclosed
+                    </span>
+                </div>
+                
+                <!-- View Details Button -->
+                <a th:href="@{'/jobseeker/job/' + ${job.jobId}}" class="view-btn">
+                    🔍 View Details
+                </a>
+            </div>
+        </div>
+    </div>
 
-			<div th:if="${jobs.isEmpty()}" class="empty">
-				No jobs found. Try adjusting filters.
-			</div>
-
-			<div class="job-card" th:each="job : ${jobs}">
-
-				<div class="title" th:text="${job.title}"></div>
-
-				<div class="company" th:text="${job.employer!=null ? job.employer.companyName : 'Company'}">
-				</div>
-
-				<p th:text="${job.description}"></p>
-
-				<span class="badge" th:text="${job.jobType}"></span>
-				<span class="badge" th:text="${job.experienceRequired}"></span>
-
-				<div class="salary">
-					₹ <span th:text="${job.salaryMin}"></span>
-					-
-					₹ <span th:text="${job.salaryMax}"></span>
-				</div>
-
-				<a th:if="${role=='JOBSEEKER'}" th:href="@{'/jobseeker/job/' + ${job.jobId}}" class="btn">
-					View Details
-				</a>
-
-				<a th:if="${role=='EMPLOYER'}" th:href="@{'/employer/job/' + ${job.jobId}}" class="btn">
-					View Details
-				</a>
-
-			</div>
-
-		</div>
-
-	</div>
+    <!-- CSRF for AJAX if needed -->
+    <script>
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+    </script>
 
 </body>
-
 </html>

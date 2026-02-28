@@ -185,7 +185,47 @@
 		.nav-btn:hover {
 		    background: #434190;
 		}
-
+		
+		.edit-btn {
+		        background: #667eea;
+		        color: white;
+		        border: none;
+		        padding: 4px 10px;
+		        border-radius: 15px;
+		        font-size: 12px;
+		        cursor: pointer;
+		        margin-left: 10px;
+		    }
+		    
+		    .edit-btn:hover {
+		        background: #5a67d8;
+		    }
+		    
+		    #personal-edit form, #employment-edit form {
+		        display: flex;
+		        flex-direction: column;
+		        gap: 10px;
+		    }
+		    
+		    #personal-edit input, #employment-edit input, #employment-edit select {
+		        padding: 8px;
+		        border: 1px solid #ddd;
+		        border-radius: 6px;
+		    }
+		    
+		    #personal-edit button, #employment-edit button {
+		        background: #28a745;
+		        color: white;
+		        border: none;
+		        padding: 8px;
+		        border-radius: 6px;
+		        cursor: pointer;
+		        margin-right: 10px;
+		    }
+		    
+		    #personal-edit button[type="button"], #employment-edit button[type="button"] {
+		        background: #6c757d;
+		    }
     </style>
 </head>
 
@@ -212,30 +252,74 @@
     <hr>
 
     <!-- PERSONAL DETAILS -->
-    <div class="section">
-        <h3>👤 Personal Details</h3>
+	<div class="section">
+	    <h3>👤 Personal Details 
+	        <button class="edit-btn" onclick="toggleEdit('personal')">✏️ Edit</button>
+	    </h3>
+	    
+	    <div id="personal-view" class="info-card">
+	        <p><b>Name:</b> <span th:text="${user.fullName}"></span></p>
+	        <p><b>Email:</b> <span th:text="${user.email}"></span></p>
+	        <p><b>Phone:</b> <span th:text="${user.phoneNumber}"></span></p>
+	        <p><b>Location:</b> <span th:text="${user.location ?: 'Not specified'}"></span></p>
+	    </div>
+	    
+	    <div id="personal-edit" style="display:none;" class="info-card">
+	        <form th:action="@{/jobseeker/profile/update/personal}" method="post">
+	            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	            
+	            <label>Phone Number</label>
+	            <input type="text" name="phoneNumber" th:value="${user.phoneNumber}" />
+	            
+	            <label>Location</label>
+	            <input type="text" name="location" th:value="${user.location}" />
+	            
+	            <button type="submit">Save Changes</button>
+	            <button type="button" onclick="cancelEdit('personal')">Cancel</button>
+	        </form>
+	    </div>
+	</div>
 
-        <div class="info-card">
-            <p><b>Name:</b> <span th:text="${user.fullName}"></span></p>
-            <p><b>Email:</b> <span th:text="${user.email}"></span></p>
-            <p><b>Phone:</b> <span th:text="${user.phoneNumber}"></span></p>
-            <p><b>Location:</b> <span th:text="${user.location}"></span></p>
-        </div>
-    </div>
-
-    <hr>
-
-    <!-- EMPLOYMENT -->
-    <div class="section">
-        <h3>💼 Employment</h3>
-
-        <div class="info-card">
-            <p><b>Status:</b> <span th:text="${user.currentEmploymentStatus}"></span></p>
-            <p><b>Company:</b> <span th:text="${user.currentCompany}"></span></p>
-            <p><b>Designation:</b> <span th:text="${user.designation}"></span></p>
-            <p><b>Experience:</b> <span th:text="${user.totalExperienceYears}"></span> Years</p>
-        </div>
-    </div>
+	<!-- Update Employment section with edit button -->
+	<div class="section">
+	    <h3>💼 Employment 
+	        <button class="edit-btn" onclick="toggleEdit('employment')">✏️ Edit</button>
+	    </h3>
+	    
+	    <div id="employment-view" class="info-card">
+	        <p><b>Status:</b> <span th:text="${user.currentEmploymentStatus ?: 'Not specified'}"></span></p>
+	        <p><b>Company:</b> <span th:text="${user.currentCompany ?: 'Not specified'}"></span></p>
+	        <p><b>Designation:</b> <span th:text="${user.designation ?: 'Not specified'}"></span></p>
+	        <p><b>Experience:</b> <span th:text="${user.totalExperienceYears ?: '0'}"></span> Years</p>
+	    </div>
+	    
+	    <div id="employment-edit" style="display:none;" class="info-card">
+	        <form th:action="@{/jobseeker/profile/update/employment}" method="post">
+	            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	            
+	            <label>Employment Status</label>
+	            <select name="currentEmploymentStatus">
+	                <option value="">Select</option>
+	                <option value="Employed" th:selected="${user.currentEmploymentStatus == 'Employed'}">Employed</option>
+	                <option value="Unemployed" th:selected="${user.currentEmploymentStatus == 'Unemployed'}">Unemployed</option>
+	                <option value="Fresher" th:selected="${user.currentEmploymentStatus == 'Fresher'}">Fresher</option>
+	                <option value="Student" th:selected="${user.currentEmploymentStatus == 'Student'}">Student</option>
+	            </select>
+	            
+	            <label>Current Company</label>
+	            <input type="text" name="currentCompany" th:value="${user.currentCompany}" />
+	            
+	            <label>Designation</label>
+	            <input type="text" name="designation" th:value="${user.designation}" />
+	            
+	            <label>Total Experience (Years)</label>
+	            <input type="number" name="totalExperienceYears" th:value="${user.totalExperienceYears}" min="0" step="1"/>
+	            
+	            <button type="submit">Save Changes</button>
+	            <button type="button" onclick="cancelEdit('employment')">Cancel</button>
+	        </form>
+	    </div>
+	</div>
 
     <hr>
 
@@ -349,6 +433,16 @@
     </div>
 
 </div>
-
+<script>
+    function toggleEdit(section) {
+        document.getElementById(section + '-view').style.display = 'none';
+        document.getElementById(section + '-edit').style.display = 'block';
+    }
+    
+    function cancelEdit(section) {
+        document.getElementById(section + '-view').style.display = 'block';
+        document.getElementById(section + '-edit').style.display = 'none';
+    }
+</script>
 </body>
 </html>

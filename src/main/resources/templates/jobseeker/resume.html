@@ -2,9 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <title>Resume - RevHire</title>
-
     <style>
-
         *{
             margin:0;
             padding:0;
@@ -21,6 +19,30 @@
         .container{
             max-width:900px;
             margin:auto;
+        }
+
+        /* Add navigation bar */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .back-btn {
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .back-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-2px);
         }
 
         .card {
@@ -146,6 +168,15 @@
             font-size:13px;
         }
 
+        .info-note {
+            background: #e3f2fd;
+            color: #0d47a1;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+
         @keyframes fadeIn{
             from{ opacity:0; transform:translateY(-5px); }
             to{ opacity:1; transform:translateY(0); }
@@ -157,6 +188,18 @@
 <body>
 
 <div class="container">
+
+    <!-- Navigation Bar with Back Button -->
+    <div class="nav-bar">
+        <h1>📄 Resume Management</h1>
+        <a th:href="@{/jobseeker/dashboard}" class="back-btn">← Back to Dashboard</a>
+    </div>
+
+    <!-- Info Note -->
+    <div class="info-note">
+        ℹ️ The resume parser automatically extracts information from your uploaded resume. 
+        You can manually edit any details below.
+    </div>
 
     <!-- ✅ BUILDER -->
     <div class="card">
@@ -176,20 +219,20 @@
             <h3>Career Objective</h3>
 
             <label>Objective</label>
-            <textarea th:field="*{objective}"></textarea>
+            <textarea th:field="*{objective}" placeholder="Write your career objective..."></textarea>
 
             <h3>Education</h3>
 
             <label>Degree</label>
-            <input th:field="*{degree}"/>
+            <input th:field="*{degree}" placeholder="e.g. B.Tech Computer Science"/>
 
             <label>Year</label>
-            <input th:field="*{year}"/>
+            <input th:field="*{year}" placeholder="e.g. 2024"/>
 
             <h3>Skills</h3>
 
             <label>Skills (comma separated)</label>
-            <input th:field="*{skills}"/>
+            <input th:field="*{skills}" placeholder="e.g. Java, Spring, SQL"/>
 
             <button type="submit">Save Resume Details</button>
 
@@ -234,7 +277,7 @@
               enctype="multipart/form-data"
               th:action="@{/jobseeker/uploadResume}">
 
-            <input type="file" name="file" required/>
+            <input type="file" name="file" accept=".pdf,.docx" required/>
             <button type="submit">Upload Resume</button>
 
         </form>

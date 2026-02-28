@@ -144,7 +144,7 @@
 
     <div class="page-title">⭐ Saved Jobs</div>
 
-    <!-- ✅ EMPTY STATE -->
+    <!-- EMPTY STATE -->
     <div th:if="${#lists.isEmpty(savedJobs)}" class="empty">
         <h3>No saved jobs yet</h3>
         <p>Start exploring opportunities and save jobs you like.</p>
@@ -154,7 +154,7 @@
         </a>
     </div>
 
-    <!-- ✅ JOB LIST -->
+    <!-- JOB LIST -->
     <div th:each="saved : ${savedJobs}" class="job-card">
 
         <div class="job-info">
@@ -190,36 +190,55 @@
 
 </div>
 
+<!-- Update the removeSaved function in saved-jobs.html -->
 <script>
-
 function getCsrfHeaders() {
-
     const tokenMeta = document.querySelector("meta[name='_csrf']");
     const headerMeta = document.querySelector("meta[name='_csrf_header']");
-
     if (!tokenMeta || !headerMeta) {
         console.warn("CSRF meta tags missing");
         return {};
     }
-
-    const token = tokenMeta.content;
-    const header = headerMeta.content;
-
-    return { [header]: token };
+    return { [headerMeta.content]: tokenMeta.content };
 }
 
 // ✅ APPLY JOB
 function applyJob(id){
-    fetch('/jobseeker/applyJob/' + id,{method:'POST'})
-        .then(r=>r.text())
-        .then(alert);
+    fetch('/jobseeker/applyJob/' + id, {
+        method: 'POST',
+        headers: getCsrfHeaders(),
+        credentials: 'same-origin'
+    })
+    .then(response => response.text())
+    .then(message => {
+        // Show inline message instead of alert
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'alert success';
+        messageDiv.style.position = 'fixed';
+        messageDiv.style.top = '20px';
+        messageDiv.style.right = '20px';
+        messageDiv.style.zIndex = '1000';
+        messageDiv.style.padding = '15px 25px';
+        messageDiv.style.borderRadius = '8px';
+        messageDiv.style.background = '#d4edda';
+        messageDiv.style.color = '#155724';
+        messageDiv.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+        messageDiv.textContent = message;
+        
+        document.body.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            messageDiv.remove();
+            location.reload();
+        }, 2000);
+    })
+    .catch(err => {
+        console.error(err);
+    });
 }
 
 // ✅ REMOVE SAVED JOB
-function removeSaved(jobId) {
-
-    console.log("Removing job:", jobId);
-
+function removeSaved(jobId, button) {
     fetch('/jobseeker/removeSaved/' + jobId, {
         method: 'POST',
         headers: getCsrfHeaders(),
@@ -227,16 +246,61 @@ function removeSaved(jobId) {
     })
     .then(response => response.text())
     .then(message => {
-
-        console.log("SUCCESS:", message);
-        location.reload();
+        // Show success message
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'alert success';
+        messageDiv.style.position = 'fixed';
+        messageDiv.style.top = '20px';
+        messageDiv.style.right = '20px';
+        messageDiv.style.zIndex = '1000';
+        messageDiv.style.padding = '15px 25px';
+        messageDiv.style.borderRadius = '8px';
+        messageDiv.style.background = '#f8d7da';
+        messageDiv.style.color = '#721c24';
+        messageDiv.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+        messageDiv.textContent = '🗑️ Job removed from saved list';
+        
+        document.body.appendChild(messageDiv);
+        
+        // Remove the job card
+        const jobCard = button.closest('.job-card');
+        jobCard.style.transition = 'opacity 0.3s';
+        jobCard.style.opacity = '0';
+        
+        setTimeout(() => {
+            jobCard.remove();
+            messageDiv.remove();
+            
+            // Check if no jobs left
+            const jobsContainer = document.querySelector('.jobs');
+            if (jobsContainer && jobsContainer.children.length === 0) {
+                location.reload(); // Reload to show empty state
+            }
+        }, 300);
     })
     .catch(err => {
-
         console.error("REMOVE ERROR:", err);
+        // Show error message
+        const messageDiv = document.createElement('div');
+        messageDiv.className = 'alert error';
+        messageDiv.style.position = 'fixed';
+        messageDiv.style.top = '20px';
+        messageDiv.style.right = '20px';
+        messageDiv.style.zIndex = '1000';
+        messageDiv.style.padding = '15px 25px';
+        messageDiv.style.borderRadius = '8px';
+        messageDiv.style.background = '#f8d7da';
+        messageDiv.style.color = '#721c24';
+        messageDiv.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+        messageDiv.textContent = '❌ Failed to remove job';
+        
+        document.body.appendChild(messageDiv);
+        
+        setTimeout(() => {
+            messageDiv.remove();
+        }, 3000);
     });
 }
-
 </script>
 
 </body>

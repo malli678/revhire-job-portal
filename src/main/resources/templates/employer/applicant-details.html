@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Applicant Details - RevHire</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        .back-btn {
+            background: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+        .section {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 10px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+        .resume-link {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+        }
+        .cover-letter {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="header">
+                <h2>Applicant Details</h2>
+                <a href="/employer/dashboard" class="back-btn">← Back</a>
+            </div>
+            
+            <!-- Personal Info -->
+            <div class="section">
+                <h3>👤 Personal Information</h3>
+                <p><strong>Name:</strong> <span th:text="${applicant.fullName}"></span></p>
+                <p><strong>Email:</strong> <span th:text="${applicant.email}"></span></p>
+                <p><strong>Phone:</strong> <span th:text="${applicant.phoneNumber}"></span></p>
+                <p><strong>Location:</strong> <span th:text="${applicant.location}"></span></p>
+            </div>
+            
+            <!-- Application Details -->
+            <div class="section">
+                <h3>📄 Application Details</h3>
+                <p><strong>Applied Date:</strong> <span th:text="${#temporals.format(application.appliedDate, 'dd MMM yyyy HH:mm')}"></span></p>
+                <p><strong>Status:</strong> <span th:text="${application.status}" style="font-weight:bold;"></span></p>
+                
+                <!-- Cover Letter -->
+                <div th:if="${application.coverLetter != null and !application.coverLetter.isEmpty()}">
+                    <h4>Cover Letter:</h4>
+                    <div class="cover-letter" th:text="${application.coverLetter}"></div>
+                </div>
+                <div th-else>
+                    <p><em>No cover letter provided</em></p>
+                </div>
+                
+                <!-- Resume -->
+                <div style="margin-top: 20px;">
+                    <a th:href="@{/employer/download-resume/{id}(id=${application.id})}" 
+                       class="resume-link">📎 Download Resume</a>
+                </div>
+            </div>
+            
+            <!-- Skills -->
+            <div class="section" th:if="${applicant.skills != null and !applicant.skills.isEmpty()}">
+                <h3>🔧 Skills</h3>
+                <div>
+                    <span th:each="skill : ${applicant.skills}" 
+                          style="display:inline-block; background:#667eea; color:white; 
+                                 padding:5px 12px; border-radius:20px; margin:3px; font-size:12px;"
+                          th:text="${skill}"></span>
+                </div>
+            </div>
+            
+            <!-- Actions -->
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <form th:action="@{/employer/shortlist/{id}(id=${application.id})}" method="post" style="display:inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <button type="submit" style="background:#28a745; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">
+                        ✅ Shortlist
+                    </button>
+                </form>
+                
+                <form th:action="@{/employer/reject/{id}(id=${application.id})}" method="post" style="display:inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <input type="text" name="notes" placeholder="Reason" style="padding:8px; margin-right:5px;"/>
+                    <button type="submit" style="background:#dc3545; color:white; padding:10px 20px; border:none; border-radius:8px; cursor:pointer;">
+                        ❌ Reject
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
