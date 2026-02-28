@@ -9,6 +9,7 @@ import com.revhire.service.JobService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.ui.Model;
 
 import java.util.List;
@@ -30,14 +31,35 @@ public class JobController {
     // WEB: SAVE JOB (Thymeleaf Form)
     // =========================
     @PostMapping("/save")
-    public String saveJob(@ModelAttribute Job job,
-                          Authentication authentication) {
-
-        String email = authentication.getName();
-        Employer employer = employerService.getEmployerByEmail(email);
-
-        jobService.saveJob(job, employer);
-
+    public String saveJob(@ModelAttribute JobDto jobDto, 
+                          Authentication authentication,
+                          RedirectAttributes redirectAttributes) {
+        try {
+            String email = authentication.getName();
+            Employer employer = employerService.getEmployerByEmail(email);
+            
+            // Convert DTO to Entity
+            Job job = new Job();
+            job.setTitle(jobDto.getTitle());
+            job.setDescription(jobDto.getDescription());
+            job.setLocation(jobDto.getLocation());
+            job.setJobType(jobDto.getJobType());
+            job.setExperienceRequired(jobDto.getExperienceRequired());
+            job.setSkillsRequired(jobDto.getSkillsRequired());     
+            job.setEducationRequired(jobDto.getEducationRequired());
+            job.setSalaryMin(jobDto.getSalaryMin());
+            job.setSalaryMax(jobDto.getSalaryMax());
+            job.setDeadline(jobDto.getDeadline());
+            job.setNumberOfOpenings(jobDto.getNumberOfOpenings());
+            
+            jobService.saveJob(job, employer);
+            
+            redirectAttributes.addFlashAttribute("successMessage", "Job posted successfully!");
+            
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to post job: " + e.getMessage());
+        }
+        
         return "redirect:/employer/manage-jobs";
     }
 
@@ -102,24 +124,27 @@ public class JobController {
     public String searchJobsPage(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String location,
-            @RequestParam(required = false) Double salary,
+            @RequestParam(required = false) String company,
+            @RequestParam(required = false) String jobType,
+            @RequestParam(required = false) Double minSalary,
+            @RequestParam(required = false) Double maxSalary,
+            @RequestParam(required = false) Integer daysPosted,
+            @RequestParam(required = false) Integer minExp,
+            @RequestParam(required = false) Integer maxExp,
             Model model) {
 
-        List<Job> jobs = jobService.getAllJobs();
-
-        if (title != null && !title.isEmpty()) {
-            jobs = jobService.searchByRole(title);
+        List<Job> jobs = jobService.advancedSearch(title, location, company, jobType, 
+                                                   minSalary, maxSalary, daysPosted, minExp, maxExp);
+        
+        System.out.println("Found " + jobs.size() + " jobs"); // Debug log
+        for (Job job : jobs) {
+            System.out.println("Job: " + job.getTitle() + 
+                              ", Salary Min: " + job.getSalaryMin() + 
+                              ", Salary Max: " + job.getSalaryMax());
         }
-
-        if (location != null && !location.isEmpty()) {
-            jobs = jobService.searchByLocation(location);
-        }
-
-        if (salary != null) {
-            jobs = jobService.searchBySalary(salary);
-        }
-
+        
         model.addAttribute("jobs", jobs);
+        model.addAttribute("role", "JOBSEEKER");
 
         return "jobseeker/search-jobs";
     }
@@ -181,5 +206,24 @@ public class JobController {
 
         model.addAttribute("job", jobService.getJobById(id));
         return "jobseeker/job-details";
+    }
+    
+    // advanced search
+
+    @GetMapping("/advanced-search")
+    @ResponseBody
+    public List<Job> advancedSearch(
+            @RequestParam(required = false) String title,
+            @RequestParam(required = false) String location,
+            @RequestParam(required = false) String company,
+            @RequestParam(required = false) String jobType,
+            @RequestParam(required = false) Double minSalary,
+            @RequestParam(required = false) Double maxSalary,
+            @RequestParam(required = false) Integer daysPosted,
+            @RequestParam(required = false) Integer minExp,
+            @RequestParam(required = false) Integer maxExp) {
+        
+        return jobService.advancedSearch(title, location, company, jobType, 
+                                         minSalary, maxSalary, daysPosted, minExp, maxExp);
     }
 }

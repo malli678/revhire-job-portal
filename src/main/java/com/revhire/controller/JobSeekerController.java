@@ -42,7 +42,10 @@ public class JobSeekerController {
 	private JobService jobService;
 	@Autowired
 	private RecommendationService recommendationService;
-
+	
+	@Autowired
+	private ResumeParserService resumeParserService;
+	
     private final ResumeService resumeService;
     private final JobSeekerService jobSeekerService;
     private final EducationService educationService;
@@ -254,8 +257,7 @@ public class JobSeekerController {
     // PROFILE PAGE
     // =========================
     @GetMapping("/profile")
-    public String profile(Model model, HttpSession session) {
-
+    public String profile(Model model, HttpSession session, Authentication auth) {
         Long userId = validateSession(session);
         User user = userService.getUserById(userId);
 
@@ -263,14 +265,15 @@ public class JobSeekerController {
             throw new RuntimeException("Invalid user role");
         }
 
-        model.addAttribute("user", js);
+        // Force reload from database to get latest data
+        JobSeeker freshJs = jobSeekerRepository.findById(js.getUserId())
+                .orElseThrow(() -> new RuntimeException("JobSeeker not found"));
 
-        // ✅ REQUIRED ⭐⭐⭐
-        model.addAttribute("skills", js.getSkillEntities());
-        model.addAttribute("education", js.getEducationEntities());
-        model.addAttribute("certifications", js.getCertificationEntities());
-
-        model.addAttribute("completion", js.calculateProfileCompletion());
+        model.addAttribute("user", freshJs);
+        model.addAttribute("skills", freshJs.getSkillEntities());
+        model.addAttribute("education", freshJs.getEducationEntities());
+        model.addAttribute("certifications", freshJs.getCertificationEntities());
+        model.addAttribute("completion", freshJs.calculateProfileCompletion());
 
         return "jobseeker/profile";
     }
@@ -331,6 +334,8 @@ public class JobSeekerController {
     // =========================
     // UPLOAD RESUME
     // =========================
+
+
     @PostMapping("/uploadResume")
     public String uploadResume(@RequestParam MultipartFile file,
                                Principal principal,
@@ -340,22 +345,20 @@ public class JobSeekerController {
         validateSession(session);
 
         try {
-
-            // ✅ Save file to uploads folder
-            String fileName = fileStorageService.storeFile(file);
-
-            // ✅ Get logged-in jobseeker
+            // Get logged-in jobseeker
             JobSeeker js = jobSeekerService.getJobSeekerByEmail(principal.getName());
-
-            // ✅ Save filename into DB
+            
+            // Save file and parse resume
+            String fileName = fileStorageService.storeFile(file);
             js.setResumeFile(fileName);
-
             jobSeekerRepository.save(js);
-
-            ra.addFlashAttribute("successMsg", "Resume uploaded successfully ✅");
+            
+            // Parse resume asynchronously
+            resumeParserService.parseAndUpdateResume(js.getUserId(), file);
+            
+            ra.addFlashAttribute("successMsg", "Resume uploaded successfully. Parsing in background...");
 
         } catch (Exception e) {
-
             ra.addFlashAttribute("errorMsg", e.getMessage());
         }
 
@@ -371,7 +374,7 @@ public class JobSeekerController {
 
         resumeService.save(dto, principal.getName());
 
-        redirectAttributes.addFlashAttribute("successMsg", "Resume details saved successfully ✅");
+        redirectAttributes.addFlashAttribute("successMsg", "Resume details saved successfully");
 
         return "redirect:/jobseeker/resume";
     }
@@ -410,5 +413,44 @@ public class JobSeekerController {
         model.addAttribute("recommendedJobs", recommendedJobs);
         
         return "jobseeker/recommendations";
+    }
+    
+
+    @PostMapping("/profile/update/personal")
+    public String updatePersonalInfo(Authentication auth,
+                                     @RequestParam String phoneNumber,
+                                     @RequestParam String location,
+                                     RedirectAttributes ra) {
+        try {
+            JobSeeker js = jobSeekerService.getJobSeekerByEmail(auth.getName());
+            js.setPhoneNumber(phoneNumber);
+            js.setLocation(location);
+            jobSeekerRepository.save(js);
+            ra.addFlashAttribute("success", "Personal information updated");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/jobseeker/profile";
+    }
+
+    @PostMapping("/profile/update/employment")
+    public String updateEmploymentInfo(Authentication auth,
+                                       @RequestParam(required = false) String currentEmploymentStatus,
+                                       @RequestParam(required = false) String currentCompany,
+                                       @RequestParam(required = false) String designation,
+                                       @RequestParam(required = false) Integer totalExperienceYears,
+                                       RedirectAttributes ra) {
+        try {
+            JobSeeker js = jobSeekerService.getJobSeekerByEmail(auth.getName());
+            js.setCurrentEmploymentStatus(currentEmploymentStatus);
+            js.setCurrentCompany(currentCompany);
+            js.setDesignation(designation);
+            js.setTotalExperienceYears(totalExperienceYears);
+            jobSeekerRepository.save(js);
+            ra.addFlashAttribute("success", "Employment information updated");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", e.getMessage());
+        }
+        return "redirect:/jobseeker/profile";
     }
 }

@@ -9,12 +9,17 @@ public class JobDto {
     private String location;
     private String jobType;
     private String experienceRequired;
+
+
+    private String skillsRequired;
+    private String educationRequired;
+    private LocalDateTime deadline;
+    private Integer numberOfOpenings;
+
     private Double salaryMin;
     private Double salaryMax;
-    private LocalDateTime deadline;
-    private Integer numberOfOpenings;  // ✅ ADD THIS FIELD
 
-    // Getters & Setters
+    // ===== Getters & Setters =====
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
@@ -30,16 +35,21 @@ public class JobDto {
     public String getExperienceRequired() { return experienceRequired; }
     public void setExperienceRequired(String experienceRequired) { this.experienceRequired = experienceRequired; }
 
+    public String getSkillsRequired() { return skillsRequired; }
+    public void setSkillsRequired(String skillsRequired) { this.skillsRequired = skillsRequired; }
+
+    public String getEducationRequired() { return educationRequired; }
+    public void setEducationRequired(String educationRequired) { this.educationRequired = educationRequired; }
+
+    public LocalDateTime getDeadline() { return deadline; }
+    public void setDeadline(LocalDateTime deadline) { this.deadline = deadline; }
+
+    public Integer getNumberOfOpenings() { return numberOfOpenings; }
+    public void setNumberOfOpenings(Integer numberOfOpenings) { this.numberOfOpenings = numberOfOpenings; }
+
     public Double getSalaryMin() { return salaryMin; }
     public void setSalaryMin(Double salaryMin) { this.salaryMin = salaryMin; }
 
     public Double getSalaryMax() { return salaryMax; }
     public void setSalaryMax(Double salaryMax) { this.salaryMax = salaryMax; }
-
-    public LocalDateTime getDeadline() { return deadline; }
-    public void setDeadline(LocalDateTime deadline) { this.deadline = deadline; }
-    
-    // ✅ ADD GETTER/SETTER
-    public Integer getNumberOfOpenings() { return numberOfOpenings; }
-    public void setNumberOfOpenings(Integer numberOfOpenings) { this.numberOfOpenings = numberOfOpenings; }
 }

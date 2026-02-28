@@ -39,12 +39,15 @@ public class UserService {
 
     @Transactional
     public JobSeeker registerJobSeeker(JobSeekerRegistrationDto dto) {
-        log.info("Registering JobSeeker: {}", dto.getEmail());
-
+    	log.info("Registering new job seeker with email: {}", dto.getEmail());
+        log.debug("Registration details: name={}, phone={}, location={}", 
+                  dto.getFullName(), dto.getPhoneNumber(), dto.getLocation());
         if (userRepository.existsByEmail(dto.getEmail())) {
+        	log.warn("Registration failed - email already exists: {}", dto.getEmail());
             throw new RuntimeException("Email already registered");
         }
 
+        try {
         JobSeeker jobSeeker = new JobSeeker();
         jobSeeker.setFullName(dto.getFullName());
         jobSeeker.setEmail(dto.getEmail());
@@ -58,9 +61,14 @@ public class UserService {
         jobSeeker.setTotalExperienceYears(dto.getTotalExperienceYears());
         jobSeeker.setActive(true);
         jobSeeker.setCreatedAt(LocalDateTime.now());
-
-        log.info("JobSeeker registered successfully: {}", dto.getEmail());
-        return jobSeekerRepository.save(jobSeeker);
+        
+        JobSeeker saved = jobSeekerRepository.save(jobSeeker);
+        log.info("Job seeker registered successfully with ID: {}", saved.getUserId());
+        return saved;
+    } catch (Exception e) {
+        log.error("Failed to register job seeker: {}", e.getMessage(), e);
+        throw e;
+    }
     }
 
     @Transactional

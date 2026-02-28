@@ -2,6 +2,7 @@ package com.revhire.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,198 +17,204 @@ import com.revhire.repository.*;
 @Service
 public class JobSeekerService {
 
-    @Autowired
-    private SavedJobRepository savedJobRepository;
+	@Autowired
+	private SavedJobRepository savedJobRepository;
 
-    @Autowired
-    private JobRepository jobRepository;
+	@Autowired
+	private JobRepository jobRepository;
 
-    @Autowired
-    private JobSeekerRepository jobSeekerRepository;
+	@Autowired
+	private JobSeekerRepository jobSeekerRepository;
 
-    @Autowired
-    private ApplicationRepository applicationRepository;
-    @Autowired private SkillRepository skillRepository;
-    @Autowired private EducationRepository educationRepository;
-    @Autowired private CertificationRepository certificationRepository;
+	@Autowired
+	private ApplicationRepository applicationRepository;
+	@Autowired
+	private SkillRepository skillRepository;
+	@Autowired
+	private EducationRepository educationRepository;
+	@Autowired
+	private CertificationRepository certificationRepository;
 
-    // =========================
-    // SAVE JOB
-    // =========================
-    public ResponseEntity<?> saveJob(Long jobSeekerId, Long jobId) {
+	// =========================
+	// SAVE JOB
+	// =========================
+	public ResponseEntity<?> saveJob(Long jobSeekerId, Long jobId) {
 
-        JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
-                .orElseThrow(() -> new ResourceNotFoundException("JobSeeker not found"));
+		JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
+				.orElseThrow(() -> new ResourceNotFoundException("JobSeeker not found"));
 
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
+		Job job = jobRepository.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job not found"));
 
-        // Check if already saved
-        savedJobRepository.findByJobSeekerAndJob(jobSeeker, job)
-                .ifPresent(s -> { throw new FileStorageException("Job already saved"); });
+		// Check if already saved
+		savedJobRepository.findByJobSeekerAndJob(jobSeeker, job).ifPresent(s -> {
+			throw new FileStorageException("Job already saved");
+		});
 
-        SavedJob savedJob = new SavedJob();
-        savedJob.setJobSeeker(jobSeeker);
-        savedJob.setJob(job);
+		SavedJob savedJob = new SavedJob();
+		savedJob.setJobSeeker(jobSeeker);
+		savedJob.setJob(job);
 
-        savedJobRepository.save(savedJob);
+		savedJobRepository.save(savedJob);
 
-        return ResponseEntity.ok("Job saved successfully");
-    }
+		return ResponseEntity.ok("Job saved successfully");
+	}
 
-    // =========================
-    // APPLY JOB
-    // =========================
-    public ResponseEntity<String> applyJob(Long userId, Long jobId) {
+	// =========================
+	// APPLY JOB
+	// =========================
+	public ResponseEntity<String> applyJob(Long userId, Long jobId) {
 
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+		Job job = jobRepository.findById(jobId).orElseThrow(() -> new RuntimeException("Job not found"));
 
-        JobSeeker jobSeeker = jobSeekerRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("JobSeeker not found"));
+		JobSeeker jobSeeker = jobSeekerRepository.findById(userId)
+				.orElseThrow(() -> new RuntimeException("JobSeeker not found"));
 
-        if (applicationRepository.findByJobAndJobSeeker(job, jobSeeker).isPresent()) {
-            throw new RuntimeException("Already applied for this job");
-        }
+		if (applicationRepository.findByJobAndJobSeeker(job, jobSeeker).isPresent()) {
+			throw new RuntimeException("Already applied for this job");
+		}
 
-        Application app = new Application();
-        app.setJob(job);
-        app.setJobSeeker(jobSeeker);
-        app.setStatus(Application.ApplicationStatus.APPLIED);
-        app.setAppliedDate(LocalDateTime.now());
+		Application app = new Application();
+		app.setJob(job);
+		app.setJobSeeker(jobSeeker);
+		app.setStatus(Application.ApplicationStatus.APPLIED);
+		app.setAppliedDate(LocalDateTime.now());
 
-        applicationRepository.save(app);
+		applicationRepository.save(app);
 
-        return ResponseEntity.ok("Application Submitted Successfully!");
-    }
-    // =========================
-    // GET ALL JOBS
-    // =========================
-    public List<Job> getAllJobs() {
-        return jobRepository.findAll();
-    }
+		return ResponseEntity.ok("Application Submitted Successfully!");
+	}
 
-    // =========================
-    // GET SAVED JOBS
-    // =========================
-    public List<SavedJob> getSavedJobsList(Long jobSeekerId) {
+	// =========================
+	// GET ALL JOBS
+	// =========================
+	public List<Job> getAllJobs() {
+		return jobRepository.findAll();
+	}
 
-        JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
-                .orElseThrow(() -> new ResourceNotFoundException("JobSeeker not found"));
+	// =========================
+	// GET SAVED JOBS
+	// =========================
+	public List<SavedJob> getSavedJobsList(Long jobSeekerId) {
 
-        return savedJobRepository.findByJobSeeker(jobSeeker);
-    }
-    // REMOVE SAVED JOB
-    // =========================
-    public ResponseEntity<?> removeSavedJob(Long jobSeekerId, Long jobId) {
+		JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
+				.orElseThrow(() -> new ResourceNotFoundException("JobSeeker not found"));
 
-        JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
-                .orElseThrow(() -> new ResourceNotFoundException("JobSeeker not found"));
+		return savedJobRepository.findByJobSeeker(jobSeeker);
+	}
 
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
+	// REMOVE SAVED JOB
+	// =========================
+	public ResponseEntity<?> removeSavedJob(Long jobSeekerId, Long jobId) {
 
-        SavedJob savedJob = savedJobRepository
-                .findByJobSeekerAndJob(jobSeeker, job)
-                .orElseThrow(() -> new ResourceNotFoundException("Saved job not found"));
+		JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
+				.orElseThrow(() -> new ResourceNotFoundException("JobSeeker not found"));
 
-        savedJobRepository.delete(savedJob);
+		Job job = jobRepository.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job not found"));
 
-        return ResponseEntity.ok("Removed from saved jobs");
-    }
+		SavedJob savedJob = savedJobRepository.findByJobSeekerAndJob(jobSeeker, job)
+				.orElseThrow(() -> new ResourceNotFoundException("Saved job not found"));
 
-    // =========================
-    // GET APPLICATIONS
-    // =========================
-    public List<Application> getApplicationsList(Long jobSeekerId) { 
-        return applicationRepository.findByJobSeeker_UserId(jobSeekerId);
-    }
- // =========================
- // GET JOB SEEKER BY EMAIL ⭐⭐⭐
- // =========================
- public JobSeeker getJobSeekerByEmail(String email) {
+		savedJobRepository.delete(savedJob);
 
-     return jobSeekerRepository.findByEmail(email)
-             .orElseThrow(() -> new ResourceNotFoundException("JobSeeker not found"));
- }
-    // =========================
-    // GET JOB BY ID
-    // =========================
-    public Job getJobById(Long jobId) {
-        return jobRepository.findById(jobId)
-                .orElseThrow(() -> new ResourceNotFoundException("Job not found"));
-    }
+		return ResponseEntity.ok("Removed from saved jobs");
+	}
 
-    // =========================
-    // WITHDRAW APPLICATION
-    // =========================
-    public void withdrawApplication(Long applicationId, String notes) {
+	// =========================
+	// GET APPLICATIONS
+	// =========================
+	public List<Application> getApplicationsList(Long jobSeekerId) {
+		return applicationRepository.findByJobSeeker_UserId(jobSeekerId);
+	}
 
-        Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new RuntimeException("Application not found"));
+	// =========================
+	// GET JOB SEEKER BY EMAIL ⭐⭐⭐
+	// =========================
+	public JobSeeker getJobSeekerByEmail(String email) {
 
-        // ✅ SAFETY CHECK ⭐⭐⭐
-        if (application.getStatus() != Application.ApplicationStatus.APPLIED) {
-            throw new RuntimeException("Only APPLIED applications can be withdrawn");
-        }
+		return jobSeekerRepository.findByEmail(email)
+				.orElseThrow(() -> new ResourceNotFoundException("JobSeeker not found"));
+	}
 
-        application.setStatus(Application.ApplicationStatus.WITHDRAWN);
-        application.setNotes(notes);
+	// =========================
+	// GET JOB BY ID
+	// =========================
+	public Job getJobById(Long jobId) {
+		return jobRepository.findById(jobId).orElseThrow(() -> new ResourceNotFoundException("Job not found"));
+	}
 
-        applicationRepository.save(application);
-    }
-    public void addSkill(Long jobSeekerId, String skillName) {
+	// =========================
+	// WITHDRAW APPLICATION
+	// =========================
+	public void withdrawApplication(Long applicationId, String notes) {
 
-        JobSeeker js = jobSeekerRepository.findById(jobSeekerId)
-                .orElseThrow(() -> new RuntimeException("JobSeeker not found"));
+		Application application = applicationRepository.findById(applicationId)
+				.orElseThrow(() -> new RuntimeException("Application not found"));
 
-        Skill skill = new Skill();
-        skill.setName(skillName);
-        skill.setJobSeeker(js);
+		// ✅ SAFETY CHECK ⭐⭐⭐
+		if (application.getStatus() != Application.ApplicationStatus.APPLIED) {
+			throw new RuntimeException("Only APPLIED applications can be withdrawn");
+		}
 
-        skillRepository.save(skill);
-    }
+		application.setStatus(Application.ApplicationStatus.WITHDRAWN);
+		application.setNotes(notes);
 
-    public void deleteSkill(Long skillId) {
-        skillRepository.deleteById(skillId);
-    }
-    public void addEducation(Long jobSeekerId,
-            String degree,
-            String institution) {
+		applicationRepository.save(application);
+	}
 
-JobSeeker js = jobSeekerRepository.findById(jobSeekerId)
-.orElseThrow(() -> new RuntimeException("JobSeeker not found"));
+	public void addSkill(Long jobSeekerId, String skillName) {
 
-Education edu = new Education();
-edu.setDegree(degree);
-edu.setInstitution(institution);
-edu.setJobSeeker(js);
+		JobSeeker js = jobSeekerRepository.findById(jobSeekerId)
+				.orElseThrow(() -> new RuntimeException("JobSeeker not found"));
 
-educationRepository.save(edu);
-}
+		Skill skill = new Skill();
+		skill.setName(skillName);
+		skill.setJobSeeker(js);
 
-public void deleteEducation(Long educationId) {
-educationRepository.deleteById(educationId);
-}
-public void addCertification(Long jobSeekerId,
-        String name,
-        String issuer,
-        String year) {
+		skillRepository.save(skill);
+	}
 
-JobSeeker js = jobSeekerRepository.findById(jobSeekerId)
-.orElseThrow(() -> new RuntimeException("JobSeeker not found"));
+	public void deleteSkill(Long skillId) {
+		skillRepository.deleteById(skillId);
+	}
 
-Certification cert = new Certification();
-cert.setName(name);
-cert.setIssuer(issuer);
-cert.setYear(year);
-cert.setJobSeeker(js);
+	public void addEducation(Long jobSeekerId, String degree, String institution) {
 
-certificationRepository.save(cert);
-}
+		JobSeeker js = jobSeekerRepository.findById(jobSeekerId)
+				.orElseThrow(() -> new RuntimeException("JobSeeker not found"));
 
-public void deleteCertification(Long certId) {
-certificationRepository.deleteById(certId);
-}
+		Education edu = new Education();
+		edu.setDegree(degree);
+		edu.setInstitution(institution);
+		edu.setJobSeeker(js);
 
+		educationRepository.save(edu);
+	}
+
+	public void deleteEducation(Long educationId) {
+		educationRepository.deleteById(educationId);
+	}
+
+	public void addCertification(Long jobSeekerId, String name, String issuer, String year) {
+
+		JobSeeker js = jobSeekerRepository.findById(jobSeekerId)
+				.orElseThrow(() -> new RuntimeException("JobSeeker not found"));
+
+		Certification cert = new Certification();
+		cert.setName(name);
+		cert.setIssuer(issuer);
+		cert.setYear(year);
+		cert.setJobSeeker(js);
+
+		certificationRepository.save(cert);
+	}
+
+	public void deleteCertification(Long certId) {
+		certificationRepository.deleteById(certId);
+	}
+
+	public List<JobSeeker> searchJobSeekersByResumeContent(String keyword) {
+		return jobSeekerRepository.findAll().stream().filter(js -> js.getResumeText() != null)
+				.filter(js -> js.getResumeText().toLowerCase().contains(keyword.toLowerCase()))
+				.collect(Collectors.toList());
+	}
 }

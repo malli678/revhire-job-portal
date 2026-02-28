@@ -35,9 +35,8 @@ public class RecommendationService {
         
         // Get user's skills
         Set<String> userSkills = jobSeeker.getSkills();
-        if (userSkills == null || userSkills.isEmpty()) {
-            return jobRepository.findTop10ByOrderByPostedDateDesc();
-        }
+        Integer userExperience = jobSeeker.getTotalExperienceYears() != null ? 
+                                 jobSeeker.getTotalExperienceYears() : 0;
         
         // Get all active jobs
         List<Job> allJobs = jobRepository.findByStatus("ACTIVE");
@@ -49,7 +48,7 @@ public class RecommendationService {
             int score = 0;
             
             // Skill match (highest weight)
-            if (job.getSkillsRequired() != null) {
+            if (job.getSkillsRequired() != null && userSkills != null) {
                 String[] jobSkills = job.getSkillsRequired().split(",");
                 for (String jobSkill : jobSkills) {
                     if (userSkills.stream().anyMatch(s -> 
@@ -59,36 +58,55 @@ public class RecommendationService {
                 }
             }
             
-            // Title match
-            if (job.getTitle() != null && jobSeeker.getDesignation() != null) {
-                if (job.getTitle().toLowerCase().contains(jobSeeker.getDesignation().toLowerCase())) {
-                    score += 5;
-                }
-            }
-            
-            // Location match
-            if (job.getLocation() != null && jobSeeker.getLocation() != null) {
-                if (job.getLocation().equalsIgnoreCase(jobSeeker.getLocation())) {
-                    score += 3;
-                }
-            }
-            
-            // Experience level match
-            if (job.getExperienceRequired() != null && jobSeeker.getTotalExperienceYears() != null) {
-                try {
-                    int reqExp = Integer.parseInt(job.getExperienceRequired().replaceAll("[^0-9]", ""));
-                    int userExp = jobSeeker.getTotalExperienceYears();
-                    if (Math.abs(reqExp - userExp) <= 2) {
-                        score += 2;
+            // For freshers (0-1 year experience), show entry-level jobs
+            if (userExperience <= 1) {
+                if (job.getExperienceRequired() != null) {
+                    String expStr = job.getExperienceRequired().toLowerCase();
+                    if (expStr.contains("fresher") || expStr.contains("entry") || 
+                        expStr.contains("0") || expStr.contains("1") ||
+                        expStr.contains("intern")) {
+                        score += 15; // Boost score for entry-level jobs
                     }
-                } catch (Exception e) {
-                    // Ignore parsing errors
+                }
+            } else {
+                // For experienced, match experience level
+                if (job.getExperienceRequired() != null && userExperience != null) {
+                    try {
+                        String expStr = job.getExperienceRequired().replaceAll("[^0-9-]", "");
+                        if (expStr.contains("-")) {
+                            String[] parts = expStr.split("-");
+                            int minExp = Integer.parseInt(parts[0].trim());
+                            int maxExp = Integer.parseInt(parts[1].trim());
+                            if (userExperience >= minExp && userExperience <= maxExp) {
+                                score += 8;
+                            }
+                        } else {
+                            int reqExp = Integer.parseInt(expStr);
+                            if (Math.abs(reqExp - userExperience) <= 2) {
+                                score += 8;
+                            }
+                        }
+                    } catch (Exception e) {
+                        // Ignore parsing errors
+                    }
+                }
+            }
+            
+            // Location match (bonus)
+            if (job.getLocation() != null && jobSeeker.getLocation() != null) {
+                if (job.getLocation().toLowerCase().contains(jobSeeker.getLocation().toLowerCase())) {
+                    score += 5;
                 }
             }
             
             if (score > 0) {
                 jobScores.put(job, score);
             }
+        }
+        
+        // If no matches found, return recent jobs
+        if (jobScores.isEmpty()) {
+            return jobRepository.findTop10ByOrderByPostedDateDesc();
         }
         
         // Sort by score and return top N

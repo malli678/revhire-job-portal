@@ -228,18 +228,50 @@ public class JobSeeker extends User {
 
     public String getYear() { return year; }
     public void setYear(String year) { this.year = year; }
-    // Helper method
+
     public Double calculateProfileCompletion() {
-        double completion = 0.0;
-        if (profileSummary != null && !profileSummary.isEmpty()) completion += 10;
-        if (resumePath != null) completion += 15;
-        if (skills != null && !skills.isEmpty()) completion += 15;
-        if (education != null && !education.isEmpty()) completion += 15;
-        if (experiences != null && !experiences.isEmpty()) completion += 15;
-        if (projects != null && !projects.isEmpty()) completion += 10;
-        if (certifications != null && !certifications.isEmpty()) completion += 10;
-        if (linkedInProfile != null && !linkedInProfile.isEmpty()) completion += 5;
-        if (portfolioUrl != null && !portfolioUrl.isEmpty()) completion += 5;
-        return completion;
+        int totalFields = 0;
+        int filledFields = 0;
+        
+        // Personal details (3 fields)
+        if (getPhoneNumber() != null && !getPhoneNumber().isEmpty()) filledFields++;
+        if (getLocation() != null && !getLocation().isEmpty()) filledFields++;
+        totalFields += 2;
+        
+        // Employment (4 fields) - Fresher is valid
+        if (currentEmploymentStatus != null && !currentEmploymentStatus.isEmpty()) filledFields++;
+        if (currentCompany != null && !currentCompany.isEmpty()) filledFields++;
+        if (designation != null && !designation.isEmpty()) filledFields++;
+        if (totalExperienceYears != null) filledFields++; // 0 is valid for fresher
+        totalFields += 4;
+        
+        // Skills (at least 3 skills count as complete)
+        if (skills != null && !skills.isEmpty()) {
+            filledFields += Math.min(skills.size(), 3);
+        }
+        totalFields += 3;
+        
+        // Education (at least 1)
+        if (education != null && !education.isEmpty()) {
+            filledFields++;
+        }
+        totalFields += 1;
+        
+        // Experience (internship counts)
+        if (experiences != null && !experiences.isEmpty()) {
+            filledFields++;
+        }
+        totalFields += 1;
+        
+        // Resume (2 fields)
+        if (resumeFile != null && !resumeFile.isEmpty()) filledFields++;
+        if (objective != null && !objective.isEmpty()) filledFields++;
+        totalFields += 2;
+        
+        // Calculate percentage
+        double completion = (filledFields * 100.0) / totalFields;
+        
+        // Round to 1 decimal place
+        return Math.round(completion * 10) / 10.0;
     }
 }

@@ -27,7 +27,7 @@ public interface ApplicationRepository extends JpaRepository<Application, Long> 
     List<Application> findByJob_Employer_UserId(Long userId);
 
     long countByJob_Employer_UserId(Long userId);
-
+    long countByJob_JobId(Long jobId);
     long countByJob_Employer_UserIdAndStatus(
             Long userId,
             Application.ApplicationStatus status

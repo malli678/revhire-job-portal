@@ -29,13 +29,13 @@ public class SecurityConfig {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
-    // ✅ PASSWORD ENCODER
+    // PASSWORD ENCODER
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    // ✅ AUTH PROVIDER
+    // AUTH PROVIDER
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -44,19 +44,19 @@ public class SecurityConfig {
         return authProvider;
     }
 
-    // ✅ SECURITY CONTEXT (SESSION BASED)
+    // SECURITY CONTEXT (SESSION BASED)
     @Bean
     public SecurityContextRepository securityContextRepository() {
         return new HttpSessionSecurityContextRepository();
     }
 
-    // ✅ FILTER CHAIN ⭐⭐⭐
+    // FILTER CHAIN ⭐⭐⭐
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
 
-            // ✅ CSRF CONFIG
+            // CSRF CONFIG
         .csrf(csrf -> csrf
         	    .ignoringRequestMatchers(
 
@@ -70,23 +70,23 @@ public class SecurityConfig {
         	    )
         	)
 
-            // ✅ SESSION MANAGEMENT
+            // SESSION MANAGEMENT
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 .maximumSessions(1)
                 .maxSessionsPreventsLogin(false)
             )
 
-            // ✅ SECURITY CONTEXT
+            // SECURITY CONTEXT
             .securityContext(context -> context
                 .securityContextRepository(securityContextRepository())
             )
 
-            // ✅ AUTHORIZATION RULES ⭐⭐⭐
+            // AUTHORIZATION RULES ⭐⭐⭐
 
             .authorizeHttpRequests(authz -> authz
 
-                // ✅ PUBLIC ROUTES
+                // PUBLIC ROUTES
                 .requestMatchers(
                     "/auth/login",
                     "/auth/forgot-password",
@@ -95,33 +95,34 @@ public class SecurityConfig {
                     "/css/**",
                     "/js/**",
                     "/images/**",
-                    "/employer/public/**",    // ✅ ADD THIS - Allow public company profiles
-                    "/jobs/all",               // ✅ OPTIONAL: Allow public job listing API
-                    "/jobs/view/**"            // ✅ OPTIONAL: Allow public job view
+                    "/employer/public/**",
+                    "/jobs/all",    
+                    "/jobs/search-page",
+                    "/jobs/view/**"             
                 ).permitAll()
 
-                // ✅ ROLE-BASED ACCESS
+                // ROLE-BASED ACCESS
                 .requestMatchers("/jobseeker/**").hasRole("JOBSEEKER")
                 .requestMatchers("/employer/**").hasRole("EMPLOYER")
 
-                // ✅ EVERYTHING ELSE REQUIRES LOGIN
+                // EVERYTHING ELSE REQUIRES LOGIN
                 .anyRequest().authenticated()
             )
 
-            // ✅ AUTH PROVIDER
+            // AUTH PROVIDER
             .authenticationProvider(authenticationProvider())
 
-            // ✅ JWT FILTER (SAFE TO KEEP)
+            // JWT FILTER (SAFE TO KEEP)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
-            // ✅ FORM LOGIN ⭐⭐⭐
+            // FORM LOGIN ⭐⭐⭐
             .formLogin(form -> form
                 .loginPage("/auth/login")
                 .loginProcessingUrl("/auth/login")
                 .usernameParameter("email")
                 .passwordParameter("password")
 
-                // ✅ SUCCESS HANDLER
+                // SUCCESS HANDLER
                 .successHandler((request, response, authentication) -> {
 
                     String role = authentication.getAuthorities()
@@ -142,7 +143,7 @@ public class SecurityConfig {
                 .permitAll()
             )
 
-            // ✅ LOGOUT
+            // LOGOUT
             .logout(logout -> logout
                 .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"))
                 .logoutSuccessUrl("/auth/login?logout")

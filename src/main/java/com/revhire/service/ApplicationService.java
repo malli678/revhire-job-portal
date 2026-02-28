@@ -32,6 +32,9 @@ public class ApplicationService {
 	@Autowired
 	private FileStorageService fileStorageService;
 	
+	@Autowired
+	private EmailService emailService;
+	
 	// ✅ ADD THIS - Inject NotificationService
 	@Autowired
 	private NotificationService notificationService;
@@ -106,10 +109,11 @@ public class ApplicationService {
 	// SHORTLIST
 	public void shortlistCandidate(Long applicationId, String note) {
 		Application app = applicationRepository.findById(applicationId).orElseThrow();
+		String oldStatus = app.getStatus().toString();
 		app.setStatus(Application.ApplicationStatus.SHORTLISTED);
 		app.setNotes(note);
 		applicationRepository.save(app);
-		
+		emailService.sendApplicationStatusUpdate(app, oldStatus);
 		// ✅ Create notification for shortlist
 		notificationService.createNotification(
 		    app.getJobSeeker().getUserId(),
@@ -124,12 +128,13 @@ public class ApplicationService {
 	public void rejectCandidate(Long applicationId, String notes) {
 		Application app = applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));
-
+		String oldStatus = app.getStatus().toString();
 		app.setStatus(Application.ApplicationStatus.REJECTED);
 		app.setNotes(notes);
 		applicationRepository.save(app);
-		
-		// ✅ Create notification for rejection
+		// Send email notification
+	    emailService.sendApplicationStatusUpdate(app, oldStatus);
+		// Create notification for rejection
 		notificationService.createNotification(
 		    app.getJobSeeker().getUserId(),
 		    "Application Update",
@@ -148,7 +153,7 @@ public class ApplicationService {
 		application.setStatus(status);
 		applicationRepository.save(application);
 		
-		// ✅ Create notification for status change
+		// Create notification for status change
 		notificationService.createNotification(
 		    application.getJobSeeker().getUserId(),
 		    "Application Status Updated",
@@ -174,7 +179,7 @@ public class ApplicationService {
 			
 			applicationRepository.save(app);
 			
-			// ✅ Create notification for bulk update
+			// Create notification for bulk update
 			notificationService.createNotification(
 			    app.getJobSeeker().getUserId(),
 			    "Application Status Updated",
@@ -223,7 +228,7 @@ public class ApplicationService {
 			}
 			applicationRepository.save(app);
 			
-			// ✅ Create notification for status change
+			// Create notification for status change
 			notificationService.createNotification(
 			    app.getJobSeeker().getUserId(),
 			    "Application Status Updated",
@@ -276,7 +281,7 @@ public class ApplicationService {
 	            .toList();
 	}
 	
-	// ✅ FIXED apply method with notification
+	//  FIXED apply method with notification
 	public void apply(Long jobId, MultipartFile resume, String coverLetter, String email) {
 	    Job job = jobRepository.findById(jobId)
 	            .orElseThrow(() -> new RuntimeException("Job not found with id: " + jobId));
@@ -288,14 +293,14 @@ public class ApplicationService {
 	        throw new RuntimeException("Already applied");
 	    }
 
-	    // ✅ SAVE FILE
+	    // SAVE FILE
 	    String resumeFileName = fileStorageService.storeFile(resume);
 
 	    Application app = new Application();
 	    app.setJob(job);
 	    app.setJobSeeker(jobSeeker);
 	    
-	    // ✅ CRITICAL: Set the bidirectional relationship
+	    // CRITICAL: Set the bidirectional relationship
 	    job.getApplications().add(app);  // Add to job's applications list
 	    jobSeeker.getApplications().add(app);  // Add to jobSeeker's applications list
 	    
@@ -304,9 +309,13 @@ public class ApplicationService {
 	    app.setStatus(Application.ApplicationStatus.APPLIED);
 	    app.setAppliedDate(LocalDateTime.now());
 
-	    // ✅ Save with explicit flush to catch any issues
+	    // Save with explicit flush to catch any issues
 	    applicationRepository.saveAndFlush(app);
+	    applicationRepository.save(app);
 	    
+	    // Send emails
+	    emailService.sendApplicationConfirmation(jobSeeker, job);
+	    emailService.sendNewApplicationAlert(app);
 	    // Create notifications
 	    notificationService.createNotification(
 	        jobSeeker.getUserId(), 
@@ -321,5 +330,56 @@ public class ApplicationService {
 	        jobSeeker.getFullName() + " applied for " + job.getTitle(),
 	        "/employer/dashboard"
 	    );
+	}
+	// Add these methods to ApplicationService.java
+
+	public void moveToUnderReview(Long applicationId, String notes) {
+	    Application app = applicationRepository.findById(applicationId)
+	        .orElseThrow(() -> new RuntimeException("Application not found"));
+	    
+	    if (app.getStatus() != ApplicationStatus.APPLIED) {
+	        throw new RuntimeException("Only APPLIED applications can be moved to UNDER_REVIEW");
+	    }
+	    
+	    app.setStatus(ApplicationStatus.UNDER_REVIEW);
+	    if (notes != null && !notes.isEmpty()) {
+	        app.setNotes(notes);
+	    }
+	    applicationRepository.save(app);
+	    
+	    // Create notification
+	    notificationService.createNotification(
+	        app.getJobSeeker().getUserId(),
+	        "Application Under Review",
+	        "Your application for " + app.getJob().getTitle() + " is now under review.",
+	        "/jobseeker/applications"
+	    );
+	}
+
+	public void moveFromUnderReviewToShortlisted(Long applicationId, String notes) {
+	    Application app = applicationRepository.findById(applicationId)
+	        .orElseThrow(() -> new RuntimeException("Application not found"));
+	    
+	    if (app.getStatus() != ApplicationStatus.UNDER_REVIEW) {
+	        throw new RuntimeException("Only UNDER_REVIEW applications can be shortlisted");
+	    }
+	    
+	    app.setStatus(ApplicationStatus.SHORTLISTED);
+	    if (notes != null && !notes.isEmpty()) {
+	        app.setNotes(notes);
+	    }
+	    applicationRepository.save(app);
+	    
+	    // Create notification
+	    notificationService.createNotification(
+	        app.getJobSeeker().getUserId(),
+	        "Application Shortlisted!",
+	        "Congratulations! Your application for " + app.getJob().getTitle() + " has been shortlisted.",
+	        "/jobseeker/applications"
+	    );
+	}
+	public Application getApplicationById(Long applicationId) {
+	    return applicationRepository.findById(applicationId)
+	            .orElseThrow(() -> new RuntimeException("Application not found"));
 	}
 }
