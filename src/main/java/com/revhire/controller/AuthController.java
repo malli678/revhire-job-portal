@@ -25,29 +25,48 @@ public class AuthController {
         this.userService = userService;
     }
 
-    // ✅ ONLY show login page
+    // ===================== LOGIN =====================
+
     @GetMapping("/login")
     public String showLoginForm(Model model) {
-        model.addAttribute("loginDto", new LoginDto());
+        if (!model.containsAttribute("loginDto")) {
+            model.addAttribute("loginDto", new LoginDto());
+        }
         return "auth/login";
     }
 
-    // ❌ REMOVED manual login method
     // Spring Security handles POST /auth/login
+
+    // ===================== JOB SEEKER REGISTRATION =====================
 
     @GetMapping("/register/seeker")
     public String showJobSeekerRegistrationForm(Model model) {
-        model.addAttribute("registrationDto", new JobSeekerRegistrationDto());
+        if (!model.containsAttribute("registrationDto")) {
+            model.addAttribute("registrationDto", new JobSeekerRegistrationDto());
+        }
         return "auth/register-seeker";
     }
 
     @PostMapping("/register/seeker")
-    public String registerJobSeeker(@Valid @ModelAttribute JobSeekerRegistrationDto registrationDto,
-                                    BindingResult result,
-                                    RedirectAttributes redirectAttributes) {
+    public String registerJobSeeker(
+            @Valid @ModelAttribute("registrationDto") JobSeekerRegistrationDto registrationDto,
+            BindingResult result,
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
-        if (result.hasErrors()) return "auth/register-seeker";
+        // Convert employment status to uppercase
+        if (registrationDto.getCurrentEmploymentStatus() != null) {
+            registrationDto.setCurrentEmploymentStatus(
+                registrationDto.getCurrentEmploymentStatus().toUpperCase()
+            );
+        }
 
+        // Field-level validation errors
+        if (result.hasErrors()) {
+            return "auth/register-seeker";
+        }
+
+        // Password match validation
         if (!registrationDto.getPassword().equals(registrationDto.getConfirmPassword())) {
             result.rejectValue("confirmPassword", "error.confirmPassword", "Passwords do not match");
             return "auth/register-seeker";
@@ -55,27 +74,45 @@ public class AuthController {
 
         try {
             userService.registerJobSeeker(registrationDto);
-            redirectAttributes.addFlashAttribute("success", "Registration successful! Please login.");
+            redirectAttributes.addFlashAttribute("success",
+                    "Registration successful! Please login.");
             return "redirect:/auth/login";
+
+        } catch (IllegalArgumentException e) {
+            log.warn("Business validation failed: {}", e.getMessage());
+            // Add error to the model
+            result.reject("error.registration", e.getMessage());
+            return "auth/register-seeker";  // Return to same page with errors
+
         } catch (Exception e) {
-            log.error("Registration failed: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/auth/register/seeker";
+            log.error("Unexpected registration error: ", e);
+            result.reject("error.registration", "Something went wrong. Please try again.");
+            return "auth/register-seeker";
         }
     }
+    // ===================== EMPLOYER REGISTRATION =====================
 
     @GetMapping("/register/employer")
     public String showEmployerRegistrationForm(Model model) {
-        model.addAttribute("registrationDto", new EmployerRegistrationDto());
+        if (!model.containsAttribute("registrationDto")) {
+            model.addAttribute("registrationDto", new EmployerRegistrationDto());
+        }
         return "auth/register-employer";
     }
 
     @PostMapping("/register/employer")
-    public String registerEmployer(@Valid @ModelAttribute EmployerRegistrationDto registrationDto,
-                                   BindingResult result,
-                                   RedirectAttributes redirectAttributes) {
+    public String registerEmployer(
+            @Valid @ModelAttribute("registrationDto") EmployerRegistrationDto registrationDto,
+            BindingResult result,
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
-        if (result.hasErrors()) return "auth/register-employer";
+    	// Debug: print all errors
+        if (result.hasErrors()) {
+            System.out.println("=== VALIDATION ERRORS ===");
+            result.getAllErrors().forEach(error -> 
+                System.out.println(error.getDefaultMessage()));
+        }
 
         if (!registrationDto.getPassword().equals(registrationDto.getConfirmPassword())) {
             result.rejectValue("confirmPassword", "error.confirmPassword", "Passwords do not match");
@@ -84,12 +121,19 @@ public class AuthController {
 
         try {
             userService.registerEmployer(registrationDto);
-            redirectAttributes.addFlashAttribute("success", "Registration successful! Please login.");
+            redirectAttributes.addFlashAttribute("success",
+                    "Registration successful! Please login.");
             return "redirect:/auth/login";
+
+        } catch (IllegalArgumentException e) {
+            log.warn("Business validation failed: {}", e.getMessage());
+            result.reject("error.registration", e.getMessage());
+            return "auth/register-employer";
+
         } catch (Exception e) {
-            log.error("Registration failed: {}", e.getMessage());
-            redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/auth/register/employer";
+            log.error("Unexpected registration error: ", e);
+            result.reject("error.registration", "Something went wrong. Please try again.");
+            return "auth/register-employer";
         }
     }
 }
