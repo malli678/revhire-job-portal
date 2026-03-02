@@ -72,19 +72,26 @@ public class PasswordService {
 
         User user = userOpt.get();
         
-        // Delete existing token first
-        Optional<PasswordResetToken> existingToken = tokenRepository.findByUserUserId(user.getUserId());
-        if (existingToken.isPresent()) {
-            tokenRepository.delete(existingToken.get());
-        }
+        // IMPORTANT: Delete ANY existing tokens for this user FIRST
+        tokenRepository.findByUserUserId(user.getUserId()).ifPresent(existingToken -> {
+            tokenRepository.delete(existingToken);
+            tokenRepository.flush(); // Force immediate deletion
+        });
 
         // Generate new token
         String token = UUID.randomUUID().toString();
         LocalDateTime expiryDate = LocalDateTime.now().plusHours(24);
         
-        PasswordResetToken resetToken = new PasswordResetToken(token, user, expiryDate);
-        tokenRepository.save(resetToken);
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken(token);
+        resetToken.setUser(user);
+        resetToken.setExpiryDate(expiryDate);
 
+        tokenRepository.save(resetToken);
+        
+        // For testing, print token to console
+        System.out.println("🔑 PASSWORD RESET TOKEN for " + email + ": " + token);
+        
         return token;
     }
 
