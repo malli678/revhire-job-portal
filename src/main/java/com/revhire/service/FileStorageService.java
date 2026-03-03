@@ -28,10 +28,16 @@ public class FileStorageService {
             // ✅ Validate type
             String originalName = file.getOriginalFilename();
 
-            if (originalName == null ||
-                !(originalName.endsWith(".pdf") || originalName.endsWith(".docx"))) {
+            if (originalName == null) {
+                throw new RuntimeException("File name is invalid");
+            }
 
-                throw new RuntimeException("Only PDF/DOCX files allowed");
+            String lowerCaseName = originalName.toLowerCase();
+            if (!(lowerCaseName.endsWith(".pdf") || lowerCaseName.endsWith(".docx") ||
+                    lowerCaseName.endsWith(".jpg") || lowerCaseName.endsWith(".jpeg")
+                    || lowerCaseName.endsWith(".png"))) {
+
+                throw new RuntimeException("Only PDF/DOCX and JPG/PNG image files are allowed");
             }
 
             Path uploadPath = Paths.get(UPLOAD_DIR);
@@ -48,10 +54,9 @@ public class FileStorageService {
             Files.copy(
                     file.getInputStream(),
                     filePath,
-                    StandardCopyOption.REPLACE_EXISTING
-            );
+                    StandardCopyOption.REPLACE_EXISTING);
 
-            return uniqueFileName;   // ✅ store ONLY filename in DB
+            return uniqueFileName; // ✅ store ONLY filename in DB
 
         } catch (IOException e) {
             throw new RuntimeException("File storage failed: " + e.getMessage());

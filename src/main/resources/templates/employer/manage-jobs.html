@@ -2,217 +2,332 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-<title>Manage Jobs - RevHire</title>
-<meta name="_csrf" th:content="${_csrf.token}"/>
-   <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
-<style>
-body{
-    font-family: Arial, sans-serif;
-    background:#f4f4f4;
-    padding:20px;
-}
+    <title>Manage Jobs - RevHire</title>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1a202c;
+        }
 
-.container{
-    max-width:1000px;
-    margin:auto;
-    background:white;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 2px 10px rgba(0,0,0,0.1);
-}
+        .container {
+            max-width: 1250px;
+            margin: 40px auto;
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+        }
 
-h2{
-    margin-top:0;
-    color:#333;
-}
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #edf2f7;
+        }
 
-table{
-    width:100%;
-    border-collapse:collapse;
-}
+        h2 {
+            margin: 0;
+            color: #1e293b;
+            font-size: 1.8rem;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-th{
-    background:#28a745;
-    color:white;
-    padding:10px;
-}
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+        }
 
-td{
-    padding:10px;
-    border-bottom:1px solid #ddd;
-}
+        .data-table th {
+            background: #f8fafc;
+            color: #64748b;
+            padding: 16px;
+            text-align: left;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            border-bottom: 2px solid #edf2f7;
+        }
 
-tr:hover{
-    background:#f9f9f9;
-}
+        .data-table td {
+            padding: 20px 16px;
+            background: #ffffff;
+            border-top: 1px solid #f1f5f9;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
 
-/* STATUS COLORS */
-.status-active{
-    color:white;
-    background:#28a745;
-    padding:4px 10px;
-    border-radius:12px;
-    font-size:12px;
-}
+        .data-table tr td:first-child {
+            border-left: 1px solid #f1f5f9;
+            border-radius: 12px 0 0 12px;
+        }
 
-.status-closed{
-    color:white;
-    background:#dc3545;
-    padding:4px 10px;
-    border-radius:12px;
-    font-size:12px;
-}
+        .data-table tr td:last-child {
+            border-right: 1px solid #f1f5f9;
+            border-radius: 0 12px 12px 0;
+        }
 
-.status-filled{
-    color:white;
-    background:#007bff;
-    padding:4px 10px;
-    border-radius:12px;
-    font-size:12px;
-}
+        .data-table tr:hover td {
+            background: #fbfcfe;
+        }
 
-/* BUTTONS */
-.btn{
-    border:none;
-    padding:6px 10px;
-    border-radius:5px;
-    cursor:pointer;
-    color:white;
-    font-size:12px;
-}
+        /* STATUS BADGES */
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
 
-.btn-view{ background:#007bff; }
-.btn-close{ background:#dc3545; }
-.btn-open{ background:#28a745; }
-.btn-delete{ background:#6c757d; }
+        .status-active {
+            color: #059669;
+            background: #d1fae5;
+        }
 
-.btn:hover{
-    opacity:0.9;
-}
-</style>
+        .status-closed {
+            color: #dc2626;
+            background: #fee2e2;
+        }
+
+        .status-filled {
+            color: #2563eb;
+            background: #dbeafe;
+        }
+
+        /* BUTTONS */
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 18px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 700;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-view {
+            background: #4F46E5;
+            color: white;
+        }
+
+        .btn-edit {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-action {
+            background: #ffffff;
+            border: 1.5px solid #e2e8f0;
+            color: #475569;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .btn-view:hover {
+            background: #4338ca;
+        }
+
+        .btn-edit:hover {
+            background: #e2e8f0;
+        }
+
+        .stats-box {
+            display: flex;
+            gap: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-weight: 800;
+            font-size: 1.1rem;
+        }
+
+        .stat-label {
+            color: #94a3b8;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+    </style>
+    <!-- Common Fragments Styles -->
+    <style th:replace="fragments/header :: header-css"></style>
+    <style th:replace="fragments/footer :: footer-css"></style>
 </head>
 
 <body>
 
-<div class="container">
+    <div th:replace="fragments/header :: header"></div>
 
-<h2>📋 Manage Jobs</h2>
+    <div class="container">
+        <div class="header-section">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button onclick="history.back()" class="btn btn-edit" style="padding: 5px 10px;">←</button>
+                <h2>📋 Manage Job Postings</h2>
+            </div>
+            <a href="/jobs/post" class="btn btn-view">➕ Post New Job</a>
+        </div>
 
-<div style="margin-bottom:15px;">
-<a href="/employer/dashboard"
-style="background:#28a745;color:white;padding:8px 15px;
-text-decoration:none;border-radius:6px;">
-⬅ Back to Dashboard
-</a>
-</div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Job Title</th>
+                    <th>Location</th>
+                    <th>Status</th>
+                    <th>Applicants Statistics</th>
+                    <th>Deadline</th>
+                    <th>Operations</th>
+                </tr>
+            </thead>
 
-<table>
-<thead>
-<tr>
-    <th>ID</th>
-    <th>Title</th>
-    <th>Location</th>
-    <th>Status</th>
-    <th>Actions</th>
-</tr>
-</thead>
+            <tbody>
+                <tr th:each="job : ${jobs}">
+                    <td>
+                        <div style="font-weight: 800; color: #1e293b; font-size: 1.05rem;" th:text="${job.title}">Job
+                            Title</div>
+                        <div style="color: #94a3b8; font-size: 0.7rem; font-weight: 700;">UID: <span
+                                th:text="${job.jobId}">1</span></div>
+                    </td>
 
-<tbody>
+                    <td>
+                        <div th:text="${job.location}" style="font-weight: 600; color: #475569;">Location</div>
+                        <div th:text="${job.jobType}" style="font-size: 0.75rem; color: #94a3b8; font-weight: 700;">Type
+                        </div>
+                    </td>
 
-<tr th:each="job : ${jobs}">
+                    <td>
+                        <span th:if="${job.status=='ACTIVE'}" class="status-badge status-active">Active</span>
+                        <span th:if="${job.status=='CLOSED'}" class="status-badge status-closed">Closed</span>
+                        <span th:if="${job.status=='FILLED'}" class="status-badge status-filled">Filled</span>
+                    </td>
 
-<td th:text="${job.jobId}"></td>
-<td th:text="${job.title}"></td>
-<td th:text="${job.location}"></td>
+                    <td>
+                        <div class="stats-box">
+                            <div class="stat-item">
+                                <span class="stat-value" th:text="${job.totalApplicationsCount}"
+                                    style="color: #4F46E5;">0</span>
+                                <span class="stat-label">Total Apps</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" th:text="${job.pendingApplicationsCount}"
+                                    style="color: #f59e0b;">0</span>
+                                <span class="stat-label">Pending</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-value" th:text="${job.shortlistedApplicationsCount}"
+                                    style="color: #10b981;">0</span>
+                                <span class="stat-label">Shortlisted</span>
+                            </div>
+                        </div>
+                    </td>
 
-<td>
-    <span th:if="${job.status=='ACTIVE'}"
-          class="status-active">ACTIVE</span>
+                    <td style="color: #475569; font-weight: 700; font-size: 0.9rem;"
+                        th:text="${job.deadline != null ? #temporals.format(job.deadline, 'dd MMM yyyy') : 'Indefinite'}">
+                    </td>
 
-    <span th:if="${job.status=='CLOSED'}"
-          class="status-closed">CLOSED</span>
+                    <td>
+                        <div class="btn-group">
+                            <a th:href="@{'/applications/job/' + ${job.jobId}}" class="btn btn-view"
+                                title="View Applicants">
+                                👥 Applicants
+                            </a>
+                            <a th:href="@{'/employer/job/edit/' + ${job.jobId}}" class="btn btn-edit"
+                                title="Edit Posting">
+                                ✏️ Edit
+                            </a>
 
-    <span th:if="${job.status=='FILLED'}"
-          class="status-filled">FILLED</span>
-</td>
+                            <button class="btn btn-action" th:if="${job.status=='ACTIVE'}"
+                                th:onclick="'updateStatus(' + ${job.jobId} + ',\'FILLED\')'" title="Mark as Filled">
+                                🎯 Filled
+                            </button>
 
-<td>
+                            <button class="btn btn-action" th:if="${job.status=='ACTIVE'}"
+                                th:onclick="'updateStatus(' + ${job.jobId} + ',\'CLOSED\')'" title="Close Posting">
+                                🔒 Close
+                            </button>
 
-<!-- VIEW -->
-<a th:href="@{'/jobs/' + ${job.jobId}}">
-<button class="btn btn-view">View</button>
-</a>
+                            <button class="btn btn-action" th:if="${job.status=='CLOSED'}"
+                                th:onclick="'updateStatus(' + ${job.jobId} + ',\'ACTIVE\')'" title="Re-open Posting">
+                                🔓 Re-open
+                            </button>
 
-<!-- ⭐ EDIT (ADDED ONLY THIS) -->
-<a th:href="@{'/employer/job/edit/' + ${job.jobId}}">
-<button class="btn btn-open">Edit</button>
-</a>
+                            <button class="btn btn-danger" th:onclick="'deleteJob(' + ${job.jobId} + ')'"
+                                title="Delete Permanent">
+                                🗑️ Delete
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
-<button class="btn btn-close"
-        th:onclick="'updateStatus(' + ${job.jobId} + ',\'CLOSED\')'">
-Close
-</button>
+    <footer th:replace="fragments/footer :: footer"></footer>
 
-<button class="btn btn-open"
-        th:onclick="'updateStatus(' + ${job.jobId} + ',\'ACTIVE\')'">
-Reopen
-</button>
+    <script th:replace="fragments/header :: header-js"></script>
 
-<button class="btn btn-delete"
-        th:onclick="'deleteJob(' + ${job.jobId} + ')'">
-Delete
-</button>
+    <script th:inline="javascript">
+        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
 
-</td>
-
-</tr>
-
-</tbody>
-</table>
-
-</div>
-
-<script>
-
-const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-
-function deleteJob(id){
-
-    fetch('/employer/job/delete/' + id, {
-        method:'POST',
-        headers:{
-            [csrfHeader]: csrfToken
+        async function postAction(url) {
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { [csrfHeader]: csrfToken }
+                });
+                if (res.ok) location.reload();
+                else alert("Operation failed. Access might be restricted.");
+            } catch (err) { console.error(err); }
         }
-    })
-    .then(() => location.reload())
-    .catch(err => console.error(err));
-}
 
-function updateStatus(id, status){
-
-    let url;
-
-    if(status === 'CLOSED')
-        url = `/employer/job/close/${id}`;
-
-    if(status === 'ACTIVE')
-        url = `/employer/job/reopen/${id}`;
-
-    if(status === 'FILLED')
-        url = `/employer/job/filled/${id}`;
-
-    fetch(url,{
-        method:'POST',
-        headers:{
-            [csrfHeader]: csrfToken
+        function deleteJob(id) {
+            if (confirm("Confirm permanent removal of this assignment?")) {
+                postAction('/employer/job/delete/' + id);
+            }
         }
-    })
-    .then(() => location.reload())
-    .catch(err => console.error(err));
-}
 
-</script>
-
+        function updateStatus(id, status) {
+            let url;
+            if (status === 'CLOSED') url = `/employer/job/close/${id}`;
+            else if (status === 'ACTIVE') url = `/employer/job/reopen/${id}`;
+            else if (status === 'FILLED') url = `/employer/job/filled/${id}`;
+            postAction(url);
+        }
+    </script>
 </body>
+
 </html>

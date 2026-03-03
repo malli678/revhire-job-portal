@@ -33,8 +33,8 @@ public class PasswordController {
 	@PostMapping("/change-password")
 	public String changePassword(@ModelAttribute PasswordChangeDto dto, Authentication authentication, Model model) {
 		try {
-			Long userId = (Long) authentication.getDetails();
-			passwordService.changePassword(userId, dto.getCurrentPassword(), dto.getNewPassword());
+			String email = authentication.getName();
+			passwordService.changePassword(email, dto.getCurrentPassword(), dto.getNewPassword());
 			model.addAttribute("success", "Password changed successfully!");
 		} catch (Exception e) {
 			model.addAttribute("error", e.getMessage());
@@ -48,17 +48,34 @@ public class PasswordController {
 		return "auth/forgot-password";
 	}
 
-	// Process forgot password (send reset link)
+	// Process forgot password (look up user and show security question)
 	@PostMapping("/forgot-password")
 	public String processForgotPassword(@ModelAttribute ForgotPasswordDto dto, Model model) {
 		try {
-			String token = passwordService.generateResetToken(dto.getEmail());
-			// In production, send email here
-			// For now, we'll show the token
-			model.addAttribute("token", token);
+			String question = passwordService.getSecurityQuestion(dto.getEmail());
 			model.addAttribute("email", dto.getEmail());
-			model.addAttribute("success", "Password reset link generated!");
-			return "auth/reset-password";
+			model.addAttribute("securityQuestion", question);
+			return "auth/security-question";
+		} catch (Exception e) {
+			model.addAttribute("error", e.getMessage());
+			return "auth/forgot-password";
+		}
+	}
+
+	// Verify security answer and generate token
+	@PostMapping("/verify-security-answer")
+	public String verifySecurityAnswer(@RequestParam String email, @RequestParam String answer, Model model) {
+		try {
+			if (passwordService.verifySecurityAnswer(email, answer)) {
+				String token = passwordService.generateResetToken(email);
+				model.addAttribute("token", token);
+				return "auth/reset-password";
+			} else {
+				model.addAttribute("error", "Incorrect answer to security question.");
+				model.addAttribute("email", email);
+				model.addAttribute("securityQuestion", passwordService.getSecurityQuestion(email));
+				return "auth/security-question";
+			}
 		} catch (Exception e) {
 			model.addAttribute("error", e.getMessage());
 			return "auth/forgot-password";
@@ -67,14 +84,15 @@ public class PasswordController {
 
 	// Show reset password page (with token)
 	@GetMapping("/reset-password")
-    public String showResetPasswordPage(@RequestParam String token, Model model) {
-        if (!passwordService.validateToken(token)) {
-            model.addAttribute("error", "Invalid or expired reset link");
-            return "auth/forgot-password";
-            		
-        } model.addAttribute("token", token); 
-        return "auth/reset-password"; 
-        }
+	public String showResetPasswordPage(@RequestParam String token, Model model) {
+		if (!passwordService.validateToken(token)) {
+			model.addAttribute("error", "Invalid or expired reset link");
+			return "auth/forgot-password";
+
+		}
+		model.addAttribute("token", token);
+		return "auth/reset-password";
+	}
 
 	// Process reset password
 	@PostMapping("/reset-password")

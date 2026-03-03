@@ -20,3 +20,8 @@ Thumbs.db
 
 # ===== Logs =====
 *.log
+output_ascii.txt
+test_output.txt
+
+# ===== IDEs =====
+.vscode/

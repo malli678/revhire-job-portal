@@ -52,62 +52,173 @@ public class Job {
     // Getters & Setters
     // =========================
 
-    public Long getJobId() { return jobId; }
-    public void setJobId(Long jobId) { this.jobId = jobId; }
+    public Long getJobId() {
+        return jobId;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public void setJobId(Long jobId) {
+        this.jobId = jobId;
+    }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String getLocation() { return location; }
-    public void setLocation(String location) { this.location = location; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public String getJobType() { return jobType; }
-    public void setJobType(String jobType) { this.jobType = jobType; }
+    public String getDescription() {
+        return description;
+    }
 
-    public String getExperienceRequired() { return experienceRequired; }
-    public void setExperienceRequired(String experienceRequired) { this.experienceRequired = experienceRequired; }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public String getEducationRequired() { return educationRequired; }
-    public void setEducationRequired(String educationRequired) { this.educationRequired = educationRequired; }
+    public String getLocation() {
+        return location;
+    }
 
-    public String getSkillsRequired() { return skillsRequired; }
-    public void setSkillsRequired(String skillsRequired) { this.skillsRequired = skillsRequired; }
+    public void setLocation(String location) {
+        this.location = location;
+    }
 
-    public Double getSalaryMin() { return salaryMin; }
-    public void setSalaryMin(Double salaryMin) { this.salaryMin = salaryMin; }
+    public String getJobType() {
+        return jobType;
+    }
 
-    public Double getSalaryMax() { return salaryMax; }
-    public void setSalaryMax(Double salaryMax) { this.salaryMax = salaryMax; }
+    public void setJobType(String jobType) {
+        this.jobType = jobType;
+    }
 
-    public String getSalaryCurrency() { return salaryCurrency; }
-    public void setSalaryCurrency(String salaryCurrency) { this.salaryCurrency = salaryCurrency; }
+    public String getExperienceRequired() {
+        return experienceRequired;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setExperienceRequired(String experienceRequired) {
+        this.experienceRequired = experienceRequired;
+    }
 
-    public Integer getNumberOfOpenings() { return numberOfOpenings; }
-    public void setNumberOfOpenings(Integer numberOfOpenings) { this.numberOfOpenings = numberOfOpenings; }
+    public String getEducationRequired() {
+        return educationRequired;
+    }
 
-    public LocalDateTime getPostedDate() { return postedDate; }
-    public void setPostedDate(LocalDateTime postedDate) { this.postedDate = postedDate; }
+    public void setEducationRequired(String educationRequired) {
+        this.educationRequired = educationRequired;
+    }
 
-    public LocalDateTime getDeadline() { return deadline; }
-    public void setDeadline(LocalDateTime deadline) { this.deadline = deadline; }
+    public String getSkillsRequired() {
+        return skillsRequired;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public void setSkillsRequired(String skillsRequired) {
+        this.skillsRequired = skillsRequired;
+    }
 
-    public LocalDateTime getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
-    
+    public Double getSalaryMin() {
+        return salaryMin;
+    }
 
-    public Employer getEmployer() { return employer; }
-    public void setEmployer(Employer employer) { this.employer = employer; }
+    public void setSalaryMin(Double salaryMin) {
+        this.salaryMin = salaryMin;
+    }
 
-    public List<Application> getApplications() { return applications; }
-    public void setApplications(List<Application> applications) { this.applications = applications; }
-    
+    public Double getSalaryMax() {
+        return salaryMax;
+    }
+
+    public void setSalaryMax(Double salaryMax) {
+        this.salaryMax = salaryMax;
+    }
+
+    public String getSalaryCurrency() {
+        return salaryCurrency;
+    }
+
+    public void setSalaryCurrency(String salaryCurrency) {
+        this.salaryCurrency = salaryCurrency;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Integer getNumberOfOpenings() {
+        return numberOfOpenings;
+    }
+
+    public void setNumberOfOpenings(Integer numberOfOpenings) {
+        this.numberOfOpenings = numberOfOpenings;
+    }
+
+    public LocalDateTime getPostedDate() {
+        return postedDate;
+    }
+
+    public void setPostedDate(LocalDateTime postedDate) {
+        this.postedDate = postedDate;
+    }
+
+    public LocalDateTime getDeadline() {
+        return deadline;
+    }
+
+    public void setDeadline(LocalDateTime deadline) {
+        this.deadline = deadline;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public Employer getEmployer() {
+        return employer;
+    }
+
+    public void setEmployer(Employer employer) {
+        this.employer = employer;
+    }
+
+    public List<Application> getApplications() {
+        return applications;
+    }
+
+    public void setApplications(List<Application> applications) {
+        this.applications = applications;
+    }
+
+    // Statistics Helpers
+    public long getTotalApplicationsCount() {
+        return applications.size();
+    }
+
+    public long getPendingApplicationsCount() {
+        return applications.stream()
+                .filter(app -> app.getStatus() == Application.ApplicationStatus.APPLIED ||
+                        app.getStatus() == Application.ApplicationStatus.UNDER_REVIEW)
+                .count();
+    }
+
+    public long getShortlistedApplicationsCount() {
+        return applications.stream()
+                .filter(app -> app.getStatus() == Application.ApplicationStatus.SHORTLISTED)
+                .count();
+    }
 }

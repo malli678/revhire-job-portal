@@ -16,32 +16,32 @@ import java.util.Map;
 @Controller
 @RequestMapping("/notifications")
 public class NotificationController {
-    
+
     private final NotificationService notificationService;
     private final UserService userService;
-    
-    public NotificationController(NotificationService notificationService, 
-                                  UserService userService) {
+
+    public NotificationController(NotificationService notificationService,
+            UserService userService) {
         this.notificationService = notificationService;
         this.userService = userService;
     }
-    
+
     // =========================
     // VIEW NOTIFICATIONS PAGE
     // =========================
     @GetMapping
     public String viewNotifications(Model model, Authentication authentication) {
         Long userId = userService.findByEmail(authentication.getName()).getUserId();
-        
+
         List<Notification> notifications = notificationService.getUserNotifications(userId);
         long unreadCount = notificationService.getUnreadCount(userId);
-        
+
         model.addAttribute("notifications", notifications);
         model.addAttribute("unreadCount", unreadCount);
-        
+
         return "notifications";
     }
-    
+
     // =========================
     // GET UNREAD COUNT (AJAX)
     // =========================
@@ -49,15 +49,15 @@ public class NotificationController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> getUnreadCount(Authentication authentication) {
         Long userId = userService.findByEmail(authentication.getName()).getUserId();
-        
+
         long count = notificationService.getUnreadCount(userId);
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("count", count);
-        
+
         return ResponseEntity.ok(response);
     }
-    
+
     // =========================
     // GET RECENT NOTIFICATIONS (AJAX)
     // =========================
@@ -66,14 +66,14 @@ public class NotificationController {
     public ResponseEntity<List<Notification>> getRecentNotifications(
             Authentication authentication,
             @RequestParam(defaultValue = "5") int limit) {
-        
+
         Long userId = userService.findByEmail(authentication.getName()).getUserId();
-        
+
         List<Notification> notifications = notificationService.getUserNotifications(userId, limit);
-        
+
         return ResponseEntity.ok(notifications);
     }
-    
+
     // =========================
     // MARK AS READ
     // =========================
@@ -81,13 +81,13 @@ public class NotificationController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> markAsRead(@PathVariable Long id) {
         notificationService.markAsRead(id);
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
-        
+
         return ResponseEntity.ok(response);
     }
-    
+
     // =========================
     // MARK ALL AS READ
     // =========================
@@ -95,13 +95,27 @@ public class NotificationController {
     @ResponseBody
     public ResponseEntity<Map<String, Object>> markAllAsRead(Authentication authentication) {
         Long userId = userService.findByEmail(authentication.getName()).getUserId();
-        
+
         int count = notificationService.markAllAsRead(userId);
-        
+
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);
         response.put("count", count);
-        
+
+        return ResponseEntity.ok(response);
+    }
+
+    // =========================
+    // DELETE NOTIFICATION
+    // =========================
+    @DeleteMapping("/{id}")
+    @ResponseBody
+    public ResponseEntity<Map<String, Object>> deleteNotification(@PathVariable Long id) {
+        notificationService.deleteNotification(id);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+
         return ResponseEntity.ok(response);
     }
 }

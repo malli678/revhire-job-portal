@@ -15,10 +15,7 @@ public class EmployerRegistrationDto {
 
     @NotBlank(message = "Password is required")
     @Size(min = 8, max = 20, message = "Password must be between 8 and 20 characters")
-    @Pattern(
-            regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).+$",
-            message = "Password must contain uppercase, lowercase, digit and special character"
-    )
+    @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&]).+$", message = "Password must contain uppercase, lowercase, digit and special character")
     private String password;
 
     @NotBlank(message = "Confirm password is required")
@@ -33,20 +30,14 @@ public class EmployerRegistrationDto {
     private String industry;
 
     @NotBlank(message = "Company size is required")
-    @Pattern(
-            regexp = "^(1-10|11-50|51-200|201-500|500\\+)$",
-            message = "Company size must be one of: 1-10, 11-50, 51-200, 201-500, 500+"
-    )
+    @Pattern(regexp = "^(1-10|11-50|51-200|201-500|500\\+)$", message = "Company size must be one of: 1-10, 11-50, 51-200, 201-500, 500+")
     private String companySize;
 
-    //  Website is optional and accepts simple domain names
-    @Pattern(
-        regexp = "^(https?://)?([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}(/.*)?$",
-        message = "Invalid website URL (e.g., example.com or https://example.com)"
-    )
+    // Website is optional and accepts simple domain names
+    @Pattern(regexp = "^(https?://)?([a-zA-Z0-9]([a-zA-Z0-9\\-]{0,61}[a-zA-Z0-9])?\\.)+[a-zA-Z]{2,}(/.*)?$", message = "Invalid website URL (e.g., example.com or https://example.com)")
     private String companyWebsite;
 
-    //  Description is optional
+    // Description is optional
     @Size(max = 2000, message = "Description must not exceed 2000 characters")
     private String companyDescription;
 
@@ -54,38 +45,111 @@ public class EmployerRegistrationDto {
     @Size(max = 150, message = "Headquarters must not exceed 150 characters")
     private String headquarters;
 
+    @NotBlank(message = "Security question is required")
+    private String securityQuestion;
+
+    @NotBlank(message = "Security answer is required")
+    @Size(min = 2, max = 100, message = "Security answer must be between 2 and 100 characters")
+    private String securityAnswer;
+
     // Default Constructor
     public EmployerRegistrationDto() {
     }
 
     // Getters and Setters (same as yours)
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
+    public String getFullName() {
+        return fullName;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setFullName(String fullName) {
+        this.fullName = fullName;
+    }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public String getEmail() {
+        return email;
+    }
 
-    public String getConfirmPassword() { return confirmPassword; }
-    public void setConfirmPassword(String confirmPassword) { this.confirmPassword = confirmPassword; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public String getCompanyName() { return companyName; }
-    public void setCompanyName(String companyName) { this.companyName = companyName; }
+    public String getPassword() {
+        return password;
+    }
 
-    public String getIndustry() { return industry; }
-    public void setIndustry(String industry) { this.industry = industry; }
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-    public String getCompanySize() { return companySize; }
-    public void setCompanySize(String companySize) { this.companySize = companySize; }
+    public String getConfirmPassword() {
+        return confirmPassword;
+    }
 
-    public String getCompanyWebsite() { return companyWebsite; }
-    public void setCompanyWebsite(String companyWebsite) { this.companyWebsite = companyWebsite; }
+    public void setConfirmPassword(String confirmPassword) {
+        this.confirmPassword = confirmPassword;
+    }
 
-    public String getCompanyDescription() { return companyDescription; }
-    public void setCompanyDescription(String companyDescription) { this.companyDescription = companyDescription; }
+    public String getCompanyName() {
+        return companyName;
+    }
 
-    public String getHeadquarters() { return headquarters; }
-    public void setHeadquarters(String headquarters) { this.headquarters = headquarters; }
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public String getIndustry() {
+        return industry;
+    }
+
+    public void setIndustry(String industry) {
+        this.industry = industry;
+    }
+
+    public String getCompanySize() {
+        return companySize;
+    }
+
+    public void setCompanySize(String companySize) {
+        this.companySize = companySize;
+    }
+
+    public String getCompanyWebsite() {
+        return companyWebsite;
+    }
+
+    public void setCompanyWebsite(String companyWebsite) {
+        this.companyWebsite = companyWebsite;
+    }
+
+    public String getCompanyDescription() {
+        return companyDescription;
+    }
+
+    public void setCompanyDescription(String companyDescription) {
+        this.companyDescription = companyDescription;
+    }
+
+    public String getHeadquarters() {
+        return headquarters;
+    }
+
+    public void setHeadquarters(String headquarters) {
+        this.headquarters = headquarters;
+    }
+
+    public String getSecurityQuestion() {
+        return securityQuestion;
+    }
+
+    public void setSecurityQuestion(String securityQuestion) {
+        this.securityQuestion = securityQuestion;
+    }
+
+    public String getSecurityAnswer() {
+        return securityAnswer;
+    }
+
+    public void setSecurityAnswer(String securityAnswer) {
+        this.securityAnswer = securityAnswer;
+    }
 }

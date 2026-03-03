@@ -1,60 +1,77 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register as Job Seeker - RevHire</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 40px 20px;
         }
+
         .container {
             max-width: 600px;
             margin: 0 auto;
             background: white;
             border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             padding: 40px;
         }
+
         h2 {
             text-align: center;
             color: #333;
             margin-bottom: 10px;
         }
+
         .subtitle {
             text-align: center;
             color: #666;
             margin-bottom: 30px;
         }
+
         .form-row {
             display: flex;
             gap: 15px;
         }
+
         .form-group {
             margin-bottom: 20px;
             flex: 1;
         }
+
         label {
             display: block;
             margin-bottom: 8px;
             color: #555;
             font-weight: 500;
         }
-        input, select {
+
+        input,
+        select {
             width: 100%;
             padding: 12px;
             border: 2px solid #e1e1e1;
             border-radius: 6px;
             font-size: 15px;
         }
-        input:focus, select:focus {
+
+        input:focus,
+        select:focus {
             outline: none;
             border-color: #667eea;
         }
+
         button {
             width: 100%;
             padding: 14px;
@@ -67,29 +84,32 @@
             cursor: pointer;
             margin-top: 10px;
         }
+
         button:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
-		.has-error input {
-		        border-color: #dc3545 !important;
-		    }
-		    
-		    .error {
-		        color: #dc3545;
-		        font-size: 12px;
-		        margin-top: 5px;
-		        display: block;
-		    }
-		    
-		    .alert-error {
-		        background: #f8d7da;
-		        color: #721c24;
-		        padding: 12px;
-		        border-radius: 6px;
-		        margin-bottom: 20px;
-		        border: 1px solid #f5c6cb;
-		    }
+
+        .has-error input {
+            border-color: #dc3545 !important;
+        }
+
+        .error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
         .alert-success {
             background: #efe;
             color: #060;
@@ -98,108 +118,137 @@
             margin-bottom: 20px;
             border: 1px solid #cfc;
         }
+
         .links {
             text-align: center;
             margin-top: 20px;
         }
+
         .links a {
             color: #667eea;
             text-decoration: none;
         }
+
         .login-link {
             margin-top: 15px;
             text-align: center;
         }
-		
-		.hint {
-		        display: block;
-		        font-size: 11px;
-		        color: #6c757d;
-		        margin-top: 5px;
-		    }
+
+        .hint {
+            display: block;
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h2>Create Job Seeker Account</h2>
         <p class="subtitle">Find your dream job with RevHire</p>
-        
+
         <div th:if="${error}" class="alert-error" th:text="${error}"></div>
         <div th:if="${success}" class="alert-success" th:text="${success}"></div>
-        
-		<form th:action="@{/auth/register/seeker}" th:object="${registrationDto}" method="post">
-		    
-		    <!-- Global Errors -->
-		    <div th:if="${#fields.hasErrors('global')}" class="alert-error">
-		        <p th:each="err : ${#fields.errors('global')}" th:text="${err}"></p>
-		    </div>
-		    
-		    <div class="form-row">
-		        <div class="form-group" th:classappend="${#fields.hasErrors('fullName')} ? 'has-error' : ''">
-		            <label>Full Name *</label>
-		            <input type="text" th:field="*{fullName}" placeholder="Enter your full name" required>
-		            <span th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="error"></span>
-		        </div>
-		        
-		        <div class="form-group" th:classappend="${#fields.hasErrors('email')} ? 'has-error' : ''">
-		            <label>Email *</label>
-		            <input type="email" th:field="*{email}" placeholder="Enter your email" required>
-		            <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
-		        </div>
-		    </div>
-		    
-		    <div class="form-row">
-		        <div class="form-group" th:classappend="${#fields.hasErrors('password')} ? 'has-error' : ''">
-		            <label>Password *</label>
-		            <input type="password" th:field="*{password}" 
-		                   placeholder="8-20 chars with uppercase, lowercase, number & special char" 
-		                   required minlength="8">
-		            <small class="hint">Must contain uppercase, lowercase, number and special character (@$!%*?&)</small>
-		            <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
-		        </div>
-		        
-		        <div class="form-group" th:classappend="${#fields.hasErrors('confirmPassword')} ? 'has-error' : ''">
-		            <label>Confirm Password *</label>
-		            <input type="password" th:field="*{confirmPassword}" 
-		                   placeholder="Re-enter password" required>
-		            <span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" class="error"></span>
-		        </div>
-		    </div>
-		    
-		    <div class="form-row">
-		        <div class="form-group" th:classappend="${#fields.hasErrors('phoneNumber')} ? 'has-error' : ''">
-		            <label>Phone Number *</label>
-		            <input type="text" th:field="*{phoneNumber}" placeholder="10 digit mobile number" required pattern="[0-9]{10}">
-		            <span th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="error"></span>
-		        </div>
-		        
-		        <div class="form-group" th:classappend="${#fields.hasErrors('location')} ? 'has-error' : ''">
-		            <label>Location *</label>
-		            <input type="text" th:field="*{location}" placeholder="City, Country" required>
-		            <span th:if="${#fields.hasErrors('location')}" th:errors="*{location}" class="error"></span>
-		        </div>
-		    </div>
-		    
-		    <div class="form-group" th:classappend="${#fields.hasErrors('currentEmploymentStatus')} ? 'has-error' : ''">
-		        <label>Current Employment Status *</label>
-		        <select th:field="*{currentEmploymentStatus}" required>
-		            <option value="">Select status</option>
-		            <option value="EMPLOYED">Employed</option>
-		            <option value="UNEMPLOYED">Unemployed</option>
-		            <option value="STUDENT">Student</option>
-		            <option value="FRESHER">Fresher</option>
-		            <option value="FREELANCER">Freelancer</option>
-		        </select>
-		        <span th:if="${#fields.hasErrors('currentEmploymentStatus')}" 
-		              th:errors="*{currentEmploymentStatus}" class="error"></span>
-		    </div>
-		    
-		    <button type="submit">Register as Job Seeker</button>
-		</form>
-        
+
+        <form th:action="@{/auth/register/seeker}" th:object="${registrationDto}" method="post">
+
+            <!-- Global Errors -->
+            <div th:if="${#fields.hasErrors('global')}" class="alert-error">
+                <p th:each="err : ${#fields.errors('global')}" th:text="${err}"></p>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" th:classappend="${#fields.hasErrors('fullName')} ? 'has-error' : ''">
+                    <label>Full Name *</label>
+                    <input type="text" th:field="*{fullName}" placeholder="Enter your full name" required>
+                    <span th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="error"></span>
+                </div>
+
+                <div class="form-group" th:classappend="${#fields.hasErrors('email')} ? 'has-error' : ''">
+                    <label>Email *</label>
+                    <input type="email" th:field="*{email}" placeholder="Enter your email" required>
+                    <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" th:classappend="${#fields.hasErrors('password')} ? 'has-error' : ''">
+                    <label>Password *</label>
+                    <input type="password" th:field="*{password}"
+                        placeholder="8-20 chars with uppercase, lowercase, number & special char" required
+                        minlength="8">
+                    <small class="hint">Must contain uppercase, lowercase, number and special character
+                        (@$!%*?&)</small>
+                    <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
+                </div>
+
+                <div class="form-group" th:classappend="${#fields.hasErrors('confirmPassword')} ? 'has-error' : ''">
+                    <label>Confirm Password *</label>
+                    <input type="password" th:field="*{confirmPassword}" placeholder="Re-enter password" required>
+                    <span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"
+                        class="error"></span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" th:classappend="${#fields.hasErrors('phoneNumber')} ? 'has-error' : ''">
+                    <label>Phone Number *</label>
+                    <input type="text" th:field="*{phoneNumber}" placeholder="10 digit mobile number" required
+                        pattern="[0-9]{10}">
+                    <span th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="error"></span>
+                </div>
+
+                <div class="form-group" th:classappend="${#fields.hasErrors('location')} ? 'has-error' : ''">
+                    <label>Location *</label>
+                    <input type="text" th:field="*{location}" placeholder="City, Country" required>
+                    <span th:if="${#fields.hasErrors('location')}" th:errors="*{location}" class="error"></span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group" th:classappend="${#fields.hasErrors('securityQuestion')} ? 'has-error' : ''">
+                    <label>Security Question *</label>
+                    <select th:field="*{securityQuestion}" required>
+                        <option value="What is your favorite color?" selected>What is your favorite color?</option>
+                        <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+                        <option value="What was the name of your first pet?">What was the name of your first pet?
+                        </option>
+                        <option value="What city were you born in?">What city were you born in?</option>
+                    </select>
+                    <span th:if="${#fields.hasErrors('securityQuestion')}" th:errors="*{securityQuestion}"
+                        class="error"></span>
+                </div>
+
+                <div class="form-group" th:classappend="${#fields.hasErrors('securityAnswer')} ? 'has-error' : ''">
+                    <label>Security Answer *</label>
+                    <input type="text" th:field="*{securityAnswer}" placeholder="Your answer" required>
+                    <span th:if="${#fields.hasErrors('securityAnswer')}" th:errors="*{securityAnswer}"
+                        class="error"></span>
+                </div>
+            </div>
+
+            <div class="form-group" th:classappend="${#fields.hasErrors('currentEmploymentStatus')} ? 'has-error' : ''">
+                <label>Current Employment Status *</label>
+                <select th:field="*{currentEmploymentStatus}" required>
+                    <option value="">Select status</option>
+                    <option value="EMPLOYED">Employed</option>
+                    <option value="UNEMPLOYED">Unemployed</option>
+                    <option value="STUDENT">Student</option>
+                    <option value="FRESHER">Fresher</option>
+                    <option value="FREELANCER">Freelancer</option>
+                </select>
+                <span th:if="${#fields.hasErrors('currentEmploymentStatus')}" th:errors="*{currentEmploymentStatus}"
+                    class="error"></span>
+            </div>
+
+            <button type="submit">Register as Job Seeker</button>
+        </form>
+
         <div class="login-link">
             Already have an account? <a th:href="@{/auth/login}">Login here</a>
         </div>
     </div>
 </body>
+
 </html>

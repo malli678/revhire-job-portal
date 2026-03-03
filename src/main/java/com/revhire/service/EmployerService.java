@@ -16,218 +16,211 @@ import java.util.List;
 @Service
 public class EmployerService {
 
-    private final EmployerRepository employerRepository;
-    private final JobRepository jobRepository;
-    private final ApplicationRepository applicationRepository;
+        private final EmployerRepository employerRepository;
+        private final JobRepository jobRepository;
+        private final ApplicationRepository applicationRepository;
 
-    public EmployerService(EmployerRepository employerRepository,
-                           JobRepository jobRepository,
-                           ApplicationRepository applicationRepository) {
-        this.employerRepository = employerRepository;
-        this.jobRepository = jobRepository;
-        this.applicationRepository = applicationRepository;
-    }
+        public EmployerService(EmployerRepository employerRepository,
+                        JobRepository jobRepository,
+                        ApplicationRepository applicationRepository) {
+                this.employerRepository = employerRepository;
+                this.jobRepository = jobRepository;
+                this.applicationRepository = applicationRepository;
+        }
 
-    // =====================================
-    // EMPLOYER FETCH
-    // =====================================
+        // =====================================
+        // EMPLOYER FETCH
+        // =====================================
 
-    public Employer getEmployerByEmail(String email) {
-        return employerRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("Employer not found"));
-    }
+        public Employer getEmployerByEmail(String email) {
+                return employerRepository.findByEmail(email)
+                                .orElseThrow(() -> new RuntimeException("Employer not found"));
+        }
 
-    public Employer getEmployerById(Long id) {
-        return employerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employer not found"));
-    }
+        public Employer getEmployerById(Long id) {
+                return employerRepository.findById(id)
+                                .orElseThrow(() -> new RuntimeException("Employer not found"));
+        }
 
-    public Employer saveEmployer(Employer employer) {
-        return employerRepository.save(employer);
-    }
+        public Employer saveEmployer(Employer employer) {
+                return employerRepository.save(employer);
+        }
 
-    // =====================================
-    // APPLICATION FETCH ⭐⭐⭐
-    // =====================================
+        // =====================================
+        // APPLICATION FETCH ⭐⭐⭐
+        // =====================================
 
-    public List<Application> getApplicationsForEmployer(Employer employer) {
-        return applicationRepository.findByJob_Employer_UserId(
-                employer.getUserId()
-        );
-    }
+        public List<Application> getApplicationsForEmployer(Employer employer) {
+                return applicationRepository.findByJob_Employer_UserId(
+                                employer.getUserId());
+        }
 
-    // =====================================
-    // DASHBOARD STATISTICS ⭐⭐⭐
-    // =====================================
+        // =====================================
+        // DASHBOARD STATISTICS ⭐⭐⭐
+        // =====================================
 
-    // ✅ TOTAL JOBS
-    public long countTotalJobs(Employer employer) {
-        return jobRepository.countByEmployerUserId(
-                employer.getUserId()
-        );
-    }
+        // ✅ TOTAL JOBS
+        public long countTotalJobs(Employer employer) {
+                return jobRepository.countByEmployerUserId(
+                                employer.getUserId());
+        }
 
-    // ✅ ACTIVE JOBS
-    public long countActiveJobs(Employer employer) {
-        return jobRepository.countByEmployerUserIdAndStatus(
-                employer.getUserId(),
-                "ACTIVE"
-        );
-    }
+        // ✅ ACTIVE JOBS
+        public long countActiveJobs(Employer employer) {
+                return jobRepository.countByEmployerUserIdAndStatus(
+                                employer.getUserId(),
+                                "ACTIVE");
+        }
 
-    // ✅ TOTAL APPLICATIONS
-    public long countTotalApplications(Employer employer) {
-        return applicationRepository.countByJob_Employer_UserId(
-                employer.getUserId()
-        );
-    }
+        // ✅ TOTAL APPLICATIONS
+        public long countTotalApplications(Employer employer) {
+                return applicationRepository.countByJob_Employer_UserId(
+                                employer.getUserId());
+        }
 
-    // ✅ PENDING REVIEWS (APPLIED only)
-    public long countPendingReviews(Employer employer) {
-        return applicationRepository.countByJob_Employer_UserIdAndStatus(
-                employer.getUserId(),
-                Application.ApplicationStatus.APPLIED
-        );
-    }
+        // ✅ PENDING REVIEWS (APPLIED & UNDER_REVIEW)
+        public long countPendingReviews(Employer employer) {
+                long applied = applicationRepository.countByJob_Employer_UserIdAndStatus(
+                                employer.getUserId(),
+                                Application.ApplicationStatus.APPLIED);
+                long underReview = applicationRepository.countByJob_Employer_UserIdAndStatus(
+                                employer.getUserId(),
+                                Application.ApplicationStatus.UNDER_REVIEW);
+                return applied + underReview;
+        }
 
-    // ✅ SHORTLISTED COUNT
-    public long countShortlisted(Employer employer) {
-        return applicationRepository.countByJob_Employer_UserIdAndStatus(
-                employer.getUserId(),
-                Application.ApplicationStatus.SHORTLISTED
-        );
-    }
+        // ✅ SHORTLISTED COUNT
+        public long countShortlisted(Employer employer) {
+                return applicationRepository.countByJob_Employer_UserIdAndStatus(
+                                employer.getUserId(),
+                                Application.ApplicationStatus.SHORTLISTED);
+        }
 
-    // ✅ REJECTED COUNT ⭐⭐⭐ (NEW)
-    public long countRejectedApplications(Employer employer) {
-        return applicationRepository.countByJob_Employer_UserIdAndStatus(
-                employer.getUserId(),
-                Application.ApplicationStatus.REJECTED
-        );
-    }
+        // ✅ REJECTED COUNT ⭐⭐⭐ (NEW)
+        public long countRejectedApplications(Employer employer) {
+                return applicationRepository.countByJob_Employer_UserIdAndStatus(
+                                employer.getUserId(),
+                                Application.ApplicationStatus.REJECTED);
+        }
 
-    // ✅ GENERIC STATUS COUNT
-    public long countByStatus(Employer employer,
-                              Application.ApplicationStatus status) {
+        // ✅ GENERIC STATUS COUNT
+        public long countByStatus(Employer employer,
+                        Application.ApplicationStatus status) {
 
-        return applicationRepository.countByJob_Employer_UserIdAndStatus(
-                employer.getUserId(),
-                status
-        );
-    }
-    public void updateCompanyProfile(Long employerId,
-            CompanyProfileUpdateDto dto) {
+                return applicationRepository.countByJob_Employer_UserIdAndStatus(
+                                employer.getUserId(),
+                                status);
+        }
 
-Employer employer = employerRepository.findById(employerId)
-.orElseThrow(() -> new RuntimeException("Employer not found"));
+        public void updateCompanyProfile(Long employerId,
+                        CompanyProfileUpdateDto dto) {
 
-// ✅ Update only editable fields
-employer.setCompanyName(dto.getCompanyName());
-employer.setIndustry(dto.getIndustry());
-employer.setCompanySize(dto.getCompanySize());
-employer.setCompanyWebsite(dto.getCompanyWebsite());
-employer.setCompanyDescription(dto.getCompanyDescription());
-employer.setHeadquarters(dto.getHeadquarters());
+                Employer employer = employerRepository.findById(employerId)
+                                .orElseThrow(() -> new RuntimeException("Employer not found"));
 
-employerRepository.save(employer);
-}
-    //filters
- // =====================================
- // FILTER APPLICATIONS ⭐⭐⭐⭐⭐
- // =====================================
- public List<Application> filterApplications(
-         Employer employer,
-         String skill,
-         Integer experience,
-         String education,
-         String status,
-         LocalDateTime date
- ) {
+                // ✅ Update only editable fields
+                employer.setCompanyName(dto.getCompanyName());
+                employer.setIndustry(dto.getIndustry());
+                employer.setCompanySize(dto.getCompanySize());
+                employer.setCompanyWebsite(dto.getCompanyWebsite());
+                employer.setCompanyDescription(dto.getCompanyDescription());
+                employer.setHeadquarters(dto.getHeadquarters());
 
-     Long employerId = employer.getUserId();
+                employerRepository.save(employer);
+        }
 
-     // ✅ FILTER BY STATUS
-     if (status != null && !status.isBlank()) {
+        // filters
+        // =====================================
+        // FILTER APPLICATIONS ⭐⭐⭐⭐⭐
+        // =====================================
+        public List<Application> filterApplications(
+                        Employer employer,
+                        String skill,
+                        Integer experience,
+                        String education,
+                        String status,
+                        LocalDateTime date) {
 
-         return applicationRepository
-                 .findByJob_Employer_UserIdAndStatus(
-                         employerId,
-                         Application.ApplicationStatus.valueOf(status)
-                 );
-     }
+                Long employerId = employer.getUserId();
 
-     // ✅ FILTER BY SKILLS
-     if (skill != null && !skill.isBlank()) {
+                // ✅ FILTER BY STATUS
+                if (status != null && !status.isBlank()) {
 
-         return applicationRepository
-                 .findByJob_Employer_UserIdAndJobSeeker_SkillsContaining(
-                         employerId,
-                         skill
-                 );
-     }
+                        return applicationRepository
+                                        .findByJob_Employer_UserIdAndStatus(
+                                                        employerId,
+                                                        Application.ApplicationStatus.valueOf(status));
+                }
 
-     // ✅ FILTER BY EXPERIENCE ⭐ FIXED SAFE CONVERSION
-     if (experience != null) {
+                // ✅ FILTER BY SKILLS
+                if (skill != null && !skill.isBlank()) {
 
-         return applicationRepository
-                 .findByJob_Employer_UserIdAndJobSeeker_TotalExperienceYearsGreaterThanEqual(
-                         employerId,
-                         experience
-                 );
-     }
+                        return applicationRepository
+                                        .findByJob_Employer_UserIdAndJobSeeker_SkillsContaining(
+                                                        employerId,
+                                                        skill);
+                }
 
-     // ✅ FILTER BY EDUCATION
-     if (education != null && !education.isBlank()) {
+                // ✅ FILTER BY EXPERIENCE ⭐ FIXED SAFE CONVERSION
+                if (experience != null) {
 
-         return applicationRepository
-                 .findByJob_Employer_UserIdAndJobSeeker_DegreeContainingIgnoreCase(
-                         employerId,
-                         education
-                 );
-     }
+                        return applicationRepository
+                                        .findByJob_Employer_UserIdAndJobSeeker_TotalExperienceYearsGreaterThanEqual(
+                                                        employerId,
+                                                        experience);
+                }
 
-     // ✅ FILTER BY DATE
-     if (date != null) {
+                // ✅ FILTER BY EDUCATION
+                if (education != null && !education.isBlank()) {
 
-         return applicationRepository
-                 .findByJob_Employer_UserIdAndAppliedDateAfter(
-                         employerId,
-                         date
-                 );
-     }
+                        return applicationRepository
+                                        .findByJob_Employer_UserIdAndJobSeeker_DegreeContainingIgnoreCase(
+                                                        employerId,
+                                                        education);
+                }
 
-     // ✅ DEFAULT → ALL APPLICATIONS
-     return applicationRepository
-             .findByJob_Employer_UserId(employerId);
- }
-               // ⭐⭐⭐ MISSING IN YOUR CODE
-	
- public void closeJob(Long jobId) {
+                // ✅ FILTER BY DATE
+                if (date != null) {
 
-	    Job job = jobRepository.findById(jobId)
-	            .orElseThrow(() -> new RuntimeException("Job not found"));
+                        return applicationRepository
+                                        .findByJob_Employer_UserIdAndAppliedDateAfter(
+                                                        employerId,
+                                                        date);
+                }
 
-	    job.setStatus("CLOSED");   // ✅ STRING VALUE
+                // ✅ DEFAULT → ALL APPLICATIONS
+                return applicationRepository
+                                .findByJob_Employer_UserId(employerId);
+        }
+        // ⭐⭐⭐ MISSING IN YOUR CODE
 
-	    jobRepository.save(job);
-	}
-	
-public void reopenJob(Long jobId) {
+        public void closeJob(Long jobId) {
 
-    Job job = jobRepository.findById(jobId)
-            .orElseThrow(() -> new RuntimeException("Job not found"));
+                Job job = jobRepository.findById(jobId)
+                                .orElseThrow(() -> new RuntimeException("Job not found"));
 
-    job.setStatus("ACTIVE");   // ✅ STRING VALUE
+                job.setStatus("CLOSED"); // ✅ STRING VALUE
 
-    jobRepository.save(job);
-}
-public void deleteJob(Long jobId) {
+                jobRepository.save(job);
+        }
 
-    Job job = jobRepository.findById(jobId)
-            .orElseThrow(() -> new RuntimeException("Job not found"));
+        public void reopenJob(Long jobId) {
 
-    job.setStatus("DELETED");   // ✅ SAFE APPROACH
+                Job job = jobRepository.findById(jobId)
+                                .orElseThrow(() -> new RuntimeException("Job not found"));
 
-    jobRepository.save(job);
-}
+                job.setStatus("ACTIVE"); // ✅ STRING VALUE
+
+                jobRepository.save(job);
+        }
+
+        public void deleteJob(Long jobId) {
+
+                Job job = jobRepository.findById(jobId)
+                                .orElseThrow(() -> new RuntimeException("Job not found"));
+
+                job.setStatus("DELETED"); // ✅ SAFE APPROACH
+
+                jobRepository.save(job);
+        }
 }

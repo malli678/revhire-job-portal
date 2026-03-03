@@ -10,7 +10,7 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/").setViewName("redirect:/auth/login");
+        // Removed redirect to allow HomeController to serve landing page
     }
 
     @Override

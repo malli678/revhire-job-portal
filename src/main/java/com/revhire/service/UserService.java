@@ -28,9 +28,9 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
-                       JobSeekerRepository jobSeekerRepository,
-                       EmployerRepository employerRepository,
-                       PasswordEncoder passwordEncoder) {
+            JobSeekerRepository jobSeekerRepository,
+            EmployerRepository employerRepository,
+            PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.jobSeekerRepository = jobSeekerRepository;
         this.employerRepository = employerRepository;
@@ -68,13 +68,15 @@ public class UserService {
             jobSeeker.setLocation(dto.getLocation().trim());
             jobSeeker.setCurrentEmploymentStatus(dto.getCurrentEmploymentStatus());
 
+            jobSeeker.setSecurityQuestion(dto.getSecurityQuestion());
+            // In a real application, you would hash the answer or standardize its format
+            jobSeeker.setSecurityAnswer(dto.getSecurityAnswer().trim().toLowerCase());
+
             jobSeeker.setCurrentCompany(
-                    dto.getCurrentCompany() != null ? dto.getCurrentCompany().trim() : null
-            );
+                    dto.getCurrentCompany() != null ? dto.getCurrentCompany().trim() : null);
 
             jobSeeker.setDesignation(
-                    dto.getDesignation() != null ? dto.getDesignation().trim() : null
-            );
+                    dto.getDesignation() != null ? dto.getDesignation().trim() : null);
 
             jobSeeker.setTotalExperienceYears(dto.getTotalExperienceYears());
             jobSeeker.setActive(true);
@@ -119,6 +121,9 @@ public class UserService {
             employer.setPassword(passwordEncoder.encode(dto.getPassword()));
             employer.setRole(User.Role.EMPLOYER);
 
+            employer.setSecurityQuestion(dto.getSecurityQuestion());
+            employer.setSecurityAnswer(dto.getSecurityAnswer().trim().toLowerCase());
+
             employer.setCompanyName(dto.getCompanyName().trim());
             employer.setIndustry(dto.getIndustry().trim());
             employer.setCompanySize(dto.getCompanySize());
@@ -144,13 +149,11 @@ public class UserService {
 
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
     }
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email.trim().toLowerCase())
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("User not found with email: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
     }
 }

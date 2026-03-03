@@ -37,6 +37,8 @@ public class JobSeekerService {
 	private EducationRepository educationRepository;
 	@Autowired
 	private CertificationRepository certificationRepository;
+	@Autowired
+	private NotificationService notificationService;
 
 	// =========================
 	// SAVE JOB
@@ -82,7 +84,21 @@ public class JobSeekerService {
 		app.setStatus(Application.ApplicationStatus.APPLIED);
 		app.setAppliedDate(LocalDateTime.now());
 
+		// Capture current resume for one-click apply
+		if (jobSeeker.getResumeFile() != null) {
+			app.setResumePath(jobSeeker.getResumeFile());
+		}
+
 		applicationRepository.save(app);
+
+		// Notify Employer
+		notificationService.createNotification(
+				job.getEmployer().getUserId(),
+				"New Job Application",
+				jobSeeker.getFullName() + " has applied for your job: " + job.getTitle(),
+				"APPLICATION_UPDATE",
+				"/employer/applicant/" + app.getId() // Link to applicant details
+		);
 
 		return ResponseEntity.ok("Application Submitted Successfully!");
 	}
