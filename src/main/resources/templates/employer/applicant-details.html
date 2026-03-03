@@ -157,9 +157,10 @@
                 <div>
                     <h1 class="applicant-name"
                         th:text="${applicant != null ? applicant.fullName : 'Anonymous Applicant'}">Name</h1>
-                    <p style="color:#64748b; font-weight:600; margin-top:5px;"
-                        th:text="${'Applying for: ' + (application.job != null ? application.job.title : 'Position')}">
-                        Job Title</p>
+                    <p style="color:#64748b; font-weight:600; margin-top:5px;">
+                        Applying for: <span
+                            th:text="${application.job != null ? application.job.title : 'Position'}">Job Title</span>
+                    </p>
                 </div>
                 <div class="status-pill" th:text="${application.status}">Applied</div>
             </div>
@@ -197,7 +198,7 @@
                     <div class="data-item">
                         <span class="data-label">Submission Date</span>
                         <span class="data-value"
-                            th:text="${application.appliedDate != null ? #temporals.format(application.appliedDate, 'dd MMM yyyy, HH:mm') : 'Unknown'}">Date</span>
+                            th:text="${application.appliedDate != null ? #temporals.format(application.appliedDate, 'dd MMM yyyy, HH:mm') : 'Not available'}">Date</span>
                     </div>
                     <div class="data-item"
                         th:if="${application.coverLetter != null and !application.coverLetter.isEmpty()}">

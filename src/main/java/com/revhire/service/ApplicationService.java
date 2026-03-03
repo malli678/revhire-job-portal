@@ -338,7 +338,7 @@ public class ApplicationService {
 				job.getEmployer().getUserId(),
 				"New Application Received",
 				jobSeeker.getFullName() + " applied for " + job.getTitle(),
-				"/employer/dashboard");
+				"/employer/applicants");
 	}
 	// Add these methods to ApplicationService.java
 

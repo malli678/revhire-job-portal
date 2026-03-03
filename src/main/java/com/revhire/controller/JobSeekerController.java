@@ -217,17 +217,28 @@ public class JobSeekerController {
         preview.setDegree(js.getDegree());
         preview.setYear(js.getYear());
 
-        if (js.getSkillEntities() != null) {
-
+        if (js.getSkillEntities() != null && !js.getSkillEntities().isEmpty()) {
             preview.setSkills(
                     js.getSkillEntities()
                             .stream()
                             .map(Skill::getName)
-                            .reduce((a, b) -> a + "," + b)
+                            .reduce((a, b) -> a + ", " + b)
+                            .orElse(""));
+        } else if (js.getSkills() != null && !js.getSkills().isEmpty()) {
+            preview.setSkills(
+                    js.getSkills()
+                            .stream()
+                            .reduce((a, b) -> a + ", " + b)
                             .orElse(""));
         }
 
-        model.addAttribute("resumeForm", new ResumeDto()); // EMPTY ⭐⭐⭐
+        ResumeDto formDto = new ResumeDto();
+        formDto.setObjective(js.getObjective());
+        formDto.setDegree(js.getDegree());
+        formDto.setYear(js.getYear());
+        formDto.setSkills(preview.getSkills());
+
+        model.addAttribute("resumeForm", formDto); // PREFILLED WITH PARSED DATA ⭐⭐⭐
         model.addAttribute("resumePreview", preview); // SAVED ⭐⭐⭐
         model.addAttribute("resumeFile", js.getResumeFile());
         return "jobseeker/resume";

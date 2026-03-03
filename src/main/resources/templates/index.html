@@ -4,179 +4,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RevHire - Find Your Dream Job</title>
-    <!-- Use a modern font -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>RevHire - Connecting Talent & Opportunity</title>
+
     <style>
-        :root {
-            --primary: #4F46E5;
-            --primary-hover: #4338CA;
-            --secondary: #10B981;
-            --secondary-hover: #059669;
-            --bg-color: #F9FAFB;
-            --text-dark: #111827;
-            --text-light: #6B7280;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            color: var(--text-dark);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fc;
         }
 
-        header {
-            padding: 1.5rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        }
-
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--primary);
-            text-decoration: none;
-        }
-
-        .header-links a {
-            margin-left: 1.5rem;
-            text-decoration: none;
-            color: var(--text-dark);
-            font-weight: 600;
-            transition: color 0.2s;
-        }
-
-        .header-links a:hover {
-            color: var(--primary);
-        }
-
+        /* ================= HERO SECTION ================= */
         .hero {
-            flex: 1;
+            height: 90vh;
+            background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
+                url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=2850&q=80') center/cover no-repeat;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 4rem 2rem;
-            background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+            color: white;
+            padding: 20px;
+        }
+
+        .hero-content {
+            max-width: 750px;
         }
 
         .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            margin-bottom: 1rem;
-            color: var(--text-dark);
-            max-width: 800px;
+            font-size: 50px;
+            margin-bottom: 20px;
         }
 
         .hero p {
-            font-size: 1.25rem;
-            color: var(--text-light);
-            margin-bottom: 3rem;
-            max-width: 600px;
+            font-size: 18px;
+            margin-bottom: 35px;
+            line-height: 1.6;
         }
 
-        .portal-options {
-            display: flex;
-            gap: 2rem;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .card {
-            background: white;
-            padding: 2.5rem 2rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            width: 300px;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-        }
-
-        .card h2 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--text-dark);
-        }
-
-        .card p {
-            color: var(--text-light);
-            margin-bottom: 2rem;
-            font-size: 0.95rem;
-            line-height: 1.5;
-        }
-
-        .btn {
-            display: inline-block;
-            width: 100%;
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
+        .hero-buttons a {
             text-decoration: none;
+            padding: 14px 28px;
+            border-radius: 30px;
             font-weight: 600;
-            text-align: center;
-            transition: background-color 0.2s;
-            box-sizing: border-box;
-            border: none;
-            cursor: pointer;
+            margin: 10px;
+            display: inline-block;
+            transition: 0.3s;
         }
 
-        .btn-primary {
-            background-color: var(--primary);
+        .seeker-btn {
+            background: #667eea;
             color: white;
-            margin-bottom: 1rem;
         }
 
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
+        .seeker-btn:hover {
+            background: #5a67d8;
+            transform: translateY(-3px);
         }
 
-        .btn-outline {
-            background-color: transparent;
-            color: var(--primary);
-            border: 2px solid var(--primary);
+        .employer-btn {
+            background: #38ef7d;
+            color: black;
         }
 
-        .btn-outline:hover {
-            background-color: #EEF2FF;
+        .employer-btn:hover {
+            background: #2ecc71;
+            transform: translateY(-3px);
         }
 
-        .btn-employer {
-            background-color: var(--secondary);
-            color: white;
-            margin-bottom: 1rem;
-        }
-
-        .btn-employer:hover {
-            background-color: var(--secondary-hover);
-        }
-
-        .btn-outline-employer {
-            background-color: transparent;
-            color: var(--secondary);
-            border: 2px solid var(--secondary);
-        }
-
-        .btn-outline-employer:hover {
-            background-color: #ECFDF5;
-        }
-
-        footer {
+        /* ================= FEATURES ================= */
+        .features {
+            padding: 80px 60px;
             text-align: center;
-            padding: 2rem;
-            color: var(--text-light);
             background: white;
-            border-top: 1px solid #E5E7EB;
+        }
+
+        .features h2 {
+            margin-bottom: 50px;
+            font-size: 32px;
+            color: #333;
+        }
+
+        .feature-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 30px;
+        }
+
+        .feature-box {
+            width: 280px;
+            padding: 25px;
+            border-radius: 12px;
+            background: #f4f6ff;
+            transition: 0.3s;
+        }
+
+        .feature-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        .feature-box h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .feature-box p {
+            font-size: 14px;
+            color: #555;
+        }
+
+        /* ================= CTA SECTION ================= */
+        .cta {
+            padding: 70px 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            text-align: center;
+            color: white;
+        }
+
+        .cta h2 {
+            margin-bottom: 20px;
+        }
+
+        .cta a {
+            background: white;
+            color: #667eea;
+            padding: 12px 25px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        /* ================= RESPONSIVE ================= */
+        @media(max-width: 768px) {
+            .hero h1 {
+                font-size: 32px;
+            }
+
+            .feature-container {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
     <!-- Common Fragments Styles -->
@@ -188,31 +161,57 @@
 
     <div th:replace="fragments/header :: header"></div>
 
-    <main class="hero">
-        <h1>Connecting Top Talent with Great Opportunities</h1>
-        <p>Whether you're taking the next step in your career or looking for the perfect candidate, RevHire makes it
-            simple.</p>
+    <!-- ================= HERO ================= -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>Connecting Talent with Opportunity</h1>
+            <p>
+                Whether you're searching for your dream job or hiring top talent,
+                RevHire makes recruitment seamless, secure, and smart.
+            </p>
 
-        <div class="portal-options">
+            <div class="hero-buttons">
+                <a th:href="@{/auth/register/seeker}" class="seeker-btn">
+                    Join as Job Seeker
+                </a>
 
-            <!-- Job Seeker Card -->
-            <div class="card">
-                <h2>I'm a Job Seeker</h2>
-                <p>Create a profile, build your resume, and discover thousands of jobs that match your skills.</p>
-                <a href="/auth/login" class="btn btn-primary">Login to Apply</a>
-                <a href="/auth/register/seeker" class="btn btn-outline">Register as Seeker</a>
+                <a th:href="@{/auth/register/employer}" class="employer-btn">
+                    Hire Talent
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= FEATURES ================= -->
+    <section class="features">
+        <h2>Why Choose RevHire?</h2>
+
+        <div class="feature-container">
+
+            <div class="feature-box">
+                <h3>Smart Job Matching</h3>
+                <p>Advanced filtering and intelligent recommendations to find the right job or candidate instantly.</p>
             </div>
 
-            <!-- Employer Card -->
-            <div class="card">
-                <h2>I'm an Employer</h2>
-                <p>Post jobs, manage applications, and hire the best talent quickly and efficiently.</p>
-                <a href="/auth/login" class="btn btn-employer">Employer Login</a>
-                <a href="/auth/register/employer" class="btn btn-outline-employer">Register Company</a>
+            <div class="feature-box">
+                <h3>Secure Authentication</h3>
+                <p>JWT-based secure login system with role-based access for Job Seekers and Employers.</p>
+            </div>
+
+            <div class="feature-box">
+                <h3>Easy Hiring Process</h3>
+                <p>Post jobs, manage applications, and hire efficiently from your employer dashboard.</p>
             </div>
 
         </div>
-    </main>
+    </section>
+
+    <!-- ================= CTA ================= -->
+    <section class="cta">
+        <h2>Ready to Get Started?</h2>
+        <p style="margin-bottom: 20px;">Create your free account today and unlock new opportunities.</p>
+        <a th:href="@{/auth/register/seeker}">Create Account</a>
+    </section>
 
     <footer th:replace="fragments/footer :: footer"></footer>
 
