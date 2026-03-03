@@ -71,19 +71,25 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
         }
-        .error {
-            color: red;
-            font-size: 14px;
-            margin-top: 5px;
-        }
-        .alert-error {
-            background: #fee;
-            color: #c00;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            border: 1px solid #fcc;
-        }
+		.has-error input {
+		        border-color: #dc3545 !important;
+		    }
+		    
+		    .error {
+		        color: #dc3545;
+		        font-size: 12px;
+		        margin-top: 5px;
+		        display: block;
+		    }
+		    
+		    .alert-error {
+		        background: #f8d7da;
+		        color: #721c24;
+		        padding: 12px;
+		        border-radius: 6px;
+		        margin-bottom: 20px;
+		        border: 1px solid #f5c6cb;
+		    }
         .alert-success {
             background: #efe;
             color: #060;
@@ -104,6 +110,13 @@
             margin-top: 15px;
             text-align: center;
         }
+		
+		.hint {
+		        display: block;
+		        font-size: 11px;
+		        color: #6c757d;
+		        margin-top: 5px;
+		    }
     </style>
 </head>
 <body>
@@ -114,60 +127,75 @@
         <div th:if="${error}" class="alert-error" th:text="${error}"></div>
         <div th:if="${success}" class="alert-success" th:text="${success}"></div>
         
-        <form th:action="@{/auth/register/seeker}" th:object="${registrationDto}" method="post">
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Full Name *</label>
-                    <input type="text" th:field="*{fullName}" placeholder="Enter your full name" required>
-                    <span th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="error"></span>
-                </div>
-                
-                <div class="form-group">
-                    <label>Email *</label>
-                    <input type="email" th:field="*{email}" placeholder="Enter your email" required>
-                    <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Password *</label>
-                    <input type="password" th:field="*{password}" placeholder="Create password" required minlength="6">
-                    <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
-                </div>
-                
-                <div class="form-group">
-                    <label>Confirm Password *</label>
-                    <input type="password" th:field="*{confirmPassword}" placeholder="Confirm password" required>
-                    <span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" class="error"></span>
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Phone Number</label>
-                    <input type="text" th:field="*{phoneNumber}" placeholder="Enter phone number">
-                </div>
-                
-                <div class="form-group">
-                    <label>Location</label>
-                    <input type="text" th:field="*{location}" placeholder="City, Country">
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label>Current Employment Status</label>
-                <select th:field="*{currentEmploymentStatus}">
-                    <option value="">Select status</option>
-                    <option value="Employed">Employed</option>
-                    <option value="Unemployed">Unemployed</option>
-                    <option value="Student">Student</option>
-                    <option value="Fresher">Fresher</option>
-                </select>
-            </div>
-            
-            <button type="submit">Register as Job Seeker</button>
-        </form>
+		<form th:action="@{/auth/register/seeker}" th:object="${registrationDto}" method="post">
+		    
+		    <!-- Global Errors -->
+		    <div th:if="${#fields.hasErrors('global')}" class="alert-error">
+		        <p th:each="err : ${#fields.errors('global')}" th:text="${err}"></p>
+		    </div>
+		    
+		    <div class="form-row">
+		        <div class="form-group" th:classappend="${#fields.hasErrors('fullName')} ? 'has-error' : ''">
+		            <label>Full Name *</label>
+		            <input type="text" th:field="*{fullName}" placeholder="Enter your full name" required>
+		            <span th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="error"></span>
+		        </div>
+		        
+		        <div class="form-group" th:classappend="${#fields.hasErrors('email')} ? 'has-error' : ''">
+		            <label>Email *</label>
+		            <input type="email" th:field="*{email}" placeholder="Enter your email" required>
+		            <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
+		        </div>
+		    </div>
+		    
+		    <div class="form-row">
+		        <div class="form-group" th:classappend="${#fields.hasErrors('password')} ? 'has-error' : ''">
+		            <label>Password *</label>
+		            <input type="password" th:field="*{password}" 
+		                   placeholder="8-20 chars with uppercase, lowercase, number & special char" 
+		                   required minlength="8">
+		            <small class="hint">Must contain uppercase, lowercase, number and special character (@$!%*?&)</small>
+		            <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
+		        </div>
+		        
+		        <div class="form-group" th:classappend="${#fields.hasErrors('confirmPassword')} ? 'has-error' : ''">
+		            <label>Confirm Password *</label>
+		            <input type="password" th:field="*{confirmPassword}" 
+		                   placeholder="Re-enter password" required>
+		            <span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}" class="error"></span>
+		        </div>
+		    </div>
+		    
+		    <div class="form-row">
+		        <div class="form-group" th:classappend="${#fields.hasErrors('phoneNumber')} ? 'has-error' : ''">
+		            <label>Phone Number *</label>
+		            <input type="text" th:field="*{phoneNumber}" placeholder="10 digit mobile number" required pattern="[0-9]{10}">
+		            <span th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="error"></span>
+		        </div>
+		        
+		        <div class="form-group" th:classappend="${#fields.hasErrors('location')} ? 'has-error' : ''">
+		            <label>Location *</label>
+		            <input type="text" th:field="*{location}" placeholder="City, Country" required>
+		            <span th:if="${#fields.hasErrors('location')}" th:errors="*{location}" class="error"></span>
+		        </div>
+		    </div>
+		    
+		    <div class="form-group" th:classappend="${#fields.hasErrors('currentEmploymentStatus')} ? 'has-error' : ''">
+		        <label>Current Employment Status *</label>
+		        <select th:field="*{currentEmploymentStatus}" required>
+		            <option value="">Select status</option>
+		            <option value="EMPLOYED">Employed</option>
+		            <option value="UNEMPLOYED">Unemployed</option>
+		            <option value="STUDENT">Student</option>
+		            <option value="FRESHER">Fresher</option>
+		            <option value="FREELANCER">Freelancer</option>
+		        </select>
+		        <span th:if="${#fields.hasErrors('currentEmploymentStatus')}" 
+		              th:errors="*{currentEmploymentStatus}" class="error"></span>
+		    </div>
+		    
+		    <button type="submit">Register as Job Seeker</button>
+		</form>
         
         <div class="login-link">
             Already have an account? <a th:href="@{/auth/login}">Login here</a>

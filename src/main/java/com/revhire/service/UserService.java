@@ -37,73 +37,120 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    // ========================= JOB SEEKER REGISTRATION =========================
+
     @Transactional
     public JobSeeker registerJobSeeker(JobSeekerRegistrationDto dto) {
-    	log.info("Registering new job seeker with email: {}", dto.getEmail());
-        log.debug("Registration details: name={}, phone={}, location={}", 
-                  dto.getFullName(), dto.getPhoneNumber(), dto.getLocation());
-        if (userRepository.existsByEmail(dto.getEmail())) {
-        	log.warn("Registration failed - email already exists: {}", dto.getEmail());
-            throw new RuntimeException("Email already registered");
+
+        String email = dto.getEmail().trim().toLowerCase();
+
+        log.info("Attempting to register JobSeeker with email: {}", email);
+
+        // Business Validation: Email uniqueness
+        if (userRepository.existsByEmail(email)) {
+            log.warn("Registration failed - Email already exists: {}", email);
+            throw new IllegalArgumentException("Email is already registered.");
+        }
+
+        // Double safety password check (even though controller checks)
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match.");
         }
 
         try {
-        JobSeeker jobSeeker = new JobSeeker();
-        jobSeeker.setFullName(dto.getFullName());
-        jobSeeker.setEmail(dto.getEmail());
-        jobSeeker.setPassword(passwordEncoder.encode(dto.getPassword()));
-        jobSeeker.setRole(User.Role.JOBSEEKER);
-        jobSeeker.setPhoneNumber(dto.getPhoneNumber());
-        jobSeeker.setLocation(dto.getLocation());
-        jobSeeker.setCurrentEmploymentStatus(dto.getCurrentEmploymentStatus());
-        jobSeeker.setCurrentCompany(dto.getCurrentCompany());
-        jobSeeker.setDesignation(dto.getDesignation());
-        jobSeeker.setTotalExperienceYears(dto.getTotalExperienceYears());
-        jobSeeker.setActive(true);
-        jobSeeker.setCreatedAt(LocalDateTime.now());
-        
-        JobSeeker saved = jobSeekerRepository.save(jobSeeker);
-        log.info("Job seeker registered successfully with ID: {}", saved.getUserId());
-        return saved;
-    } catch (Exception e) {
-        log.error("Failed to register job seeker: {}", e.getMessage(), e);
-        throw e;
+            JobSeeker jobSeeker = new JobSeeker();
+
+            jobSeeker.setFullName(dto.getFullName().trim());
+            jobSeeker.setEmail(email);
+            jobSeeker.setPassword(passwordEncoder.encode(dto.getPassword()));
+            jobSeeker.setRole(User.Role.JOBSEEKER);
+            jobSeeker.setPhoneNumber(dto.getPhoneNumber().trim());
+            jobSeeker.setLocation(dto.getLocation().trim());
+            jobSeeker.setCurrentEmploymentStatus(dto.getCurrentEmploymentStatus());
+
+            jobSeeker.setCurrentCompany(
+                    dto.getCurrentCompany() != null ? dto.getCurrentCompany().trim() : null
+            );
+
+            jobSeeker.setDesignation(
+                    dto.getDesignation() != null ? dto.getDesignation().trim() : null
+            );
+
+            jobSeeker.setTotalExperienceYears(dto.getTotalExperienceYears());
+            jobSeeker.setActive(true);
+            jobSeeker.setCreatedAt(LocalDateTime.now());
+
+            JobSeeker saved = jobSeekerRepository.save(jobSeeker);
+
+            log.info("JobSeeker registered successfully with ID: {}", saved.getUserId());
+            return saved;
+
+        } catch (Exception e) {
+            log.error("Error occurred while registering JobSeeker: ", e);
+            throw new RuntimeException("Registration failed. Please try again.");
+        }
     }
-    }
+
+    // ========================= EMPLOYER REGISTRATION =========================
 
     @Transactional
     public Employer registerEmployer(EmployerRegistrationDto dto) {
-        log.info("Registering Employer: {}", dto.getEmail());
 
-        if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new RuntimeException("Email already registered");
+        String email = dto.getEmail().trim().toLowerCase();
+
+        log.info("Attempting to register Employer with email: {}", email);
+
+        // Email uniqueness
+        if (userRepository.existsByEmail(email)) {
+            log.warn("Registration failed - Email already exists: {}", email);
+            throw new IllegalArgumentException("Email is already registered.");
         }
 
-        Employer employer = new Employer();
-        employer.setFullName(dto.getFullName());
-        employer.setEmail(dto.getEmail());
-        employer.setPassword(passwordEncoder.encode(dto.getPassword()));
-        employer.setRole(User.Role.EMPLOYER);
-        employer.setCompanyName(dto.getCompanyName());
-        employer.setIndustry(dto.getIndustry());
-        employer.setCompanySize(dto.getCompanySize());
-        employer.setCompanyWebsite(dto.getCompanyWebsite());
-        employer.setCompanyDescription(dto.getCompanyDescription());
-        employer.setHeadquarters(dto.getHeadquarters());
-        employer.setActive(true);
-        employer.setCreatedAt(LocalDateTime.now());
+        // Password match validation
+        if (!dto.getPassword().equals(dto.getConfirmPassword())) {
+            throw new IllegalArgumentException("Passwords do not match.");
+        }
 
-        log.info("Employer registered successfully: {}", dto.getEmail());
-        return employerRepository.save(employer);
+        try {
+            Employer employer = new Employer();
+
+            employer.setFullName(dto.getFullName().trim());
+            employer.setEmail(email);
+            employer.setPassword(passwordEncoder.encode(dto.getPassword()));
+            employer.setRole(User.Role.EMPLOYER);
+
+            employer.setCompanyName(dto.getCompanyName().trim());
+            employer.setIndustry(dto.getIndustry().trim());
+            employer.setCompanySize(dto.getCompanySize());
+            employer.setCompanyWebsite(dto.getCompanyWebsite().trim());
+            employer.setCompanyDescription(dto.getCompanyDescription().trim());
+            employer.setHeadquarters(dto.getHeadquarters().trim());
+
+            employer.setActive(true);
+            employer.setCreatedAt(LocalDateTime.now());
+
+            Employer saved = employerRepository.save(employer);
+
+            log.info("Employer registered successfully with ID: {}", saved.getUserId());
+            return saved;
+
+        } catch (Exception e) {
+            log.error("Error occurred while registering Employer: ", e);
+            throw new RuntimeException("Registration failed. Please try again.");
+        }
     }
+
+    // ========================= FETCH METHODS =========================
 
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found with id: " + userId));
     }
 
     public User findByEmail(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+        return userRepository.findByEmail(email.trim().toLowerCase())
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("User not found with email: " + email));
     }
 }

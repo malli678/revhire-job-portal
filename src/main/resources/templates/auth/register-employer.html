@@ -33,9 +33,9 @@
         .form-row {
             display: flex;
             gap: 15px;
+            margin-bottom: 15px;
         }
         .form-group {
-            margin-bottom: 20px;
             flex: 1;
         }
         label {
@@ -44,16 +44,20 @@
             color: #555;
             font-weight: 500;
         }
-        input, select {
+        input, select, textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #e1e1e1;
             border-radius: 6px;
             font-size: 15px;
         }
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #11998e;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 80px;
         }
         button {
             width: 100%;
@@ -72,25 +76,26 @@
             box-shadow: 0 5px 20px rgba(17, 153, 142, 0.4);
         }
         .error {
-            color: red;
-            font-size: 14px;
+            color: #dc3545;
+            font-size: 12px;
             margin-top: 5px;
+            display: block;
         }
         .alert-error {
-            background: #fee;
-            color: #c00;
+            background: #f8d7da;
+            color: #721c24;
             padding: 12px;
             border-radius: 6px;
             margin-bottom: 20px;
-            border: 1px solid #fcc;
+            border: 1px solid #f5c6cb;
         }
         .alert-success {
-            background: #efe;
-            color: #060;
+            background: #d4edda;
+            color: #155724;
             padding: 12px;
             border-radius: 6px;
             margin-bottom: 20px;
-            border: 1px solid #cfc;
+            border: 1px solid #c3e6cb;
         }
         .login-link {
             margin-top: 15px;
@@ -100,6 +105,11 @@
             color: #11998e;
             text-decoration: none;
         }
+        .hint {
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
@@ -107,10 +117,13 @@
         <h2>Register Your Company</h2>
         <p class="subtitle">Post jobs and find the best talent</p>
         
+        <!-- Success/Error Messages -->
         <div th:if="${error}" class="alert-error" th:text="${error}"></div>
         <div th:if="${success}" class="alert-success" th:text="${success}"></div>
         
         <form th:action="@{/auth/register/employer}" th:object="${registrationDto}" method="post">
+            
+            <!-- Full Name and Email -->
             <div class="form-row">
                 <div class="form-group">
                     <label>Your Name *</label>
@@ -125,10 +138,12 @@
                 </div>
             </div>
             
+            <!-- Password and Confirm Password -->
             <div class="form-row">
                 <div class="form-group">
                     <label>Password *</label>
-                    <input type="password" th:field="*{password}" placeholder="Create password" required minlength="6">
+                    <input type="password" th:field="*{password}" placeholder="Create password" required>
+                    <div class="hint">8-20 chars, with uppercase, lowercase, number & special character</div>
                     <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
                 </div>
                 
@@ -139,13 +154,15 @@
                 </div>
             </div>
             
+            <!-- Company Name -->
             <div class="form-group">
                 <label>Company Name *</label>
                 <input type="text" th:field="*{companyName}" placeholder="Your company name" required>
-                <span th:if="${#fields.hasErrors('companyName')}" th:errors="*{companyName}" class="error"></div>
+                <span th:if="${#fields.hasErrors('companyName')}" th:errors="*{companyName}" class="error"></span>
+            </div>
             
-            <div class="span>
-            </form-row">
+            <!-- Industry and Company Size -->
+            <div class="form-row">
                 <div class="form-group">
                     <label>Industry *</label>
                     <select th:field="*{industry}" required>
@@ -159,6 +176,7 @@
                         <option value="Marketing">Marketing & Advertising</option>
                         <option value="Other">Other</option>
                     </select>
+                    <span th:if="${#fields.hasErrors('industry')}" th:errors="*{industry}" class="error"></span>
                 </div>
                 
                 <div class="form-group">
@@ -171,17 +189,31 @@
                         <option value="201-500">201-500 employees</option>
                         <option value="500+">500+ employees</option>
                     </select>
+                    <span th:if="${#fields.hasErrors('companySize')}" th:errors="*{companySize}" class="error"></span>
                 </div>
             </div>
             
+            <!-- Company Website (Optional) -->
             <div class="form-group">
                 <label>Company Website</label>
-                <input type="text" th:field="*{companyWebsite}" placeholder="https://www.yourcompany.com">
+                <input type="text" th:field="*{companyWebsite}" placeholder="e.g., amazon.com or https://amazon.com">
+                <div class="hint">Optional - Enter your company website</div>
+                <span th:if="${#fields.hasErrors('companyWebsite')}" th:errors="*{companyWebsite}" class="error"></span>
             </div>
             
+            <!-- Company Description (NEW - Optional) -->
             <div class="form-group">
-                <label>Headquarters Location</label>
-                <input type="text" th:field="*{headquarters}" placeholder="City, Country">
+                <label>Company Description</label>
+                <textarea th:field="*{companyDescription}" placeholder="Tell us about your company..."></textarea>
+                <div class="hint">Optional - Brief description of your company</div>
+                <span th:if="${#fields.hasErrors('companyDescription')}" th:errors="*{companyDescription}" class="error"></span>
+            </div>
+            
+            <!-- Headquarters -->
+            <div class="form-group">
+                <label>Headquarters Location *</label>
+                <input type="text" th:field="*{headquarters}" placeholder="City, Country" required>
+                <span th:if="${#fields.hasErrors('headquarters')}" th:errors="*{headquarters}" class="error"></span>
             </div>
             
             <button type="submit">Register Company</button>
