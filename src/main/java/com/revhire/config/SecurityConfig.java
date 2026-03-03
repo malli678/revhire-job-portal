@@ -20,134 +20,135 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    private final CustomUserDetailsService customUserDetailsService;
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+        private final CustomUserDetailsService customUserDetailsService;
+        private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(CustomUserDetailsService customUserDetailsService,
-            JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.customUserDetailsService = customUserDetailsService;
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
-    }
+        public SecurityConfig(CustomUserDetailsService customUserDetailsService,
+                        JwtAuthenticationFilter jwtAuthenticationFilter) {
+                this.customUserDetailsService = customUserDetailsService;
+                this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        }
 
-    // PASSWORD ENCODER
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+        // PASSWORD ENCODER
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
-    // AUTH PROVIDER
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(customUserDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
+        // AUTH PROVIDER
+        @Bean
+        public DaoAuthenticationProvider authenticationProvider() {
+                DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+                authProvider.setUserDetailsService(customUserDetailsService);
+                authProvider.setPasswordEncoder(passwordEncoder());
+                return authProvider;
+        }
 
-    // SECURITY CONTEXT (SESSION BASED)
-    @Bean
-    public SecurityContextRepository securityContextRepository() {
-        return new HttpSessionSecurityContextRepository();
-    }
+        // SECURITY CONTEXT (SESSION BASED)
+        @Bean
+        public SecurityContextRepository securityContextRepository() {
+                return new HttpSessionSecurityContextRepository();
+        }
 
-    // FILTER CHAIN ⭐⭐⭐
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        // FILTER CHAIN ⭐⭐⭐
+        @Bean
+        public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http
+                http
 
-                // CSRF CONFIG
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers(
+                                // CSRF CONFIG
+                                .csrf(csrf -> csrf
+                                                .ignoringRequestMatchers(
 
-                                "/api/**",
+                                                                "/api/**",
 
-                                // ✅ AJAX / FETCH ENDPOINTS ⭐⭐⭐
-                                "/jobseeker/applyJob/**",
-                                "/jobseeker/saveJob/**",
-                                "/jobseeker/removeSaved/**"
+                                                                // ✅ AJAX / FETCH ENDPOINTS ⭐⭐⭐
+                                                                "/jobseeker/applyJob/**",
+                                                                "/jobseeker/saveJob/**",
+                                                                "/jobseeker/removeSaved/**"
 
-                        ))
+                                                ))
 
-                // SESSION MANAGEMENT
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .maximumSessions(1)
-                        .maxSessionsPreventsLogin(false))
+                                // SESSION MANAGEMENT
+                                .sessionManagement(session -> session
+                                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                                                .maximumSessions(1)
+                                                .maxSessionsPreventsLogin(false))
 
-                // SECURITY CONTEXT
-                .securityContext(context -> context
-                        .securityContextRepository(securityContextRepository()))
+                                // SECURITY CONTEXT
+                                .securityContext(context -> context
+                                                .securityContextRepository(securityContextRepository()))
 
-                // AUTHORIZATION RULES ⭐⭐⭐
+                                // AUTHORIZATION RULES ⭐⭐⭐
 
-                .authorizeHttpRequests(authz -> authz
+                                .authorizeHttpRequests(authz -> authz
 
-                        // PUBLIC ROUTES
-                        .requestMatchers(
-                                "/",
-                                "/index",
-                                "/auth/login",
-                                "/auth/forgot-password",
-                                "/auth/reset-password",
-                                "/auth/register/**",
-                                "/css/**",
-                                "/js/**",
-                                "/images/**",
-                                "/employer/public/**",
-                                "/jobs/all",
-                                "/jobs/search-page",
-                                "/jobs/view/**")
-                        .permitAll()
+                                                // PUBLIC ROUTES
+                                                .requestMatchers(
+                                                                "/",
+                                                                "/index",
+                                                                "/auth/login",
+                                                                "/auth/forgot-password",
+                                                                "/auth/reset-password",
+                                                                "/auth/register/**",
+                                                                "/css/**",
+                                                                "/js/**",
+                                                                "/images/**",
+                                                                "/employer/public/**",
+                                                                "/jobs/all",
+                                                                "/jobs/search-page",
+                                                                "/jobs/view/**",
+                                                                "/favicon.ico")
+                                                .permitAll()
 
-                        // ROLE-BASED ACCESS
-                        .requestMatchers("/jobseeker/**").hasRole("JOBSEEKER")
-                        .requestMatchers("/employer/**").hasRole("EMPLOYER")
+                                                // ROLE-BASED ACCESS
+                                                .requestMatchers("/jobseeker/**").hasRole("JOBSEEKER")
+                                                .requestMatchers("/employer/**").hasRole("EMPLOYER")
 
-                        // EVERYTHING ELSE REQUIRES LOGIN
-                        .anyRequest().authenticated())
+                                                // EVERYTHING ELSE REQUIRES LOGIN
+                                                .anyRequest().authenticated())
 
-                // AUTH PROVIDER
-                .authenticationProvider(authenticationProvider())
+                                // AUTH PROVIDER
+                                .authenticationProvider(authenticationProvider())
 
-                // JWT FILTER (SAFE TO KEEP)
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                                // JWT FILTER (SAFE TO KEEP)
+                                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
-                // FORM LOGIN ⭐⭐⭐
-                .formLogin(form -> form
-                        .loginPage("/auth/login")
-                        .loginProcessingUrl("/auth/login")
-                        .usernameParameter("email")
-                        .passwordParameter("password")
+                                // FORM LOGIN ⭐⭐⭐
+                                .formLogin(form -> form
+                                                .loginPage("/auth/login")
+                                                .loginProcessingUrl("/auth/login")
+                                                .usernameParameter("email")
+                                                .passwordParameter("password")
 
-                        // SUCCESS HANDLER
-                        .successHandler((request, response, authentication) -> {
+                                                // SUCCESS HANDLER
+                                                .successHandler((request, response, authentication) -> {
 
-                            String role = authentication.getAuthorities()
-                                    .stream()
-                                    .map(GrantedAuthority::getAuthority)
-                                    .findFirst()
-                                    .orElse("");
+                                                        String role = authentication.getAuthorities()
+                                                                        .stream()
+                                                                        .map(GrantedAuthority::getAuthority)
+                                                                        .findFirst()
+                                                                        .orElse("");
 
-                            if (role.equals("ROLE_EMPLOYER")) {
-                                response.sendRedirect("/employer/dashboard");
-                                return;
-                            }
+                                                        if (role.equals("ROLE_EMPLOYER")) {
+                                                                response.sendRedirect("/employer/dashboard");
+                                                                return;
+                                                        }
 
-                            response.sendRedirect("/jobseeker/dashboard");
-                        })
+                                                        response.sendRedirect("/jobseeker/dashboard");
+                                                })
 
-                        .failureUrl("/auth/login?error")
-                        .permitAll())
+                                                .failureUrl("/auth/login?error")
+                                                .permitAll())
 
-                // LOGOUT
-                .logout(logout -> logout
-                        .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"))
-                        .logoutSuccessUrl("/auth/login?logout")
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .permitAll());
+                                // LOGOUT
+                                .logout(logout -> logout
+                                                .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"))
+                                                .logoutSuccessUrl("/auth/login?logout")
+                                                .invalidateHttpSession(true)
+                                                .deleteCookies("JSESSIONID")
+                                                .permitAll());
 
-        return http.build();
-    }
+                return http.build();
+        }
 }

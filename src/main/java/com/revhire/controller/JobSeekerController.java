@@ -8,6 +8,7 @@ import com.revhire.repository.JobRepository;
 import com.revhire.repository.JobSeekerRepository;
 import com.revhire.service.*;
 import java.util.List;
+import java.io.File;
 
 import org.springframework.core.io.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +20,6 @@ import jakarta.servlet.http.HttpSession;
 
 import java.nio.file.Paths;
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -42,6 +41,8 @@ public class JobSeekerController {
     private JobService jobService;
     @Autowired
     private RecommendationService recommendationService;
+    @Autowired
+    private ApplicationService applicationService;
 
     @Autowired
     private ResumeParserService resumeParserService;
@@ -130,24 +131,21 @@ public class JobSeekerController {
         return jobSeekerService.removeSavedJob(userId, jobId);
     }
 
-    // =========================
-    // APPLY JOB
-    // =========================
     @PostMapping("/applyJob/{jobId}")
-    @ResponseBody
-    public ResponseEntity<String> applyJob(@PathVariable Long jobId,
-            Authentication authentication) {
+    public String applyJob(@PathVariable Long jobId,
+            @RequestParam(value = "resume", required = false) MultipartFile resume,
+            @RequestParam(required = false) String coverLetter,
+            Authentication authentication,
+            RedirectAttributes ra) {
 
         try {
-
-            User user = userService.findByEmail(authentication.getName());
-
-            return jobSeekerService.applyJob(user.getUserId(), jobId);
-
-        } catch (RuntimeException e) {
-
-            return ResponseEntity.badRequest().body(e.getMessage());
+            applicationService.apply(jobId, resume, coverLetter, authentication.getName());
+            ra.addFlashAttribute("successMsg", "Application submitted successfully!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMsg", e.getMessage());
         }
+
+        return "redirect:/jobseeker/job/" + jobId;
     }
 
     // =========================
@@ -238,21 +236,49 @@ public class JobSeekerController {
     @GetMapping("/downloadResume")
     @ResponseBody
     public ResponseEntity<Resource> downloadResume(Principal principal) {
+        try {
+            JobSeeker js = jobSeekerService.getJobSeekerByEmail(principal.getName());
 
-        JobSeeker js = jobSeekerService.getJobSeekerByEmail(principal.getName());
+            String resumeFile = js.getResumeFile();
+            if (resumeFile == null || resumeFile.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
 
-        if (js.getResumeFile() == null) {
-            throw new RuntimeException("No resume uploaded");
+            Path path = Paths.get("uploads").resolve(resumeFile).normalize();
+            File file = path.toFile();
+            if (file == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+            Resource resource = new FileSystemResource(file);
+
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            String contentType = "application/octet-stream";
+            try {
+                contentType = Files.probeContentType(path);
+                if (contentType == null) {
+                    String lowerName = resumeFile.toLowerCase();
+                    if (lowerName.endsWith(".pdf"))
+                        contentType = "application/pdf";
+                    else if (lowerName.endsWith(".doc"))
+                        contentType = "application/msword";
+                    else if (lowerName.endsWith(".docx"))
+                        contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                }
+            } catch (Exception e) {
+                // Ignore probing errors
+            }
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, contentType)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
+        } catch (Exception e) {
+            System.err.println("Jobseeker Download Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        Path path = Paths.get("uploads").resolve(js.getResumeFile());
-
-        Resource resource = new FileSystemResource(path);
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + js.getResumeFile() + "\"")
-                .body(resource);
     }
 
     // =========================

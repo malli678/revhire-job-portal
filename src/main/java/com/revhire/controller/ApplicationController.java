@@ -38,82 +38,26 @@ public class ApplicationController {
         return "redirect:/applications/jobseeker/" + jobSeekerId;
     }
 
-    // ================= WITHDRAW =================
-    @PostMapping("/withdraw")
-    public String withdraw(@RequestParam Long applicationId,
-            @RequestParam String notes,
-            @RequestParam Long jobSeekerId) {
-
-        applicationService.withdrawApplication(applicationId, notes);
-
-        return "redirect:/applications/jobseeker/" + jobSeekerId;
-    }
-
-    // ================= SHORTLIST =================
-    @PostMapping("/shortlist")
-    public String shortlist(
-            @RequestParam Long applicationId,
-            @RequestParam Long jobId,
-            @RequestParam String notes) {
-
-        applicationService.shortlistCandidate(applicationId, notes);
-        return "redirect:/employer/applicant/" + applicationId;
-    }
-
-    // ================= REJECT =================
-    @PostMapping("/reject")
-    public String reject(@RequestParam Long applicationId,
-            @RequestParam Long jobId,
-            @RequestParam String notes) {
-
-        applicationService.rejectCandidate(applicationId, notes);
-        return "redirect:/employer/applicant/" + applicationId;
-    }
-
-    // ================= BULK UPDATE =================
-    @PostMapping("/bulk-update")
-    public String bulkUpdate(
-            @RequestParam(value = "applicationIds", required = false) List<Long> applicationIds,
-
-            @RequestParam(value = "status", required = false) String status,
-
-            @RequestParam(value = "bulkNote", required = false) String bulkNote,
-
-            RedirectAttributes redirectAttributes) {
-
-        if (status == null || status.isEmpty()) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "Please select a bulk action.");
-            return "redirect:/employer/dashboard";
-        }
-
-        if (applicationIds == null || applicationIds.isEmpty()) {
-            redirectAttributes.addFlashAttribute(
-                    "errorMessage",
-                    "Please select at least one applicant.");
-            return "redirect:/employer/dashboard";
-        }
-
-        Application.ApplicationStatus newStatus = Application.ApplicationStatus.valueOf(status);
-
-        applicationService.bulkUpdateStatus(
-                applicationIds, newStatus, bulkNote);
-
-        redirectAttributes.addFlashAttribute(
-                "successMessage",
-                "Bulk update successful.");
-
-        return "redirect:/employer/dashboard";
-    }
-
     // ================= ADD NOTES =================
     @PostMapping("/add-notes")
-    public String addNotes(@RequestParam Long applicationId,
+    public String addNotes(@RequestParam(required = false) Long applicationId,
             @RequestParam String notes,
-            @RequestParam Long jobId) {
+            @RequestParam(required = false) Long jobId,
+            @RequestHeader(value = "Referer", required = false) String referer) {
+
+        if (applicationId == null) {
+            System.err.println("CRITICAL: addNotes called with null applicationId");
+            if (jobId != null) {
+                return "redirect:/applications/job/" + jobId;
+            }
+            return "redirect:/employer/dashboard";
+        }
 
         applicationService.addNotes(applicationId, notes);
+
+        if (referer != null && !referer.contains("/applicant/")) {
+            return "redirect:" + referer;
+        }
         return "redirect:/employer/applicant/" + applicationId;
     }
 
@@ -160,9 +104,16 @@ public class ApplicationController {
             @RequestParam Long jobId,
             @RequestParam(value = "resume", required = false) MultipartFile resume,
             @RequestParam(required = false) String coverLetter,
-            Principal principal) {
+            Principal principal,
+            RedirectAttributes ra) {
 
-        applicationService.apply(jobId, resume, coverLetter, principal.getName());
+        try {
+            applicationService.apply(jobId, resume, coverLetter, principal.getName());
+            ra.addFlashAttribute("successMessage", "Application submitted successfully!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", e.getMessage());
+            return "redirect:/jobseeker/job/" + jobId;
+        }
 
         return "redirect:/jobseeker/dashboard?applied";
     }

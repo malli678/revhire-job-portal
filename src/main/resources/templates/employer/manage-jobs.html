@@ -193,6 +193,15 @@
     <div th:replace="fragments/header :: header"></div>
 
     <div class="container">
+        <div th:if="${successMessage}" class="success-banner"
+            style="background: #10b981; color: white; padding: 15px; border-radius: 12px; margin-bottom: 25px; font-weight: 700;">
+            <span th:text="${successMessage}"></span>
+        </div>
+        <div th:if="${errorMessage}" class="error-banner"
+            style="background: #ef4444; color: white; padding: 15px; border-radius: 12px; margin-bottom: 25px; font-weight: 700;">
+            <span th:text="${errorMessage}"></span>
+        </div>
+
         <div class="header-section">
             <div style="display: flex; align-items: center; gap: 15px;">
                 <button onclick="history.back()" class="btn btn-edit" style="padding: 5px 10px;">←</button>
@@ -269,25 +278,34 @@
                                 ✏️ Edit
                             </a>
 
-                            <button class="btn btn-action" th:if="${job.status=='ACTIVE'}"
-                                th:onclick="'updateStatus(' + ${job.jobId} + ',\'FILLED\')'" title="Mark as Filled">
-                                🎯 Filled
-                            </button>
+                            <form th:action="@{/employer/job/filled/{id}(id=${job.jobId})}" method="post"
+                                th:if="${job.status=='ACTIVE'}" style="display:inline;">
+                                <button type="submit" class="btn btn-action" title="Mark as Filled">
+                                    🎯 Filled
+                                </button>
+                            </form>
 
-                            <button class="btn btn-action" th:if="${job.status=='ACTIVE'}"
-                                th:onclick="'updateStatus(' + ${job.jobId} + ',\'CLOSED\')'" title="Close Posting">
-                                🔒 Close
-                            </button>
+                            <form th:action="@{/employer/job/close/{id}(id=${job.jobId})}" method="post"
+                                th:if="${job.status=='ACTIVE'}" style="display:inline;">
+                                <button type="submit" class="btn btn-action" title="Close Posting">
+                                    🔒 Close
+                                </button>
+                            </form>
 
-                            <button class="btn btn-action" th:if="${job.status=='CLOSED'}"
-                                th:onclick="'updateStatus(' + ${job.jobId} + ',\'ACTIVE\')'" title="Re-open Posting">
-                                🔓 Re-open
-                            </button>
+                            <form th:action="@{/employer/job/reopen/{id}(id=${job.jobId})}" method="post"
+                                th:if="${job.status=='CLOSED'}" style="display:inline;">
+                                <button type="submit" class="btn btn-action" title="Re-open Posting">
+                                    🔓 Re-open
+                                </button>
+                            </form>
 
-                            <button class="btn btn-danger" th:onclick="'deleteJob(' + ${job.jobId} + ')'"
-                                title="Delete Permanent">
-                                🗑️ Delete
-                            </button>
+                            <form th:action="@{/employer/job/delete/{id}(id=${job.jobId})}" method="post"
+                                onsubmit="return confirm('Confirm permanent removal of this assignment?')"
+                                style="display:inline;">
+                                <button type="submit" class="btn btn-danger" title="Delete Permanent">
+                                    🗑️ Delete
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>
@@ -299,35 +317,7 @@
 
     <script th:replace="fragments/header :: header-js"></script>
 
-    <script th:inline="javascript">
-        const csrfToken = document.querySelector('meta[name="_csrf"]').content;
-        const csrfHeader = document.querySelector('meta[name="_csrf_header"]').content;
-
-        async function postAction(url) {
-            try {
-                const res = await fetch(url, {
-                    method: 'POST',
-                    headers: { [csrfHeader]: csrfToken }
-                });
-                if (res.ok) location.reload();
-                else alert("Operation failed. Access might be restricted.");
-            } catch (err) { console.error(err); }
-        }
-
-        function deleteJob(id) {
-            if (confirm("Confirm permanent removal of this assignment?")) {
-                postAction('/employer/job/delete/' + id);
-            }
-        }
-
-        function updateStatus(id, status) {
-            let url;
-            if (status === 'CLOSED') url = `/employer/job/close/${id}`;
-            else if (status === 'ACTIVE') url = `/employer/job/reopen/${id}`;
-            else if (status === 'FILLED') url = `/employer/job/filled/${id}`;
-            postAction(url);
-        }
-    </script>
+    <!-- Consolidated into forms above -->
 </body>
 
 </html>

@@ -17,7 +17,10 @@ import com.revhire.model.JobSeeker;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
+@Transactional
 public class ApplicationService {
 
 	@Autowired
@@ -214,11 +217,19 @@ public class ApplicationService {
 		List<Application> applications = applicationRepository.findAllById(applicationIds);
 
 		for (Application app : applications) {
+			// Rule: once terminal (SHORTLISTED or REJECTED), don't change status via bulk
+			if (app.getStatus() == ApplicationStatus.SHORTLISTED || app.getStatus() == ApplicationStatus.REJECTED) {
+				continue;
+			}
+
 			Application.ApplicationStatus oldStatus = app.getStatus();
 			app.setStatus(newStatus);
-			if (newStatus == Application.ApplicationStatus.REJECTED) {
+
+			// Apply notes if provided for any status
+			if (note != null && !note.trim().isEmpty()) {
 				app.setNotes(note);
 			}
+
 			applicationRepository.save(app);
 
 			// Create notification for status change
@@ -384,9 +395,14 @@ public class ApplicationService {
 		Application app = applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));
 
+		// Rule: once terminal, don't change
+		if (app.getStatus() == ApplicationStatus.SHORTLISTED || app.getStatus() == ApplicationStatus.REJECTED) {
+			throw new RuntimeException("This application has already been processed and its status is now permanent.");
+		}
+
 		Application.ApplicationStatus oldStatus = app.getStatus();
 		app.setStatus(status);
-		if (notes != null && !notes.isEmpty()) {
+		if (notes != null && !notes.trim().isEmpty()) {
 			app.setNotes(notes);
 		}
 		applicationRepository.save(app);
@@ -397,7 +413,7 @@ public class ApplicationService {
 				"Application Status Updated",
 				"Your application for " + app.getJob().getTitle() +
 						" has been updated to " + status
-						+ (notes != null && !notes.isEmpty() ? ". Remark: " + notes : ""),
+						+ (notes != null && !notes.trim().isEmpty() ? ". Remark: " + notes : ""),
 				"/jobseeker/applications");
 	}
 }

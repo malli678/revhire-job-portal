@@ -166,13 +166,17 @@ public class JobSeekerService {
 		Application application = applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));
 
-		// ✅ SAFETY CHECK ⭐⭐⭐
-		if (application.getStatus() != Application.ApplicationStatus.APPLIED) {
-			throw new RuntimeException("Only APPLIED applications can be withdrawn");
+		// Cannot withdraw if already withdrawn or rejected
+		Application.ApplicationStatus current = application.getStatus();
+		if (current == Application.ApplicationStatus.WITHDRAWN) {
+			throw new RuntimeException("Application has already been withdrawn.");
+		}
+		if (current == Application.ApplicationStatus.REJECTED) {
+			throw new RuntimeException("Cannot withdraw a rejected application.");
 		}
 
 		application.setStatus(Application.ApplicationStatus.WITHDRAWN);
-		application.setNotes(notes);
+		application.setNotes(notes != null ? notes : "");
 
 		applicationRepository.save(application);
 	}

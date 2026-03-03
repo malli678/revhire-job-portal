@@ -195,24 +195,7 @@ public class EmployerController {
     // =========================
     // SHORTLIST
     // =========================
-    @PostMapping("/shortlist/{applicationId}")
-    public String shortlist(@PathVariable Long applicationId,
-            @RequestParam(required = false) String notes) {
-
-        applicationService.shortlistCandidate(applicationId, notes);
-        return "redirect:/employer/dashboard";
-    }
-
-    // =========================
-    // REJECT
-    // =========================
-    @PostMapping("/reject/{applicationId}")
-    public String reject(@PathVariable Long applicationId,
-            @RequestParam(required = false) String notes) {
-
-        applicationService.rejectCandidate(applicationId, notes);
-        return "redirect:/employer/dashboard";
-    }
+    // Consolidated into updateStatus method below
 
     // =========================
     // MANAGE JOBS PAGE
@@ -276,11 +259,16 @@ public class EmployerController {
     }
 
     @PostMapping("/job/delete/{jobId}")
-    public String deleteJob(@PathVariable Long jobId) {
-
-        System.out.println("DELETE CLICKED → " + jobId);
-
-        jobService.deleteJob(jobId);
+    public String deleteJob(@PathVariable Long jobId, RedirectAttributes ra) {
+        try {
+            jobService.deleteJob(jobId);
+            ra.addFlashAttribute("successMessage", "Job deleted successfully.");
+        } catch (org.springframework.dao.DataIntegrityViolationException e) {
+            ra.addFlashAttribute("errorMessage",
+                    "Cannot delete job with active applications. Please close or fill the job instead.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("errorMessage", "Error deleting job: " + e.getMessage());
+        }
         return "redirect:/employer/manage-jobs";
     }
 
@@ -319,24 +307,27 @@ public class EmployerController {
     // =========================
     // BULK UPDATE ⭐⭐⭐
     // =========================
-    @PostMapping("/bulk-update")
-    public String bulkUpdate(@RequestParam(required = false) List<Long> applicationIds,
+    @PostMapping("/application/bulk-update")
+    public String bulkUpdate(@RequestParam(name = "ids", required = false) List<Long> applicationIds,
             @RequestParam String status,
-            @RequestParam(required = false) String bulkNote,
+            @RequestParam(name = "notes", required = false) String bulkNote,
             RedirectAttributes redirectAttributes) {
 
         if (applicationIds == null || applicationIds.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Select applicants first.");
-            return "redirect:/employer/dashboard";
+            return "redirect:/employer/applicants";
         }
 
-        Application.ApplicationStatus newStatus = Application.ApplicationStatus.valueOf(status);
+        try {
+            Application.ApplicationStatus newStatus = Application.ApplicationStatus.valueOf(status);
+            applicationService.bulkUpdateStatus(applicationIds, newStatus, bulkNote);
+            redirectAttributes.addFlashAttribute("successMessage",
+                    "Bulk update successful for " + applicationIds.size() + " applicants.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error during bulk update: " + e.getMessage());
+        }
 
-        applicationService.bulkUpdateStatus(applicationIds, newStatus, bulkNote);
-
-        redirectAttributes.addFlashAttribute("successMessage", "Bulk update successful.");
-
-        return "redirect:/employer/dashboard";
+        return "redirect:/employer/applicants";
     }
 
     @PostMapping("/company-profile/update")
@@ -440,19 +431,24 @@ public class EmployerController {
         return "employer/dashboard";
     }
 
-    @PostMapping("/update-status/{applicationId}")
+    @PostMapping("/application/update-status/{applicationId}")
     public String updateStatus(@PathVariable Long applicationId,
-            @RequestParam Application.ApplicationStatus status,
-            @RequestParam(required = false) String notes) {
-        applicationService.updateStatus(applicationId, status, notes);
-        return "redirect:/employer/dashboard";
-    }
+            @RequestParam String status,
+            @RequestParam(required = false) String notes,
+            @RequestHeader(value = "Referer", required = false) String referer) {
+        try {
+            Application.ApplicationStatus appStatus = Application.ApplicationStatus.valueOf(status);
+            applicationService.updateStatus(applicationId, appStatus, notes);
+        } catch (IllegalArgumentException e) {
+            return "redirect:/employer/applicant/" + applicationId + "?error=invalid_status";
+        } catch (Exception e) {
+            return "redirect:/employer/applicant/" + applicationId + "?error=" + e.getMessage();
+        }
 
-    @PostMapping("/under-review/{applicationId}")
-    public String moveToUnderReview(@PathVariable Long applicationId,
-            @RequestParam(required = false) String notes) {
-        applicationService.moveToUnderReview(applicationId, notes);
-        return "redirect:/employer/dashboard";
+        if (referer != null && !referer.contains("/applicant/")) {
+            return "redirect:" + referer;
+        }
+        return "redirect:/employer/applicant/" + applicationId + "?success=status_updated";
     }
 
     @PostMapping("/shortlist-from-review/{applicationId}")
@@ -492,27 +488,50 @@ public class EmployerController {
             @PathVariable Long applicationId,
             Authentication authentication) {
 
-        Application application = applicationService.getApplicationById(applicationId);
-        Employer employer = employerService.getEmployerByEmail(authentication.getName());
+        try {
+            Application application = applicationService.getApplicationById(applicationId);
+            Employer employer = employerService.getEmployerByEmail(authentication.getName());
 
-        // Security check
-        if (!application.getJob().getEmployer().getUserId()
-                .equals(employer.getUserId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            // Security check
+            if (!application.getJob().getEmployer().getUserId()
+                    .equals(employer.getUserId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            String resumeFileName = application.getResumePath();
+            if (resumeFileName == null || resumeFileName.isEmpty()) {
+                resumeFileName = application.getJobSeeker().getResumeFile();
+            }
+
+            if (resumeFileName == null || resumeFileName.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            Path path = Paths.get("uploads").resolve(resumeFileName).normalize();
+            Resource resource = new FileSystemResource(path.toFile());
+
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            String contentType = "application/octet-stream";
+            String lowerName = resumeFileName.toLowerCase();
+            if (lowerName.endsWith(".pdf"))
+                contentType = "application/pdf";
+            else if (lowerName.endsWith(".doc"))
+                contentType = "application/msword";
+            else if (lowerName.endsWith(".docx"))
+                contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, contentType)
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
+        } catch (Exception e) {
+            System.err.println("Download Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
-        String resumeFileName = application.getResumePath();
-        if (resumeFileName == null) {
-            resumeFileName = application.getJobSeeker().getResumeFile();
-        }
-
-        Path path = Paths.get("uploads").resolve(resumeFileName);
-        Resource resource = new FileSystemResource(path.toFile());
-
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
     }
 
 }
