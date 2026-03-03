@@ -1,71 +1,172 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Apply Job</title>
 
+<head>
+    <title>Application Portal - RevHire</title>
+    <meta charset="UTF-8">
     <style>
         body {
-            font-family: 'Segoe UI';
-            background: #f4f6f9;
-            padding: 40px;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1a202c;
         }
 
-        .card {
+        .container {
+            max-width: 600px;
+            margin: 60px auto;
+            padding: 0 20px;
+        }
+
+        .apply-card {
             background: white;
-            padding: 25px;
-            border-radius: 14px;
-            width: 420px;
-            box-shadow: 0 5px 18px rgba(0,0,0,0.08);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
         }
 
-        input, textarea {
-            width: 100%;
-            padding: 8px;
-            margin-top: 6px;
-            margin-bottom: 15px;
-            border-radius: 6px;
-            border: 1px solid #ddd;
+        .header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 20px;
         }
 
-        button {
-            background: #28a745;
+        .header h2 {
+            margin: 0;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .header p {
+            margin: 5px 0 0 0;
+            color: #4F46E5;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input[type="file"],
+        textarea {
+            padding: 12px;
+            border: 2px solid #edf2f7;
+            border-radius: 12px;
+            background: #f8fafc;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #4F46E5;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        .hint {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: -4px;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .btn-submit {
+            background: #4F46E5;
             color: white;
-            border: none;
-            padding: 10px;
-            border-radius: 6px;
-            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
             cursor: pointer;
+            border: none;
+            width: 100%;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-cancel {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn-cancel:hover {
+            color: #4F46E5;
         }
     </style>
+    <!-- Common Fragments Styles -->
+    <style th:replace="fragments/header :: header-css"></style>
+    <style th:replace="fragments/footer :: footer-css"></style>
 </head>
 
 <body>
 
-<div class="card">
+    <div th:replace="fragments/header :: header"></div>
 
-    <h2>📄 Apply for Job</h2>
+    <div class="container">
+        <div class="apply-card">
+            <div class="header">
+                <h2>📝 Submit Interest</h2>
+                <p th:text="${job.title}">Position Title</p>
+                <div style="font-size: 0.85rem; color: #64748b; margin-top: 5px;"
+                    th:text="${job.employer != null ? job.employer.companyName : 'Organization'}">Company</div>
+            </div>
 
-    <form th:action="@{/applications/submit}"
-          method="post"
-          enctype="multipart/form-data">
+            <form th:action="@{/jobseeker/submitApplication}" method="post" enctype="multipart/form-data">
+                <input type="hidden" name="jobId" th:value="${job.jobId}" />
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-        <input type="hidden" name="jobId" th:value="${job.jobId}" />
+                <div class="form-group">
+                    <label>Updated CV / Resume</label>
+                    <div class="hint">Optional. If empty, the system will use your primary catalogued resume.</div>
+                    <input type="file" name="resumeFile" accept=".pdf,.docx" />
+                </div>
 
-        <input type="hidden"
-               th:name="${_csrf.parameterName}"
-               th:value="${_csrf.token}" />
+                <div class="form-group">
+                    <label>Professional Introduction</label>
+                    <div class="hint">Briefly explain why you are the ideal candidate for this role.</div>
+                    <textarea name="coverLetter"
+                        placeholder="Write your cover letter or introduction here..."></textarea>
+                </div>
 
-        <label>Upload Resume</label>
-        <input type="file" name="resume" required />
+                <button type="submit" class="btn-submit">🚀 Confirm Submission</button>
+                <a th:href="@{'/jobseeker/job/' + ${job.jobId}}" class="btn-cancel">Abort Submission</a>
+            </form>
+        </div>
+    </div>
 
-        <label>Cover Letter (Optional)</label>
-        <textarea name="coverLetter"></textarea>
+    <footer th:replace="fragments/footer :: footer"></footer>
 
-        <button type="submit">Submit Application</button>
-
-    </form>
-
-</div>
-
+    <script th:replace="fragments/header :: header-js"></script>
 </body>
+
 </html>

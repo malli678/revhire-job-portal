@@ -1,312 +1,245 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <title>Dashboard - RevHire</title>
-
+    <meta charset="UTF-8">
     <style>
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin:0;
-            background:#f5f6fa;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1a202c;
         }
 
-        /* HEADER */
-        .header {
-            background:white;
-            padding:18px 40px;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            box-shadow:0 2px 10px rgba(0,0,0,0.05);
-        }
-
-		.logo {
-		    font-size:22px;
-		    font-weight:bold;
-		    color:#667eea;
-		    text-decoration:none;   /* ✅ removes underline */
-		}
-		.logo:hover {
-		    opacity:0.8;
-		}
-
-        .header-right {
-            display:flex;
-            align-items:center;
-            gap:20px;
-            font-weight:500;
-        }
-
-        .logout {
-            background:#667eea;
-            color:white;
-            padding:8px 18px;
-            border-radius:6px;
-            text-decoration:none;
-            font-size:14px;
-        }
-
-        /* CONTAINER */
         .container {
-            max-width:1200px;
-            margin:30px auto;
-            padding:0 20px;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
 
-        /* CARD */
-        .card {
-            background:white;
-            padding:25px;
-            border-radius:12px;
-            box-shadow:0 4px 20px rgba(0,0,0,0.04);
-            margin-bottom:25px;
+        .welcome-card {
+            background: linear-gradient(135deg, #4F46E5 0%, #7c3aed 100%);
+            border-radius: 24px;
+            padding: 50px;
+            color: white;
+            box-shadow: 0 20px 50px rgba(79, 70, 229, 0.2);
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* WELCOME */
-        .welcome h2 {
-            margin:0;
-            font-size:24px;
+        .welcome-card::after {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
         }
 
-        .user-meta {
-            color:#666;
-            margin-top:10px;
-            line-height:1.6;
+        .welcome-card h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.02em;
         }
 
-        /* NAVIGATION */
-        .menu {
-            display:flex;
-            gap:25px;
-            flex-wrap:wrap;
-            justify-content:space-between;
+        .welcome-card p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 10px;
+            font-weight: 500;
         }
 
-        .menu a {
-            flex:1;
-            min-width:180px;
-            background:#edf2ff;
-            padding:14px;
-            border-radius:10px;
-            text-decoration:none;
-            color:#667eea;
-            font-weight:600;
-            text-align:center;
-            transition:0.2s;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
         }
 
-        .menu a:hover {
-            background:#667eea;
-            color:white;
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.2s;
         }
 
-        .menu a.primary {
-            background:linear-gradient(135deg,#667eea,#764ba2);
-            color:white;
+        .stat-card:hover {
+            transform: translateY(-5px);
         }
 
-        .menu a.primary:hover {
-            opacity:0.9;
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
         }
 
-        /* STATS */
-        .stats {
-            display:flex;
-            gap:20px;
-            flex-wrap:wrap;
+        .stat-info h3 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1e293b;
         }
 
-        .stat-box {
-            flex:1;
-            min-width:250px;
-            background:white;
-            padding:22px;
-            border-radius:12px;
-            box-shadow:0 6px 25px rgba(0,0,0,0.05);
+        .stat-info p {
+            margin: 0;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        .stat-box h3 {
-            font-size:32px;
-            margin:0;
-            color:#667eea;
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
         }
 
-        .stat-box p {
-            margin:6px 0 0;
-            color:#666;
-            font-weight:500;
+        .nav-item {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 700;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            border: 2px solid #f1f5f9;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
         }
 
-        /* PROFILE STRENGTH */
-        .strength {
-            background:linear-gradient(135deg,#667eea,#764ba2);
-            color:white;
+        .nav-item:hover {
+            border-color: #4F46E5;
+            color: #4F46E5;
+            transform: scale(1.03);
         }
 
-        .strength h3 {
-            color:white;
+        .nav-item i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
         }
 
-        .progress-container {
-            margin-top:15px;
-            background:rgba(255,255,255,0.3);
-            height:8px;
-            border-radius:10px;
+        .nav-item.highlight {
+            background: #4F46E5;
+            color: white;
+            border: none;
         }
 
-        .progress-bar {
-            height:100%;
-            background:white;
-            border-radius:10px;
+        .nav-item.highlight:hover {
+            background: #4338ca;
         }
-		
-		.notification-bell {
-		        position: relative;
-		        cursor: pointer;
-		    }
-		    
-		    .notification-badge {
-		        animation: pulse 1.5s infinite;
-		    }
-		    
-		    @keyframes pulse {
-		        0% { transform: scale(1); }
-		        50% { transform: scale(1.1); }
-		        100% { transform: scale(1); }
-		    }
+
+        .strength-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .strength-bar {
+            height: 100%;
+            background: #10b981;
+            border-radius: 10px;
+            transition: width 1s ease-out;
+        }
     </style>
+    <!-- Common Fragments Styles -->
+    <style th:replace="fragments/header :: header-css"></style>
+    <style th:replace="fragments/footer :: footer-css"></style>
 </head>
 
 <body>
 
-<!-- HEADER -->
-<div class="header">
-    <a th:href="@{/jobseeker/dashboard}" class="logo">RevHire</a>
-    
-    <div class="header-right" style="display: flex; align-items: center; gap: 20px;">
-        
-        <!-- ✅ NOTIFICATION BELL -->
-        <div class="notification-container" style="position: relative;">
-            <a href="/notifications" class="notification-bell" style="position: relative; text-decoration: none;">
-                <span style="font-size: 24px;">🔔</span>
-                <span id="notificationBadge" class="notification-badge" 
-                      style="display: none; position: absolute; top: -5px; right: -5px; 
-                             background: #dc3545; color: white; border-radius: 50%; 
-                             padding: 2px 6px; font-size: 11px; min-width: 18px; 
-                             text-align: center;">0</span>
-            </a>
-        </div>
-        
-        <span>Hi, <span th:text="${session.userName}">User</span></span>
-        <a th:href="@{/auth/logout}" class="logout">Logout</a>
-    </div>
-</div>
+    <div th:replace="fragments/header :: header"></div>
 
-<div class="container">
-
-    <!-- WELCOME -->
-    <div class="card welcome">
-
-        <h2>
-            Welcome back,
-            <span th:text="${user.fullName}">User</span> 👋
-        </h2>
-
-        <div class="user-meta">
-            <div>Email: <span th:text="${user.email}"></span></div>
-            <div>Location: <span th:text="${user.location}"></span></div>
+    <div class="container">
+        <!-- WELCOME SECTION -->
+        <div class="welcome-card">
+            <h1 th:text="'Welcome, ' + ${user.fullName.split(' ')[0]} + '!'">Welcome, User!</h1>
+            <p>You have <span th:text="${applicationCount}" style="font-weight: 800;">0</span> active applications in
+                progress. Let's find your next milestone.</p>
         </div>
 
-    </div>
-
-    <!-- PRIMARY NAVIGATION -->
-    <div class="card menu">
-
-        <a th:href="@{/jobseeker/search-jobs}" class="primary">
-            🔍 Search Jobs
-        </a>
-
-        <a th:href="@{/jobseeker/saved-jobs}">
-            💾 Saved Jobs
-        </a>
-
-        <a th:href="@{/jobseeker/applications}">
-            📄 My Applications
-        </a>
-
-        <a th:href="@{/jobseeker/profile}">
-            👤 Profile
-        </a>
-
-        <a th:href="@{/jobseeker/resume}">
-            📎 Resume
-        </a>
-		
-		<a th:href="@{/jobseeker/recommendations}" class="primary">
-		    🎯 Recommended Jobs
-		</a>
-		<a th:href="@{/jobseeker/alerts}" class="primary">
-		    🔔 Job Alerts
-		</a>
-
-    </div>
-
-    <!-- STATS -->
-    <div class="stats">
-
-        <div class="stat-box">
-            <h3 th:text="${applicationCount}">0</h3>
-            <p>Applications Submitted</p>
-        </div>
-
-        <div class="stat-box">
-            <h3 th:text="${savedCount}">0</h3>
-            <p>Saved Jobs</p>
-        </div>
-
-        <div class="stat-box strength">
-            <h3 th:text="${completion + '%'}">0%</h3>
-            <p>Profile Strength</p>
-
-            <div class="progress-container">
-                <div class="progress-bar"
-                     th:style="'width:' + ${completion} + '%'">
+        <!-- STATS SECTION -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #e0e7ff; color: #4338ca;">📝</div>
+                <div class="stat-info">
+                    <h3 th:text="${applicationCount}">0</h3>
+                    <p>Total Apps</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fef3c7; color: #92400e;">🔖</div>
+                <div class="stat-info">
+                    <h3 th:text="${savedCount}">0</h3>
+                    <p>Saved Jobs</p>
+                </div>
+            </div>
+            <div class="stat-card" style="flex: 1.5;">
+                <div class="stat-icon" style="background: #d1fae5; color: #065f46;">⚡</div>
+                <div class="stat-info" style="width: 100%;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <h3 th:text="${completion + '%'}">70%</h3>
+                        <p>Profile Strength</p>
+                    </div>
+                    <div class="strength-bar-container">
+                        <div class="strength-bar" th:style="'width:' + ${completion} + '%'"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
+        <!-- NAVIGATION GRID -->
+        <div class="nav-grid">
+            <a th:href="@{/jobseeker/search-jobs}" class="nav-item highlight">
+                <i>🔍</i> Search Jobs
+            </a>
+            <a th:href="@{/jobseeker/recommendations}" class="nav-item">
+                <i>🎯</i> For You
+            </a>
+            <a th:href="@{/jobseeker/saved-jobs}" class="nav-item">
+                <i>💾</i> Saved
+            </a>
+            <a th:href="@{/jobseeker/applications}" class="nav-item">
+                <i>📄</i> My Applications
+            </a>
+            <a th:href="@{/jobseeker/profile}" class="nav-item">
+                <i>👤</i> Profile
+            </a>
+            <a th:href="@{/jobseeker/resume}" class="nav-item">
+                <i>📎</i> Resume
+            </a>
+            <a th:href="@{/jobseeker/alerts}" class="nav-item">
+                <i>🔔</i> Alerts
+            </a>
+            <a th:href="@{/auth/change-password}" class="nav-item">
+                <i>🔑</i> Change Password
+            </a>
+        </div>
     </div>
 
-</div>
-<script>
-    // Fetch unread notification count
-    function updateNotificationBadge() {
-        fetch('/notifications/unread/count', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            const badge = document.getElementById('notificationBadge');
-            if (data.count > 0) {
-                badge.style.display = 'inline';
-                badge.textContent = data.count > 99 ? '99+' : data.count;
-            } else {
-                badge.style.display = 'none';
-            }
-        })
-        .catch(err => console.error('Error fetching notifications:', err));
-    }
-    
-    // Update on page load
-    document.addEventListener('DOMContentLoaded', updateNotificationBadge);
-    
-    // Update every 30 seconds
-    setInterval(updateNotificationBadge, 30000);
-</script>
-</body>
+    <footer th:replace="fragments/footer :: footer"></footer>
 
+    <script th:replace="fragments/header :: header-js"></script>
+</body>
 
 </html>

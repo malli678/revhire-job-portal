@@ -34,18 +34,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/jobseeker")
 public class JobSeekerController {
-	@Autowired
-	private FileStorageService fileStorageService;
-	@Autowired
-	private JobSeekerRepository jobSeekerRepository;
-	@Autowired
-	private JobService jobService;
-	@Autowired
-	private RecommendationService recommendationService;
-	
-	@Autowired
-	private ResumeParserService resumeParserService;
-	
+    @Autowired
+    private FileStorageService fileStorageService;
+    @Autowired
+    private JobSeekerRepository jobSeekerRepository;
+    @Autowired
+    private JobService jobService;
+    @Autowired
+    private RecommendationService recommendationService;
+
+    @Autowired
+    private ResumeParserService resumeParserService;
+
     private final ResumeService resumeService;
     private final JobSeekerService jobSeekerService;
     private final EducationService educationService;
@@ -54,11 +54,11 @@ public class JobSeekerController {
     private final JobRepository jobRepository;
 
     public JobSeekerController(ResumeService resumeService,
-                               JobSeekerService jobSeekerService,
-                               EducationService educationService,
-                               UserService userService,
-                               ApplicationRepository applicationRepository,
-                               JobRepository jobRepository) {
+            JobSeekerService jobSeekerService,
+            EducationService educationService,
+            UserService userService,
+            ApplicationRepository applicationRepository,
+            JobRepository jobRepository) {
 
         this.resumeService = resumeService;
         this.jobSeekerService = jobSeekerService;
@@ -118,12 +118,13 @@ public class JobSeekerController {
 
         return "jobseeker/saved-jobs";
     }
+
     // REMOVE SAVED JOB
     // =========================
     @PostMapping("/removeSaved/{jobId}")
     @ResponseBody
     public ResponseEntity<?> removeSavedJob(@PathVariable Long jobId,
-                                            HttpSession session) {
+            HttpSession session) {
 
         Long userId = validateSession(session);
         return jobSeekerService.removeSavedJob(userId, jobId);
@@ -135,7 +136,7 @@ public class JobSeekerController {
     @PostMapping("/applyJob/{jobId}")
     @ResponseBody
     public ResponseEntity<String> applyJob(@PathVariable Long jobId,
-                                           Authentication authentication) {
+            Authentication authentication) {
 
         try {
 
@@ -148,13 +149,14 @@ public class JobSeekerController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     // =========================
-    // WITHDRAW APPLICATION 
+    // WITHDRAW APPLICATION
     // =========================
     @PostMapping("/withdraw/{applicationId}")
     public String withdrawApplication(@PathVariable Long applicationId,
-                                      @RequestParam String notes,
-                                      HttpSession session) {
+            @RequestParam String notes,
+            HttpSession session) {
 
         validateSession(session);
         jobSeekerService.withdrawApplication(applicationId, notes);
@@ -167,7 +169,7 @@ public class JobSeekerController {
     // =========================
     @GetMapping("/applications")
     public String viewApplications(Model model,
-                                   HttpSession session) {
+            HttpSession session) {
 
         Long userId = validateSession(session);
 
@@ -182,15 +184,14 @@ public class JobSeekerController {
     // =========================
     @GetMapping("/job/{jobId}")
     public String jobDetails(@PathVariable Long jobId,
-                             Model model,
-                             Principal principal) {
+            Model model,
+            Principal principal) {
 
         Job job = jobService.getJobById(jobId);
 
         JobSeeker js = jobSeekerService.getJobSeekerByEmail(principal.getName());
 
-        boolean alreadyApplied =
-                applicationRepository.findByJobAndJobSeeker(job, js).isPresent();
+        boolean alreadyApplied = applicationRepository.findByJobAndJobSeeker(job, js).isPresent();
 
         model.addAttribute("job", job);
 
@@ -218,22 +219,22 @@ public class JobSeekerController {
         preview.setDegree(js.getDegree());
         preview.setYear(js.getYear());
 
-        if(js.getSkillEntities() != null) {
+        if (js.getSkillEntities() != null) {
 
             preview.setSkills(
-                js.getSkillEntities()
-                  .stream()
-                  .map(Skill::getName)
-                  .reduce((a,b) -> a + "," + b)
-                  .orElse("")
-            );
+                    js.getSkillEntities()
+                            .stream()
+                            .map(Skill::getName)
+                            .reduce((a, b) -> a + "," + b)
+                            .orElse(""));
         }
 
-        model.addAttribute("resumeForm", new ResumeDto());   // EMPTY ⭐⭐⭐
-        model.addAttribute("resumePreview", preview);        // SAVED ⭐⭐⭐
+        model.addAttribute("resumeForm", new ResumeDto()); // EMPTY ⭐⭐⭐
+        model.addAttribute("resumePreview", preview); // SAVED ⭐⭐⭐
         model.addAttribute("resumeFile", js.getResumeFile());
         return "jobseeker/resume";
     }
+
     @GetMapping("/downloadResume")
     @ResponseBody
     public ResponseEntity<Resource> downloadResume(Principal principal) {
@@ -253,6 +254,7 @@ public class JobSeekerController {
                         "attachment; filename=\"" + js.getResumeFile() + "\"")
                 .body(resource);
     }
+
     // =========================
     // PROFILE PAGE
     // =========================
@@ -277,9 +279,10 @@ public class JobSeekerController {
 
         return "jobseeker/profile";
     }
+
     @PostMapping("/profile/skill/add")
     public String addSkill(Authentication auth,
-                           @RequestParam String skillName) {
+            @RequestParam String skillName) {
 
         JobSeeker js = jobSeekerService.getJobSeekerByEmail(auth.getName());
 
@@ -287,6 +290,7 @@ public class JobSeekerController {
 
         return "redirect:/jobseeker/profile";
     }
+
     @PostMapping("/profile/skill/delete/{id}")
     public String deleteSkill(@PathVariable Long id) {
 
@@ -294,10 +298,11 @@ public class JobSeekerController {
 
         return "redirect:/jobseeker/profile";
     }
+
     @PostMapping("/profile/education/add")
     public String addEducation(Authentication auth,
-                               @RequestParam String degree,
-                               @RequestParam String institution) {
+            @RequestParam String degree,
+            @RequestParam String institution) {
 
         JobSeeker js = jobSeekerService.getJobSeekerByEmail(auth.getName());
 
@@ -305,6 +310,7 @@ public class JobSeekerController {
 
         return "redirect:/jobseeker/profile";
     }
+
     @PostMapping("/profile/education/delete/{id}")
     public String deleteEducation(@PathVariable Long id) {
 
@@ -312,11 +318,12 @@ public class JobSeekerController {
 
         return "redirect:/jobseeker/profile";
     }
+
     @PostMapping("/profile/certification/add")
     public String addCertification(Authentication auth,
-                                   @RequestParam String name,
-                                   @RequestParam String issuer,
-                                   @RequestParam String year) {
+            @RequestParam String name,
+            @RequestParam String issuer,
+            @RequestParam String year) {
 
         JobSeeker js = jobSeekerService.getJobSeekerByEmail(auth.getName());
 
@@ -324,6 +331,7 @@ public class JobSeekerController {
 
         return "redirect:/jobseeker/profile";
     }
+
     @PostMapping("/profile/certification/delete/{id}")
     public String deleteCertification(@PathVariable Long id) {
 
@@ -335,27 +343,26 @@ public class JobSeekerController {
     // UPLOAD RESUME
     // =========================
 
-
     @PostMapping("/uploadResume")
     public String uploadResume(@RequestParam MultipartFile file,
-                               Principal principal,
-                               RedirectAttributes ra,
-                               HttpSession session) {
+            Principal principal,
+            RedirectAttributes ra,
+            HttpSession session) {
 
         validateSession(session);
 
         try {
             // Get logged-in jobseeker
             JobSeeker js = jobSeekerService.getJobSeekerByEmail(principal.getName());
-            
+
             // Save file and parse resume
             String fileName = fileStorageService.storeFile(file);
             js.setResumeFile(fileName);
             jobSeekerRepository.save(js);
-            
+
             // Parse resume asynchronously
             resumeParserService.parseAndUpdateResume(js.getUserId(), file);
-            
+
             ra.addFlashAttribute("successMsg", "Resume uploaded successfully. Parsing in background...");
 
         } catch (Exception e) {
@@ -364,13 +371,14 @@ public class JobSeekerController {
 
         return "redirect:/jobseeker/resume";
     }
+
     // =========================
     // SAVE RESUME DETAILS
     // =========================
     @PostMapping("/saveResumeDetails")
     public String saveResumeDetails(ResumeDto dto,
-                                    Principal principal,
-                                    RedirectAttributes redirectAttributes) {
+            Principal principal,
+            RedirectAttributes redirectAttributes) {
 
         resumeService.save(dto, principal.getName());
 
@@ -401,26 +409,25 @@ public class JobSeekerController {
         }
         return userId;
     }
-    
+
     @GetMapping("/recommendations")
     public String viewRecommendations(Model model, Authentication authentication) {
         User user = userService.findByEmail(authentication.getName());
         JobSeeker jobSeeker = (JobSeeker) user;
-        
+
         List<Job> recommendedJobs = recommendationService.getRecommendedJobs(
-            jobSeeker.getUserId(), 10);
-        
+                jobSeeker.getUserId(), 10);
+
         model.addAttribute("recommendedJobs", recommendedJobs);
-        
+
         return "jobseeker/recommendations";
     }
-    
 
     @PostMapping("/profile/update/personal")
     public String updatePersonalInfo(Authentication auth,
-                                     @RequestParam String phoneNumber,
-                                     @RequestParam String location,
-                                     RedirectAttributes ra) {
+            @RequestParam String phoneNumber,
+            @RequestParam String location,
+            RedirectAttributes ra) {
         try {
             JobSeeker js = jobSeekerService.getJobSeekerByEmail(auth.getName());
             js.setPhoneNumber(phoneNumber);
@@ -433,13 +440,45 @@ public class JobSeekerController {
         return "redirect:/jobseeker/profile";
     }
 
+    // =========================
+    // PROFILE PICTURE MANAGEMENT
+    // =========================
+    @PostMapping("/uploadProfilePicture")
+    public String uploadProfilePicture(@RequestParam MultipartFile file,
+            Authentication auth,
+            RedirectAttributes ra) {
+        try {
+            JobSeeker js = jobSeekerService.getJobSeekerByEmail(auth.getName());
+            String fileName = fileStorageService.storeFile(file); // Assume standard image storage
+            js.setProfilePicture(fileName);
+            jobSeekerRepository.save(js);
+            ra.addFlashAttribute("success", "Profile picture updated successfully!");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error uploading picture: " + e.getMessage());
+        }
+        return "redirect:/jobseeker/profile";
+    }
+
+    @PostMapping("/removeProfilePicture")
+    public String removeProfilePicture(Authentication auth, RedirectAttributes ra) {
+        try {
+            JobSeeker js = jobSeekerService.getJobSeekerByEmail(auth.getName());
+            js.setProfilePicture(null);
+            jobSeekerRepository.save(js);
+            ra.addFlashAttribute("success", "Profile picture removed.");
+        } catch (Exception e) {
+            ra.addFlashAttribute("error", "Error removing picture.");
+        }
+        return "redirect:/jobseeker/profile";
+    }
+
     @PostMapping("/profile/update/employment")
     public String updateEmploymentInfo(Authentication auth,
-                                       @RequestParam(required = false) String currentEmploymentStatus,
-                                       @RequestParam(required = false) String currentCompany,
-                                       @RequestParam(required = false) String designation,
-                                       @RequestParam(required = false) Integer totalExperienceYears,
-                                       RedirectAttributes ra) {
+            @RequestParam(required = false) String currentEmploymentStatus,
+            @RequestParam(required = false) String currentCompany,
+            @RequestParam(required = false) String designation,
+            @RequestParam(required = false) Integer totalExperienceYears,
+            RedirectAttributes ra) {
         try {
             JobSeeker js = jobSeekerService.getJobSeekerByEmail(auth.getName());
             js.setCurrentEmploymentStatus(currentEmploymentStatus);

@@ -18,7 +18,6 @@ import org.springframework.ui.Model;
 
 @Controller
 
-
 @RequestMapping("/applications")
 public class ApplicationController {
 
@@ -29,10 +28,11 @@ public class ApplicationController {
 
     // ================= APPLY =================
     @PostMapping("/apply")
-   // @GetMapping("/apply")
+    // @GetMapping("/apply")
     public String applyJob(@RequestParam Long jobId,
-                           @RequestParam Long jobSeekerId) {
+            @RequestParam Long jobSeekerId) {
 
+        System.out.println("Applying for Job ID: " + jobId + " by Seeker ID: " + jobSeekerId);
         applicationService.applyJob(jobId, jobSeekerId);
 
         return "redirect:/applications/jobseeker/" + jobSeekerId;
@@ -41,13 +41,14 @@ public class ApplicationController {
     // ================= WITHDRAW =================
     @PostMapping("/withdraw")
     public String withdraw(@RequestParam Long applicationId,
-                           @RequestParam String notes,
-                           @RequestParam Long jobSeekerId) {
+            @RequestParam String notes,
+            @RequestParam Long jobSeekerId) {
 
         applicationService.withdrawApplication(applicationId, notes);
 
         return "redirect:/applications/jobseeker/" + jobSeekerId;
     }
+
     // ================= SHORTLIST =================
     @PostMapping("/shortlist")
     public String shortlist(
@@ -56,32 +57,27 @@ public class ApplicationController {
             @RequestParam String notes) {
 
         applicationService.shortlistCandidate(applicationId, notes);
-
-        return "redirect:/applications/job/" + jobId;
+        return "redirect:/employer/applicant/" + applicationId;
     }
 
     // ================= REJECT =================
     @PostMapping("/reject")
     public String reject(@RequestParam Long applicationId,
-                         @RequestParam Long jobId,
-                         @RequestParam String notes) {
+            @RequestParam Long jobId,
+            @RequestParam String notes) {
 
         applicationService.rejectCandidate(applicationId, notes);
-
-        return "redirect:/applications/job/" + jobId;
+        return "redirect:/employer/applicant/" + applicationId;
     }
 
     // ================= BULK UPDATE =================
     @PostMapping("/bulk-update")
     public String bulkUpdate(
-            @RequestParam(value = "applicationIds", required = false)
-            List<Long> applicationIds,
+            @RequestParam(value = "applicationIds", required = false) List<Long> applicationIds,
 
-            @RequestParam(value = "status", required = false)
-            String status,
+            @RequestParam(value = "status", required = false) String status,
 
-            @RequestParam(value = "bulkNote", required = false)
-            String bulkNote,
+            @RequestParam(value = "bulkNote", required = false) String bulkNote,
 
             RedirectAttributes redirectAttributes) {
 
@@ -99,8 +95,7 @@ public class ApplicationController {
             return "redirect:/employer/dashboard";
         }
 
-        Application.ApplicationStatus newStatus =
-                Application.ApplicationStatus.valueOf(status);
+        Application.ApplicationStatus newStatus = Application.ApplicationStatus.valueOf(status);
 
         applicationService.bulkUpdateStatus(
                 applicationIds, newStatus, bulkNote);
@@ -111,15 +106,15 @@ public class ApplicationController {
 
         return "redirect:/employer/dashboard";
     }
+
     // ================= ADD NOTES =================
     @PostMapping("/add-notes")
     public String addNotes(@RequestParam Long applicationId,
-                           @RequestParam String notes,
-                           @RequestParam Long jobId) {
+            @RequestParam String notes,
+            @RequestParam Long jobId) {
 
         applicationService.addNotes(applicationId, notes);
-
-        return "redirect:/applications/job/" + jobId;
+        return "redirect:/employer/applicant/" + applicationId;
     }
 
     // ================= VIEW JOB SEEKER APPLICATIONS =================
@@ -149,6 +144,7 @@ public class ApplicationController {
 
         return "employer/applicants";
     }
+
     @GetMapping("/apply/{jobId}")
     public String showApplyPage(@PathVariable Long jobId, Model model) {
 
@@ -158,10 +154,11 @@ public class ApplicationController {
 
         return "jobseeker/apply-job";
     }
+
     @PostMapping("/submit")
     public String submitApplication(
             @RequestParam Long jobId,
-            @RequestParam("resume") MultipartFile resume,
+            @RequestParam(value = "resume", required = false) MultipartFile resume,
             @RequestParam(required = false) String coverLetter,
             Principal principal) {
 
