@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Applicant Profile - RevHire</title>
+    <meta charset="UTF-8">
+    <th:block th:insert="~{fragments/header :: header-css}"></th:block>
+    <th:block th:insert="~{fragments/footer :: footer-css}"></th:block>
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+        }
+
+        .details-wrapper {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 25px;
+        }
+
+        .applicant-name {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .status-pill {
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .section-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+
+        .info-box {
+            background: #f8fafc;
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid #edf2f7;
+        }
+
+        .info-box h3 {
+            margin-top: 0;
+            font-size: 1.1rem;
+            color: #4F46E5;
+            margin-bottom: 20px;
+        }
+
+        .data-item {
+            margin-bottom: 15px;
+        }
+
+        .data-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #94a3b8;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+        }
+
+        .data-value {
+            font-weight: 700;
+            color: #334155;
+            display: block;
+            margin-top: 4px;
+        }
+
+        .resume-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #4F46E5;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            transition: all 0.2s;
+            margin-top: 20px;
+        }
+
+        .resume-btn:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .back-link:hover {
+            color: #4F46E5;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-box {
+            background: white;
+            width: 450px;
+            margin: 100px auto;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <div class="details-wrapper">
+        <a onclick="history.back()" class="back-link">&#8592; Back</a>
+
+        <div class="profile-card" th:if="${application != null}">
+            <div class="profile-header">
+                <div>
+                    <h1 class="applicant-name"
+                        th:text="${applicant != null ? applicant.fullName : 'Anonymous Applicant'}">Name</h1>
+                    <p style="color:#64748b; font-weight:600; margin-top:5px;">
+                        Applying for: <span
+                            th:text="${application.job != null ? application.job.title : 'Position'}">Job Title</span>
+                    </p>
+                </div>
+                <div class="status-pill" th:text="${application.status}">Applied</div>
+            </div>
+
+            <!-- ADD NOTE BUTTON -->
+            <div style="margin-bottom:25px;">
+                <button type="button" onclick="document.getElementById('noteModal').style.display='block'"
+                    style="background:#6c757d; color:white; border:none; padding:10px 20px; border-radius:10px; font-weight:700; cursor:pointer;">
+                    &#128204; Add Internal Note
+                </button>
+
+                <div th:if="${application.notes != null and !application.notes.isEmpty()}"
+                    style="margin-top:15px; background:#fffbeb; padding:20px; border-radius:12px; border-left:5px solid #f59e0b;">
+                    <h3 style="margin-top:0; font-size:1rem; color:#92400e;">&#128221; Internal Tracking Note</h3>
+                    <p style="margin:10px 0 0 0; color:#451a03; font-weight:600;" th:text="${application.notes}"></p>
+                </div>
+            </div>
+
+            <div class="section-grid">
+                <div class="info-box" th:if="${applicant != null}">
+                    <h3>&#128100; Contact Details</h3>
+                    <div class="data-item">
+                        <span class="data-label">Email</span>
+                        <span class="data-value" th:text="${applicant.email}">email@example.com</span>
+                    </div>
+                    <div class="data-item">
+                        <span class="data-label">Phone</span>
+                        <span class="data-value"
+                            th:text="${applicant.phoneNumber != null ? applicant.phoneNumber : 'Not provided'}">Phone</span>
+                    </div>
+                </div>
+
+                <div class="info-box">
+                    <h3>&#128197; Application Details</h3>
+                    <div class="data-item">
+                        <span class="data-label">Submission Date</span>
+                        <span class="data-value"
+                            th:text="${application.appliedDate != null ? #temporals.format(application.appliedDate, 'dd MMM yyyy, HH:mm') : 'Not available'}">Date</span>
+                    </div>
+                    <div class="data-item"
+                        th:if="${application.coverLetter != null and !application.coverLetter.isEmpty()}">
+                        <span class="data-label">Cover Letter</span>
+                        <p class="data-value"
+                            style="background:white; padding:15px; border-radius:8px; border:1px solid #edf2f7; font-weight:normal; font-style:italic;"
+                            th:text="${application.coverLetter}">Cover Letter Text</p>
+                    </div>
+                </div>
+
+                <div class="info-box" th:if="${applicant != null and 
+                             ((applicant.skillEntities != null and !applicant.skillEntities.isEmpty()) 
+                              or (applicant.skills != null and !applicant.skills.isEmpty()))}">
+
+                    <h3>🛠 Skills</h3>
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+
+                        <!-- If using Skill entity -->
+                        <span th:each="skill : ${applicant.skillEntities}" th:text="${skill.name}" style="background:#eef2ff;
+                                     color:#4338ca;
+                                     padding:6px 12px;
+                                     border-radius:20px;
+                                     font-size:0.8rem;
+                                     font-weight:600;">
+                        </span>
+
+                        <!-- If using @ElementCollection List<String> -->
+                        <span th:each="skill : ${applicant.skills}" th:text="${skill}" style="background:#eef2ff;
+                                     color:#4338ca;
+                                     padding:6px 12px;
+                                     border-radius:20px;
+                                     font-size:0.8rem;
+                                     font-weight:600;">
+                        </span>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Text -->
+            <div class="info-box" style="margin-top:30px;"
+                th:if="${applicant != null and applicant.resumeText != null and !applicant.resumeText.isEmpty()}">
+                <h3>&#128221; Professional Summary</h3>
+                <div style="background:white; padding:20px; border-radius:12px; border:1px solid #edf2f7; white-space:pre-wrap; color:#475569;"
+                    th:text="${applicant.resumeText}">Text</div>
+            </div>
+
+            <!-- Download Resume -->
+            <div style="margin-top:30px;">
+                <div
+                    th:if="${application.id != null and (application.resumePath != null or (applicant != null and applicant.resumeFile != null))}">
+                    <a th:href="@{/employer/download-resume/{id}(id=${application.id})}" class="resume-btn">
+                        &#128229; Download Uploaded Resume
+                    </a>
+                </div>
+                <div th:if="${application.resumePath == null and (applicant == null or applicant.resumeFile == null)}"
+                    style="margin-top:10px; color:#94a3b8; font-style:italic;">
+                    No resume file uploaded for this application.
+                </div>
+            </div>
+        </div>
+
+        <div th:unless="${application != null}" style="text-align:center; padding:100px;">
+            <h2>Application not found or inaccessible.</h2>
+        </div>
+    </div>
+
+    <!-- NOTE MODAL - outside profile-card to avoid nesting issues -->
+    <div id="noteModal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>&#128204; Add Internal Note</h3>
+            <form th:if="${application != null}" th:action="@{/applications/add-notes}" method="post">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                <input type="hidden" name="applicationId" th:value="${application != null ? application.id : ''}" />
+
+                <div style="margin-bottom:15px;">
+                    <label style="display:block; margin-bottom:8px; font-weight:600;">Your Note:</label>
+                    <textarea name="notes" required
+                        style="width:100%; height:120px; padding:12px; border-radius:8px; border:1px solid #ddd; resize:vertical; font-family:inherit;"
+                        placeholder="Internal tracking notes..."></textarea>
+                </div>
+
+                <div style="display:flex; justify-content:flex-end; gap:12px;">
+                    <button type="button" onclick="document.getElementById('noteModal').style.display='none'"
+                        style="background:#f1f5f9; color:#475569; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Cancel</button>
+                    <button type="submit"
+                        style="background:#4F46E5; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Save
+                        Note</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+    <th:block th:insert="~{fragments/header :: header-js}"></th:block>
+
+    <script>
+        window.onclick = function (event) {
+            var modal = document.getElementById('noteModal');
+            if (event.target == modal) modal.style.display = 'none';
+        }
+    </script>
+</body>
+
+</html>
