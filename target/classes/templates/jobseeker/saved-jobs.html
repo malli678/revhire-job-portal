@@ -217,10 +217,15 @@
                     </div>
                 </div>
 
-                <div class="card-actions">
+                <div class="card-actions" th:id="'actions-' + ${saved.job.jobId}">
                     <a th:href="@{/jobseeker/job/{id}(id=${saved.job.jobId})}" class="btn btn-view">View</a>
 
-                    <button class="btn btn-apply" th:onclick="'applyJob(' + ${saved.job.jobId} + ')'">Apply Now</button>
+                    <th:block th:if="${appliedJobIds != null and appliedJobIds.contains(saved.job.jobId)}">
+                        <span
+                            style="background: #dcfce7; color: #16a34a; padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 0.9rem; display: flex; align-items: center; gap: 4px;">
+                            ✅ Applied
+                        </span>
+                    </th:block>
 
                     <button class="btn btn-remove" th:onclick="'removeSaved(' + ${saved.job.jobId} + ', this)'"
                         title="Remove from list">
@@ -256,20 +261,6 @@
             div.textContent = message;
             document.body.appendChild(div);
             setTimeout(() => div.remove(), 3000);
-        }
-
-        async function applyJob(id) {
-            try {
-                const response = await fetch('/jobseeker/applyJob/' + id, {
-                    method: 'POST',
-                    headers: getCsrfHeaders()
-                });
-                const message = await response.text();
-                showNotification(message);
-                setTimeout(() => location.reload(), 2000);
-            } catch (err) {
-                showNotification('Failed to submit application', true);
-            }
         }
 
         async function removeSaved(jobId, button) {
