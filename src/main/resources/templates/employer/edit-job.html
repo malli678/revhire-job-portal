@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Edit Job - RevHire</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1a202c;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .header-section h2 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .btn-back {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 10px 20px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover {
+            background: #e2e8f0;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        input,
+        textarea,
+        select {
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 2px solid #edf2f7;
+            background: #f8fafc;
+            font-size: 1rem;
+            transition: all 0.2s;
+            color: #1e293b;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #4F46E5;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+        }
+
+        textarea {
+            height: 150px;
+            resize: vertical;
+        }
+
+        .row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .btn-submit {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            .row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <!-- Common Fragments Styles -->
+    <style th:replace="fragments/header :: header-css"></style>
+    <style th:replace="fragments/footer :: footer-css"></style>
+</head>
+
+<body>
+
+    <div th:replace="fragments/header :: header"></div>
+
+    <div class="container">
+        <div class="main-card">
+            <div class="header-section">
+                <h2>✏️ Update Assignment</h2>
+                <a th:href="@{/employer/manage-jobs}" class="btn-back">← Back to Manage</a>
+            </div>
+
+            <form th:action="@{'/employer/job/update/' + ${job.jobId}}" method="post" class="form-grid">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+                <div class="form-group">
+                    <label>Position Designation</label>
+                    <input type="text" name="title" th:value="${job.title}" placeholder="e.g. Lead Technical Architect"
+                        required />
+                </div>
+
+                <div class="form-group">
+                    <label>Strategic Mandate (Description)</label>
+                    <textarea name="description" th:text="${job.description}"
+                        placeholder="Outline the core responsibilities and expectations..." required></textarea>
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>Deployment Location</label>
+                        <input type="text" name="location" th:value="${job.location}"
+                            placeholder="e.g. London, UK / Remote" required />
+                    </div>
+                    <div class="form-group">
+                        <label>Employment Model</label>
+                        <select name="jobType" required>
+                            <option value="Full-time" th:selected="${job.jobType == 'Full-time'}">Full-time</option>
+                            <option value="Part-time" th:selected="${job.jobType == 'Part-time'}">Part-time</option>
+                            <option value="Contract" th:selected="${job.jobType == 'Contract'}">Contract</option>
+                            <option value="Internship" th:selected="${job.jobType == 'Internship'}">Internship</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Prerequisite Experience (Years)</label>
+                    <input type="text" name="experienceRequired" th:value="${job.experienceRequired}"
+                        placeholder="e.g. 5+ years" />
+                </div>
+
+                <div class="row">
+                    <div class="form-group">
+                        <label>Floor Remuneration</label>
+                        <input type="number" name="salaryMin" th:value="${job.salaryMin}" placeholder="Min" />
+                    </div>
+                    <div class="form-group">
+                        <label>Ceiling Remuneration</label>
+                        <input type="number" name="salaryMax" th:value="${job.salaryMax}" placeholder="Max" />
+                    </div>
+                </div>
+
+                <button class="btn-submit" type="submit">💾 Synchronize Updates</button>
+            </form>
+        </div>
+    </div>
+
+    <footer th:replace="fragments/footer :: footer"></footer>
+
+    <script th:replace="fragments/header :: header-js"></script>
+</body>
+
+</html>

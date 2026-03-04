@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Explore Jobs - RevHire</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1a202c;
+        }
+
+        .wrapper {
+            max-width: 1300px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 30px;
+        }
+
+        /* FILTERS */
+        .filters-panel {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .filters-panel h3 {
+            margin: 0 0 25px 0;
+            font-size: 1.25rem;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .filter-group {
+            margin-bottom: 20px;
+        }
+
+        .filter-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 10px;
+            border: 2px solid #edf2f7;
+            background: #f8fafc;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            border-color: #4F46E5;
+            background: white;
+            outline: none;
+        }
+
+        .range-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .btn-search {
+            width: 100%;
+            padding: 14px;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-search:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .clear-link {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 0.85rem;
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .clear-link:hover {
+            color: #4F46E5;
+        }
+
+        /* JOB LIST */
+        .job-card {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .job-card:hover {
+            transform: translateY(-4px);
+            border-color: #e0e7ff;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .job-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .company-name {
+            color: #4F46E5;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 15px;
+        }
+
+        .description-preview {
+            color: #64748b;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .tag-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .tag {
+            background: #f1f5f9;
+            color: #475569;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+
+        .salary-info {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #edf2f7;
+        }
+
+        .btn-view {
+            background: #4F46E5;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn-view:hover {
+            background: #4338ca;
+        }
+
+        .empty-state {
+            text-align: center;
+            background: white;
+            padding: 80px 40px;
+            border-radius: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-panel {
+                position: static;
+                margin-bottom: 30px;
+            }
+        }
+    </style>
+    <!-- Common Fragments Styles -->
+    <style th:replace="fragments/header :: header-css"></style>
+    <style th:replace="fragments/footer :: footer-css"></style>
+</head>
+
+<body>
+
+    <div th:replace="fragments/header :: header"></div>
+
+    <div class="wrapper">
+        <!-- Dashboard Navigation -->
+        <aside class="filters-panel">
+            <form method="get" th:action="@{/jobs/search-page}">
+                <h3>🔍 Find Your Fit</h3>
+
+                <div class="filter-group">
+                    <label>Role Or Keyword</label>
+                    <input type="text" name="title" placeholder="Software Engineer..." th:value="${param.title}" />
+                </div>
+
+                <div class="filter-group">
+                    <label>Preferred City</label>
+                    <input type="text" name="location" placeholder="Pune, Bangalore..." th:value="${param.location}" />
+                </div>
+
+                <div class="filter-group">
+                    <label>Organization</label>
+                    <input type="text" name="company" placeholder="Search brands..." th:value="${param.company}" />
+                </div>
+
+                <div class="filter-group">
+                    <label>Category</label>
+                    <select name="jobType">
+                        <option value="">All Models</option>
+                        <option value="Full-time" th:selected="${param.jobType == 'Full-time'}">Full-time</option>
+                        <option value="Part-time" th:selected="${param.jobType == 'Part-time'}">Part-time</option>
+                        <option value="Contract" th:selected="${param.jobType == 'Contract'}">Contract</option>
+                        <option value="Internship" th:selected="${param.jobType == 'Internship'}">Internship</option>
+                        <option value="Remote" th:selected="${param.jobType == 'Remote'}">Remote</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label>Experience Years</label>
+                    <div class="range-grid">
+                        <input type="number" name="minExp" placeholder="Min" min="0" th:value="${param.minExp}" />
+                        <input type="number" name="maxExp" placeholder="Max" min="0" th:value="${param.maxExp}" />
+                    </div>
+                </div>
+
+                <div class="filter-group">
+                    <label>Salary (₹ / Year)</label>
+                    <div class="range-grid">
+                        <input type="number" name="minSalary" placeholder="Min" step="100000"
+                            th:value="${param.minSalary}" />
+                        <input type="number" name="maxSalary" placeholder="Max" step="100000"
+                            th:value="${param.maxSalary}" />
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-search">Search Now</button>
+                <a th:href="@{/jobseeker/search-jobs}" class="clear-link">Reset Filters</a>
+            </form>
+        </aside>
+
+        <!-- JOBS -->
+        <main class="jobs-list">
+
+            <div th:if="${jobs == null or jobs.isEmpty()}" class="empty-state">
+                <div style="font-size: 3rem; margin-bottom: 20px;">🏜️</div>
+                <h3>No matches found</h3>
+                <p>Try broadening your horizons or adjusting the filters.</p>
+            </div>
+
+            <div th:each="job : ${jobs}" class="job-card">
+                <div class="job-title" th:text="${job.title}">Position</div>
+                <div class="company-name" th:text="${job.employer != null ? job.employer.companyName : 'Organization'}">
+                    Company</div>
+
+                <p class="description-preview" th:text="${#strings.abbreviate(job.description, 180)}">Snippet</p>
+
+                <div class="tag-row">
+                    <span class="tag" th:text="${job.jobType ?: 'Hybrid'}">Type</span>
+                    <span class="tag" th:text="'Exp: ' + (${job.experienceRequired ?: 'Fresher'})">Experience</span>
+                    <span class="tag" th:text="${job.location}">Location</span>
+                </div>
+
+                <div class="card-footer">
+                    <div class="salary-info">
+                        💰
+                        <th:block th:if="${job.salaryMin != null}">
+                            ₹<span th:text="${#numbers.formatInteger(job.salaryMin, 1, 'COMMA')}"></span>+
+                        </th:block>
+                        <th:block th:unless="${job.salaryMin != null}">Competitive Rate</th:block>
+                    </div>
+                    <a th:href="@{'/jobseeker/job/' + ${job.jobId}}" class="btn-view">View Details →</a>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer th:replace="fragments/footer :: footer"></footer>
+
+    <!-- Common Fragments Scripts -->
+    <script th:replace="fragments/header :: header-js"></script>
+</body>
+
+</html>

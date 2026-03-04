@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>New Application Received</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #28a745; color: white; padding: 20px; text-align: center; }
+        .content { padding: 30px; background: #f9f9f9; }
+        .candidate-info { background: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0; }
+        .button { 
+            background: #28a745; 
+            color: white; 
+            padding: 12px 25px; 
+            text-decoration: none; 
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>RevHire - Employer Portal</h1>
+        </div>
+        <div class="content">
+            <h2>New Application Received!</h2>
+            <p>Dear <span th:text="${employerName}">Employer</span>,</p>
+            <p>A new application has been submitted for your job posting.</p>
+            
+            <div class="candidate-info">
+                <h3>Application Details:</h3>
+                <p><strong>Candidate:</strong> <span th:text="${candidateName}"></span></p>
+                <p><strong>Position:</strong> <span th:text="${jobTitle}"></span></p>
+            </div>
+            
+            <a th:href="${dashboardUrl}" class="button">Review Application</a>
+        </div>
+        <div class="footer">
+            <p>© 2026 RevHire. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>
