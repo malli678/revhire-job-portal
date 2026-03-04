@@ -74,6 +74,17 @@
 	<div th:replace="fragments/header :: header"></div>
 
 	<div style="padding: 40px; max-width: 1250px; margin: 0 auto; min-height: 80vh;">
+
+		<!-- Error/Success Messages -->
+		<div th:if="${errorMessage}"
+			style="background: #fee2e2; color: #dc2626; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca; font-weight: 600;">
+			<span th:text="${errorMessage}"></span>
+		</div>
+		<div th:if="${successMessage}"
+			style="background: #dcfce7; color: #16a34a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bbf7d0; font-weight: 600;">
+			<span th:text="${successMessage}"></span>
+		</div>
+
 		<div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
 			<button onclick="history.back()"
 				style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 1.1rem;">←</button>

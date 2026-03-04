@@ -147,47 +147,38 @@ public class EmployerController {
     @GetMapping("/applicants/filter")
     public String filterApplicants(@RequestParam(required = false) String status,
             @RequestParam(required = false) Integer experience,
-            @RequestParam(required = false) String degree,
-            @RequestParam(required = false) Integer days,
+            @RequestParam(required = false) String skill,
+            @RequestParam(required = false) String education,
+            @RequestParam(required = false) String appliedAfter,
             Authentication authentication,
             Model model) {
 
         Employer employer = employerService.getEmployerByEmail(authentication.getName());
 
-        List<Application> filtered;
-
-        if (status != null && !status.isEmpty()) {
-
-            filtered = applicationService.filterByStatus(
-                    employer,
-                    Application.ApplicationStatus.valueOf(status));
-
-        } else if (experience != null) {
-
-            filtered = applicationService.filterByExperience(employer, experience);
-
-        } else if (degree != null && !degree.isEmpty()) {
-
-            filtered = applicationService.filterByEducation(employer, degree);
-
-        } else if (days != null) {
-
-            LocalDateTime date = LocalDateTime.now().minusDays(days);
-            filtered = applicationService.filterByDate(employer, date);
-
-        } else {
-
-            filtered = applicationService.getApplicationsForEmployer(employer);
+        LocalDateTime appliedDate = null;
+        if (appliedAfter != null && !appliedAfter.isBlank()) {
+            appliedDate = java.time.LocalDate.parse(appliedAfter).atStartOfDay();
         }
+
+        List<Application> filtered = employerService.filterApplications(
+                employer,
+                skill,
+                experience,
+                education,
+                status,
+                appliedDate);
 
         model.addAttribute("applications", filtered);
         model.addAttribute("user", employer);
 
-        // Keep dashboard cards visible
+        // Keep dashboard statistics visible
+        model.addAttribute("totalJobs", employerService.countTotalJobs(employer));
         model.addAttribute("activeJobs", employerService.countActiveJobs(employer));
-        model.addAttribute("totalApplicants", employerService.countTotalApplications(employer));
+        model.addAttribute("totalApplications", employerService.getApplicationsForEmployer(employer).size());
+        model.addAttribute("pendingReviews", employerService.countPendingReviews(employer));
         model.addAttribute("shortlisted",
                 employerService.countByStatus(employer, Application.ApplicationStatus.SHORTLISTED));
+        model.addAttribute("rejected", employerService.countRejectedApplications(employer));
 
         return "employer/dashboard";
     }
@@ -308,14 +299,14 @@ public class EmployerController {
     // BULK UPDATE ⭐⭐⭐
     // =========================
     @PostMapping("/application/bulk-update")
-    public String bulkUpdate(@RequestParam(name = "ids", required = false) List<Long> applicationIds,
+    public String bulkUpdate(@RequestParam(name = "applicationIds", required = false) List<Long> applicationIds,
             @RequestParam String status,
-            @RequestParam(name = "notes", required = false) String bulkNote,
+            @RequestParam(name = "bulkNote", required = false) String bulkNote,
             RedirectAttributes redirectAttributes) {
 
         if (applicationIds == null || applicationIds.isEmpty()) {
             redirectAttributes.addFlashAttribute("errorMessage", "Select applicants first.");
-            return "redirect:/employer/applicants";
+            return "redirect:/employer/dashboard";
         }
 
         try {
@@ -327,7 +318,7 @@ public class EmployerController {
             redirectAttributes.addFlashAttribute("errorMessage", "Error during bulk update: " + e.getMessage());
         }
 
-        return "redirect:/employer/applicants";
+        return "redirect:/employer/dashboard";
     }
 
     @PostMapping("/company-profile/update")
