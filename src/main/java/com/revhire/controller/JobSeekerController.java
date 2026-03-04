@@ -479,9 +479,9 @@ public class JobSeekerController {
         return "redirect:/jobseeker/profile";
     }
 
-    // =========================
+   
     // PROFILE PICTURE MANAGEMENT
-    // =========================
+    
     @PostMapping("/uploadProfilePicture")
     public String uploadProfilePicture(@RequestParam MultipartFile file,
             Authentication auth,

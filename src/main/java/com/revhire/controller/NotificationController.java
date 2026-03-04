@@ -1,4 +1,4 @@
-package com.revhire.controller;
+ package com.revhire.controller;
 
 import com.revhire.model.Notification;
 import com.revhire.service.NotificationService;
