@@ -267,10 +267,10 @@
         </div>
     </div>
 
-    <!-- NOTE MODAL - outside profile-card to avoid nesting issues -->
+    <!-- NOTE MODAL -->
     <div id="noteModal" class="modal-overlay">
         <div class="modal-box">
-            <h3>&#128204; Add Internal Note</h3>
+            <h3>📌 Add Internal Note</h3>
             <form th:if="${application != null}" th:action="@{/applications/add-notes}" method="post">
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <input type="hidden" name="applicationId" th:value="${application != null ? application.id : ''}" />

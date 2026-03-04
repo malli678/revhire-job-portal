@@ -117,7 +117,15 @@ public class JobSeekerController {
     public String savedJobs(Model model, HttpSession session) {
 
         Long userId = validateSession(session);
-        model.addAttribute("savedJobs", jobSeekerService.getSavedJobsList(userId));
+        List<SavedJob> savedJobs = jobSeekerService.getSavedJobsList(userId);
+        model.addAttribute("savedJobs", savedJobs);
+
+        // Add IDs of jobs already applied for
+        List<Long> appliedJobIds = applicationRepository.findByJobSeeker_UserId(userId)
+                .stream()
+                .map(app -> app.getJob().getJobId())
+                .toList();
+        model.addAttribute("appliedJobIds", appliedJobIds);
 
         return "jobseeker/saved-jobs";
     }
@@ -134,20 +142,18 @@ public class JobSeekerController {
     }
 
     @PostMapping("/applyJob/{jobId}")
-    public String applyJob(@PathVariable Long jobId,
+    @ResponseBody
+    public ResponseEntity<String> applyJob(@PathVariable Long jobId,
             @RequestParam(value = "resume", required = false) MultipartFile resume,
             @RequestParam(required = false) String coverLetter,
-            Authentication authentication,
-            RedirectAttributes ra) {
+            Authentication authentication) {
 
         try {
             applicationService.apply(jobId, resume, coverLetter, authentication.getName());
-            ra.addFlashAttribute("successMsg", "Application submitted successfully!");
+            return ResponseEntity.ok("Application submitted successfully!");
         } catch (Exception e) {
-            ra.addFlashAttribute("errorMsg", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
-
-        return "redirect:/jobseeker/job/" + jobId;
     }
 
     // =========================
