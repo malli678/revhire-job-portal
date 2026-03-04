@@ -29,11 +29,13 @@ public class SecurityConfig {
                 this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         }
 
+        // PASSWORD ENCODER
         @Bean
         public PasswordEncoder passwordEncoder() {
                 return new BCryptPasswordEncoder();
         }
 
+        // AUTH PROVIDER
         @Bean
         public DaoAuthenticationProvider authenticationProvider() {
                 DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -42,38 +44,52 @@ public class SecurityConfig {
                 return authProvider;
         }
 
+        // SECURITY CONTEXT (SESSION BASED)
         @Bean
         public SecurityContextRepository securityContextRepository() {
                 return new HttpSessionSecurityContextRepository();
         }
 
+        // FILTER CHAIN 
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
                 http
 
+                                // CSRF CONFIG
                                 .csrf(csrf -> csrf
                                                 .ignoringRequestMatchers(
+
                                                                 "/api/**",
+
+                                                                // AJAX / FETCH ENDPOINTS
                                                                 "/jobseeker/applyJob/**",
                                                                 "/jobseeker/saveJob/**",
-                                                                "/jobseeker/removeSaved/**"))
+                                                                "/jobseeker/removeSaved/**"
 
+                                                ))
+
+                                // SESSION MANAGEMENT
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                                                 .maximumSessions(1)
                                                 .maxSessionsPreventsLogin(false))
 
+                                // SECURITY CONTEXT
                                 .securityContext(context -> context
                                                 .securityContextRepository(securityContextRepository()))
 
+                                // AUTHORIZATION RULES
+
                                 .authorizeHttpRequests(authz -> authz
 
+                                                // PUBLIC ROUTES
                                                 .requestMatchers(
                                                                 "/",
                                                                 "/index",
                                                                 "/auth/login",
                                                                 "/auth/forgot-password",
+                                                                "/auth/verify-security-answer",
                                                                 "/auth/reset-password",
                                                                 "/auth/register/**",
                                                                 "/css/**",
@@ -86,22 +102,27 @@ public class SecurityConfig {
                                                                 "/favicon.ico")
                                                 .permitAll()
 
+                                                // ROLE-BASED ACCESS
                                                 .requestMatchers("/jobseeker/**").hasRole("JOBSEEKER")
                                                 .requestMatchers("/employer/**").hasRole("EMPLOYER")
 
+                                                // EVERYTHING ELSE REQUIRES LOGIN
                                                 .anyRequest().authenticated())
 
+                                // AUTH PROVIDER
                                 .authenticationProvider(authenticationProvider())
 
-                                .addFilterBefore(jwtAuthenticationFilter,
-                                                UsernamePasswordAuthenticationFilter.class)
+                                // JWT FILTER (SAFE TO KEEP)
+                                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
+                                // FORM LOGIN
                                 .formLogin(form -> form
                                                 .loginPage("/auth/login")
                                                 .loginProcessingUrl("/auth/login")
                                                 .usernameParameter("email")
                                                 .passwordParameter("password")
 
+                                                // SUCCESS HANDLER
                                                 .successHandler((request, response, authentication) -> {
 
                                                         String role = authentication.getAuthorities()
@@ -121,6 +142,7 @@ public class SecurityConfig {
                                                 .failureUrl("/auth/login?error")
                                                 .permitAll())
 
+                                // LOGOUT
                                 .logout(logout -> logout
                                                 .logoutRequestMatcher(new AntPathRequestMatcher("/auth/logout"))
                                                 .logoutSuccessUrl("/auth/login?logout")

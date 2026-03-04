@@ -157,9 +157,10 @@
                 <div>
                     <h1 class="applicant-name"
                         th:text="${applicant != null ? applicant.fullName : 'Anonymous Applicant'}">Name</h1>
-                    <p style="color:#64748b; font-weight:600; margin-top:5px;"
-                        th:text="${'Applying for: ' + (application.job != null ? application.job.title : 'Position')}">
-                        Job Title</p>
+                    <p style="color:#64748b; font-weight:600; margin-top:5px;">
+                        Applying for: <span
+                            th:text="${application.job != null ? application.job.title : 'Position'}">Job Title</span>
+                    </p>
                 </div>
                 <div class="status-pill" th:text="${application.status}">Applied</div>
             </div>
@@ -197,7 +198,7 @@
                     <div class="data-item">
                         <span class="data-label">Submission Date</span>
                         <span class="data-value"
-                            th:text="${application.appliedDate != null ? #temporals.format(application.appliedDate, 'dd MMM yyyy, HH:mm') : 'Unknown'}">Date</span>
+                            th:text="${application.appliedDate != null ? #temporals.format(application.appliedDate, 'dd MMM yyyy, HH:mm') : 'Not available'}">Date</span>
                     </div>
                     <div class="data-item"
                         th:if="${application.coverLetter != null and !application.coverLetter.isEmpty()}">
@@ -205,6 +206,35 @@
                         <p class="data-value"
                             style="background:white; padding:15px; border-radius:8px; border:1px solid #edf2f7; font-weight:normal; font-style:italic;"
                             th:text="${application.coverLetter}">Cover Letter Text</p>
+                    </div>
+                </div>
+
+                <div class="info-box" th:if="${applicant != null and 
+                             ((applicant.skillEntities != null and !applicant.skillEntities.isEmpty()) 
+                              or (applicant.skills != null and !applicant.skills.isEmpty()))}">
+
+                    <h3>🛠 Skills</h3>
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+
+                        <!-- If using Skill entity -->
+                        <span th:each="skill : ${applicant.skillEntities}" th:text="${skill.name}" style="background:#eef2ff;
+                                     color:#4338ca;
+                                     padding:6px 12px;
+                                     border-radius:20px;
+                                     font-size:0.8rem;
+                                     font-weight:600;">
+                        </span>
+
+                        <!-- If using @ElementCollection List<String> -->
+                        <span th:each="skill : ${applicant.skills}" th:text="${skill}" style="background:#eef2ff;
+                                     color:#4338ca;
+                                     padding:6px 12px;
+                                     border-radius:20px;
+                                     font-size:0.8rem;
+                                     font-weight:600;">
+                        </span>
+
                     </div>
                 </div>
             </div>
