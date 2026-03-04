@@ -54,12 +54,19 @@ public class JobSeekerController {
     private final ApplicationRepository applicationRepository;
     private final JobRepository jobRepository;
 
-    public JobSeekerController(ResumeService resumeService,
+    public JobSeekerController(
+            ResumeService resumeService,
             JobSeekerService jobSeekerService,
             EducationService educationService,
             UserService userService,
             ApplicationRepository applicationRepository,
-            JobRepository jobRepository) {
+            JobRepository jobRepository,
+            JobSeekerRepository jobSeekerRepository,
+            FileStorageService fileStorageService,
+            JobService jobService,
+            RecommendationService recommendationService,
+            ApplicationService applicationService,
+            ResumeParserService resumeParserService) {
 
         this.resumeService = resumeService;
         this.jobSeekerService = jobSeekerService;
@@ -67,8 +74,13 @@ public class JobSeekerController {
         this.userService = userService;
         this.applicationRepository = applicationRepository;
         this.jobRepository = jobRepository;
+        this.jobSeekerRepository = jobSeekerRepository;
+        this.fileStorageService = fileStorageService;
+        this.jobService = jobService;
+        this.recommendationService = recommendationService;
+        this.applicationService = applicationService;
+        this.resumeParserService = resumeParserService;
     }
-
     // =========================
     // DASHBOARD
     // =========================

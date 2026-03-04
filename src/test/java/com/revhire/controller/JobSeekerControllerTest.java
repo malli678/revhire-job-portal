@@ -83,6 +83,7 @@ public class JobSeekerControllerTest {
 
     @Before
     public void setUp() {
+
         mockMvc = MockMvcBuilders.standaloneSetup(jobSeekerController).build();
 
         jobSeeker = new JobSeeker();
@@ -91,8 +92,19 @@ public class JobSeekerControllerTest {
         jobSeeker.setFullName("Test Seeker");
         jobSeeker.setRole(Role.JOBSEEKER);
 
+        jobSeeker.setSkillEntities(new ArrayList<>());
+        jobSeeker.setEducationEntities(new ArrayList<>());
+        jobSeeker.setCertificationEntities(new ArrayList<>());
+
+        // ✅ ADD THESE SAFE VALUES
+        jobSeeker.setObjective("Test Objective");
+        jobSeeker.setDegree("B.Tech");
+        jobSeeker.setYear("2023");
+        jobSeeker.setResumeFile("resume.pdf");
+        jobSeeker.setPhoneNumber("9999999999");
+        jobSeeker.setLocation("India");
+
         lenient().when(authentication.getName()).thenReturn("seeker@test.com");
-        lenient().when(principal.getName()).thenReturn("seeker@test.com");
     }
 
     @Test
@@ -135,10 +147,9 @@ public class JobSeekerControllerTest {
     public void testProfile_Success() throws Exception {
         when(userService.getUserById(1L)).thenReturn(jobSeeker);
         when(jobSeekerRepository.findById(1L)).thenReturn(Optional.of(jobSeeker));
-
         mockMvc.perform(get("/jobseeker/profile")
-                .principal(authentication)
-                .sessionAttr("userId", 1L))
+                .sessionAttr("userId", 1L)
+                .requestAttr("org.springframework.security.core.Authentication", authentication))
                 .andExpect(status().isOk())
                 .andExpect(view().name("jobseeker/profile"))
                 .andExpect(model().attributeExists("user"));
