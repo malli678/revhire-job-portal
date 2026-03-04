@@ -208,6 +208,35 @@
                             th:text="${application.coverLetter}">Cover Letter Text</p>
                     </div>
                 </div>
+
+                <div class="info-box" th:if="${applicant != null and 
+                             ((applicant.skillEntities != null and !applicant.skillEntities.isEmpty()) 
+                              or (applicant.skills != null and !applicant.skills.isEmpty()))}">
+
+                    <h3>🛠 Skills</h3>
+
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
+
+                        <!-- If using Skill entity -->
+                        <span th:each="skill : ${applicant.skillEntities}" th:text="${skill.name}" style="background:#eef2ff;
+                                     color:#4338ca;
+                                     padding:6px 12px;
+                                     border-radius:20px;
+                                     font-size:0.8rem;
+                                     font-weight:600;">
+                        </span>
+
+                        <!-- If using @ElementCollection List<String> -->
+                        <span th:each="skill : ${applicant.skills}" th:text="${skill}" style="background:#eef2ff;
+                                     color:#4338ca;
+                                     padding:6px 12px;
+                                     border-radius:20px;
+                                     font-size:0.8rem;
+                                     font-weight:600;">
+                        </span>
+
+                    </div>
+                </div>
             </div>
 
             <!-- Resume Text -->

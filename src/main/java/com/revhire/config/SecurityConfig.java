@@ -89,6 +89,7 @@ public class SecurityConfig {
                                                                 "/index",
                                                                 "/auth/login",
                                                                 "/auth/forgot-password",
+                                                                "/auth/verify-security-answer",
                                                                 "/auth/reset-password",
                                                                 "/auth/register/**",
                                                                 "/css/**",
