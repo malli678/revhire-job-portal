@@ -17,13 +17,13 @@ import java.util.stream.Collectors;
 
 @Service
 public class JobService {
-	@Autowired
-	private JobAlertService jobAlertService;
 
     private final JobRepository jobRepository;
+    private final JobAlertService jobAlertService;
 
-    public JobService(JobRepository jobRepository) {
+    public JobService(JobRepository jobRepository, JobAlertService jobAlertService) {
         this.jobRepository = jobRepository;
+        this.jobAlertService = jobAlertService;
     }
 
     // =========================
@@ -35,26 +35,24 @@ public class JobService {
             job.setStatus("ACTIVE");
         }
         job.setEmployer(employer);
-        
-        // Set default values if not provided
+
         if (job.getNumberOfOpenings() == null) {
             job.setNumberOfOpenings(1);
         }
-        
+
         Job savedJob = jobRepository.save(job);
-        
-        // Trigger job alerts for matching seekers
+
         if (jobAlertService != null) {
             jobAlertService.checkNewJobAgainstAlerts(savedJob);
         }
-        
+
         return savedJob;
     }
+
     // =========================
     // POST JOB (DTO)
     // =========================
     public Job postJob(JobDto dto, Employer employer) {
-
         Job job = new Job();
         job.setTitle(dto.getTitle());
         job.setDescription(dto.getDescription());
@@ -74,7 +72,6 @@ public class JobService {
     // EDIT JOB
     // =========================
     public Job editJob(Long id, JobDto dto) {
-
         Job job = jobRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
 
@@ -138,8 +135,7 @@ public class JobService {
     public List<Job> searchByRole(String title) {
         return jobRepository.findByTitleContainingIgnoreCase(title);
     }
-    
-    //adding.....
+
     public List<Job> searchByTitle(String title) {
         return jobRepository.findByTitleContainingIgnoreCase(title);
     }
@@ -164,9 +160,8 @@ public class JobService {
         return jobRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
     }
-    //updatejob
-    public Job updateJob(Long id, Job updatedJob) {
 
+    public Job updateJob(Long id, Job updatedJob) {
         Job job = jobRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
 
@@ -180,65 +175,60 @@ public class JobService {
 
         return jobRepository.save(job);
     }
-    
- // Advanced search
 
-    public List<Job> advancedSearch(String title, String location, String company, 
-                                     String jobType, Double minSalary, Double maxSalary,
-                                     Integer daysPosted, Integer minExp, Integer maxExp) {
-        
-        // Base search
+    public List<Job> advancedSearch(String title, String location, String company,
+            String jobType, Double minSalary, Double maxSalary,
+            Integer daysPosted, Integer minExp, Integer maxExp) {
+
         List<Job> results = jobRepository.advancedSearch(
-            title, location, company, jobType, minSalary, maxSalary, "ACTIVE");
-        
-        // Filter by date posted
+                title, location, company, jobType, minSalary, maxSalary, "ACTIVE");
+
         if (daysPosted != null && daysPosted > 0) {
             LocalDateTime cutoffDate = LocalDateTime.now().minusDays(daysPosted);
             results = results.stream()
-                .filter(j -> j.getPostedDate() != null && j.getPostedDate().isAfter(cutoffDate))
-                .collect(Collectors.toList());
+                    .filter(j -> j.getPostedDate() != null && j.getPostedDate().isAfter(cutoffDate))
+                    .collect(Collectors.toList());
         }
-        
-        // Filter by experience range
+
         if (minExp != null || maxExp != null) {
             results = results.stream()
-                .filter(j -> {
-                    try {
-                        if (j.getExperienceRequired() == null) return true;
-                        String expStr = j.getExperienceRequired().replaceAll("[^0-9-]", "");
-                        if (expStr.contains("-")) {
-                            String[] parts = expStr.split("-");
-                            int jobMinExp = Integer.parseInt(parts[0].trim());
-                            int jobMaxExp = Integer.parseInt(parts[1].trim());
-                            
-                            boolean minMatch = minExp == null || jobMaxExp >= minExp;
-                            boolean maxMatch = maxExp == null || jobMinExp <= maxExp;
-                            return minMatch && maxMatch;
-                        } else {
-                            int jobExp = Integer.parseInt(expStr);
-                            return (minExp == null || jobExp >= minExp) && 
-                                   (maxExp == null || jobExp <= maxExp);
+                    .filter(j -> {
+                        try {
+                            if (j.getExperienceRequired() == null)
+                                return true;
+                            String expStr = j.getExperienceRequired().replaceAll("[^0-9-]", "");
+                            if (expStr.contains("-")) {
+                                String[] parts = expStr.split("-");
+                                int jobMinExp = Integer.parseInt(parts[0].trim());
+                                int jobMaxExp = Integer.parseInt(parts[1].trim());
+
+                                boolean minMatch = minExp == null || jobMaxExp >= minExp;
+                                boolean maxMatch = maxExp == null || jobMinExp <= maxExp;
+                                return minMatch && maxMatch;
+                            } else {
+                                int jobExp = Integer.parseInt(expStr);
+                                return (minExp == null || jobExp >= minExp) &&
+                                        (maxExp == null || jobExp <= maxExp);
+                            }
+                        } catch (Exception e) {
+                            return true;
                         }
-                    } catch (Exception e) {
-                        return true; // If can't parse, include it
-                    }
-                })
-                .collect(Collectors.toList());
+                    })
+                    .collect(Collectors.toList());
         }
-        
+
         return results;
     }
-    
-    @Scheduled(cron = "0 0 0 * * *") // Run at midnight every day
+
+    @Scheduled(cron = "0 0 0 * * *")
     @Transactional
     public void closeExpiredJobs() {
         LocalDateTime now = LocalDateTime.now();
         List<Job> expiredJobs = jobRepository.findByDeadlineBeforeAndStatus(now, "ACTIVE");
-        
+
         for (Job job : expiredJobs) {
             job.setStatus("CLOSED");
             jobRepository.save(job);
-            //log.info("Auto-closed expired job: {} (ID: {})", job.getTitle(), job.getJobId());
         }
     }
 }

@@ -16,13 +16,11 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import java.nio.file.*;
-import jakarta.servlet.http.HttpSession;
-
 import java.nio.file.Paths;
 import java.security.Principal;
+import jakarta.servlet.http.HttpSession;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -33,20 +31,13 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @Controller
 @RequestMapping("/jobseeker")
 public class JobSeekerController {
-    @Autowired
-    private FileStorageService fileStorageService;
-    @Autowired
-    private JobSeekerRepository jobSeekerRepository;
-    @Autowired
-    private JobService jobService;
-    @Autowired
-    private RecommendationService recommendationService;
-    @Autowired
-    private ApplicationService applicationService;
 
-    @Autowired
-    private ResumeParserService resumeParserService;
-
+    private final FileStorageService fileStorageService;
+    private final JobSeekerRepository jobSeekerRepository;
+    private final JobService jobService;
+    private final RecommendationService recommendationService;
+    private final ApplicationService applicationService;
+    private final ResumeParserService resumeParserService;
     private final ResumeService resumeService;
     private final JobSeekerService jobSeekerService;
     private final EducationService educationService;
@@ -54,13 +45,24 @@ public class JobSeekerController {
     private final ApplicationRepository applicationRepository;
     private final JobRepository jobRepository;
 
-    public JobSeekerController(ResumeService resumeService,
+    public JobSeekerController(FileStorageService fileStorageService,
+            JobSeekerRepository jobSeekerRepository,
+            JobService jobService,
+            RecommendationService recommendationService,
+            ApplicationService applicationService,
+            ResumeParserService resumeParserService,
+            ResumeService resumeService,
             JobSeekerService jobSeekerService,
             EducationService educationService,
             UserService userService,
             ApplicationRepository applicationRepository,
             JobRepository jobRepository) {
-
+        this.fileStorageService = fileStorageService;
+        this.jobSeekerRepository = jobSeekerRepository;
+        this.jobService = jobService;
+        this.recommendationService = recommendationService;
+        this.applicationService = applicationService;
+        this.resumeParserService = resumeParserService;
         this.resumeService = resumeService;
         this.jobSeekerService = jobSeekerService;
         this.educationService = educationService;
