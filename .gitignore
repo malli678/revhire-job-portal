@@ -1,6 +1,31 @@
+# ===== Eclipse =====
 .metadata/
 .classpath
 .project
 .factorypath
 .settings/
+<<<<<<< HEAD
 target/"bin/" 
+=======
+
+# ===== Maven =====
+target/
+
+# ===== Build folders =====
+bin/
+
+# ===== Uploads (local files) =====
+uploads/
+
+# ===== OS Files =====
+.DS_Store
+Thumbs.db
+
+# ===== Logs =====
+*.log
+output_ascii.txt
+test_output.txt
+
+# ===== IDEs =====
+.vscode/
+>>>>>>> ae4945fda54b001eb77a890f6d62f4e13c797f0e

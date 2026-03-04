@@ -1,68 +1,203 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <title>Applicants</title>
+    <title>Applicants - RevHire</title>
     <meta charset="UTF-8">
+
     <style>
-        body { font-family: Arial; padding:40px; background:#f8f9fa; }
-        table { width:100%; border-collapse: collapse; background:white; }
-        th, td { padding:12px; border-bottom:1px solid #ddd; }
-        th { background:#007bff; color:white; }
-        button {
-            padding:6px 12px;
-            border:none;
-            border-radius:4px;
-            cursor:pointer;
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f6f9;
+            color: #2d3748;
         }
-        .shortlist { background:#28a745; color:white; }
-        .reject { background:#dc3545; color:white; }
-        .save { background:#17a2b8; color:white; }
+
+        h2 {
+            margin-bottom: 25px;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge.status-APPLIED { background:#667eea; }
+        .badge.status-UNDER_REVIEW { background:#ffc107; color:#333; }
+        .badge.status-SHORTLISTED { background:#28a745; }
+        .badge.status-REJECTED { background:#dc3545; }
+        .badge.status-WITHDRAWN { background:#6c757d; }
+
+        .candidate-card {
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .candidate-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
     </style>
+
+    <style th:replace="fragments/header :: header-css"></style>
+    <style th:replace="fragments/footer :: footer-css"></style>
+
 </head>
+
 <body>
 
-<h2>Applicants List</h2>
+<div th:replace="fragments/header :: header"></div>
 
-<table>
-    <tr>
-        <th>Candidate</th>
-        <th>Status</th>
-        <th>Applied Date</th>
-        <th>Actions</th>
-        <th>Notes</th>
-    </tr>
+<div style="padding:40px;max-width:1250px;margin:auto;min-height:80vh;">
 
-    <tr th:each="app : ${applications}">
-        <td th:text="${app.jobSeeker.fullName}"></td>
-        <td th:text="${app.status}"></td>
-        <td th:text="${#temporals.format(app.appliedDate, 'dd-MM-yyyy HH:mm')}"></td>
+    <div style="display:flex;align-items:center;gap:15px;margin-bottom:25px;">
+        <button onclick="history.back()" 
+        style="background:#f1f5f9;border:1px solid #e2e8f0;padding:8px 12px;border-radius:8px;cursor:pointer;">
+        ←
+        </button>
 
-        <td>
-            <form th:action="@{/applications/shortlist}" method="post" style="display:inline;">
-                <input type="hidden" name="applicationId" th:value="${app.id}" />
-                <input type="hidden" name="jobId" th:value="${jobId}" />
-                <button class="shortlist">Shortlist</button>
-            </form>
+        <h2 style="margin:0;">📋 Applicants List</h2>
+    </div>
 
-            <form th:action="@{/applications/reject}" method="post" style="display:inline;">
-                <input type="hidden" name="applicationId" th:value="${app.id}" />
-                <input type="hidden" name="jobId" th:value="${jobId}" />
-                <button class="reject">Reject</button>
-            </form>
-        </td>
 
-        <td>
-            <form th:action="@{/applications/add-notes}" method="post">
-                <input type="hidden" name="applicationId" th:value="${app.id}" />
-                <input type="hidden" name="jobId" th:value="${jobId}" />
-                <input type="text" name="notes"
-                       th:value="${app.notes}"
-                       placeholder="Add note" />
-                <button class="save">Save</button>
-            </form>
-        </td>
-    </tr>
-</table>
+    <!-- FILTER BAR -->
+    <div style="background:white;padding:25px;border-radius:12px;margin-bottom:30px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.05);display:flex;flex-wrap:wrap;gap:15px;">
+
+        <input type="text" id="skillFilter" placeholder="Skill"
+        style="padding:12px;border:1px solid #ddd;border-radius:8px;flex:1;">
+
+        <input type="number" id="expFilter" placeholder="Min Experience"
+        style="padding:12px;border:1px solid #ddd;border-radius:8px;flex:1;">
+
+        <input type="text" id="eduFilter" placeholder="Education"
+        style="padding:12px;border:1px solid #ddd;border-radius:8px;flex:1;">
+
+        <select id="statusFilter"
+        style="padding:12px;border:1px solid #ddd;border-radius:8px;flex:1;">
+            <option value="All Status">All Status</option>
+            <option value="APPLIED">APPLIED</option>
+            <option value="UNDER_REVIEW">UNDER_REVIEW</option>
+            <option value="SHORTLISTED">SHORTLISTED</option>
+            <option value="REJECTED">REJECTED</option>
+        </select>
+
+        <button onclick="applyFilters()"
+        style="background:#4F46E5;color:white;border:none;padding:12px 30px;border-radius:8px;">
+        Apply Filters
+        </button>
+
+        <button onclick="resetFilters()"
+        style="background:#f1f5f9;border:1px solid #ddd;padding:12px 20px;border-radius:8px;">
+        Reset
+        </button>
+
+    </div>
+
+
+    <!-- APPLICANT CARDS -->
+    <div id="applicantGrid"
+    style="display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:20px;">
+
+        <div th:each="app : ${applications}" class="candidate-card"
+        th:data-skills="${#strings.listJoin(app.jobSeeker.skills, ',').toLowerCase()}"
+        th:data-exp="${app.jobSeeker.totalExperienceYears ?: 0}"
+        th:data-status="${app.status}"
+        style="background:white;border-radius:12px;padding:25px;
+        box-shadow:0 4px 15px rgba(0,0,0,0.1);">
+
+            <div style="display:flex;justify-content:space-between;margin-bottom:15px;">
+                <h3 th:text="${app.jobSeeker.fullName}"></h3>
+
+                <span th:text="${app.status}" 
+                th:class="'badge status-' + ${app.status}">
+                </span>
+            </div>
+
+            <p><b>Applied for:</b> <span th:text="${app.job.title}"></span></p>
+
+            <p>
+                <b>Applied Date:</b>
+                <span th:text="${#temporals.format(app.appliedDate,'MMM dd yyyy HH:mm')}"></span>
+            </p>
+
+            <p>
+                <b>Experience:</b>
+                <span th:text="${app.jobSeeker.totalExperienceYears}"></span>
+            </p>
+
+            <div style="display:flex;gap:10px;margin-top:15px;">
+
+                <button type="button"
+                th:onclick="'openStatusModal(' + ${app.id} + ')'"
+                style="flex:1;background:#667eea;color:white;border:none;padding:10px;border-radius:8px;">
+                Update Status
+                </button>
+
+                <a th:href="@{/employer/applicant/{id}(id=${app.id})}"
+                style="flex:1;text-decoration:none;">
+
+                <button style="width:100%;background:#20c997;color:white;border:none;padding:10px;border-radius:8px;">
+                View Profile
+                </button>
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<footer th:replace="fragments/footer :: footer"></footer>
+
+<script th:replace="fragments/header :: header-js"></script>
+
+<script>
+
+function applyFilters(){
+
+const skill=document.getElementById("skillFilter").value.toLowerCase();
+const exp=parseInt(document.getElementById("expFilter").value)||0;
+const status=document.getElementById("statusFilter").value;
+
+const cards=document.querySelectorAll(".candidate-card");
+
+cards.forEach(card=>{
+
+const cardSkills=card.getAttribute("data-skills");
+const cardExp=parseInt(card.getAttribute("data-exp"))||0;
+const cardStatus=card.getAttribute("data-status");
+
+let show=true;
+
+if(skill && !cardSkills.includes(skill)) show=false;
+if(exp && cardExp<exp) show=false;
+if(status!=="All Status" && cardStatus!==status) show=false;
+
+card.style.display=show?"block":"none";
+
+});
+
+}
+
+function resetFilters(){
+
+document.getElementById("skillFilter").value="";
+document.getElementById("expFilter").value="";
+document.getElementById("statusFilter").value="All Status";
+
+applyFilters();
+
+}
+
+</script>
 
 </body>
 </html>

@@ -16,6 +16,11 @@ import java.util.Collections;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private Long id;
+
+    public Long getId() {
+        return id;
+    }
 
     public CustomUserDetailsService(UserRepository userRepository) {
         this.userRepository = userRepository;

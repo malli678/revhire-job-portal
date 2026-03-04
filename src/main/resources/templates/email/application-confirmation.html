@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Application Submitted</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #667eea; color: white; padding: 20px; text-align: center; }
+        .content { padding: 30px; background: #f9f9f9; }
+        .button { 
+            background: #667eea; 
+            color: white; 
+            padding: 12px 25px; 
+            text-decoration: none; 
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>RevHire</h1>
+        </div>
+        <div class="content">
+            <h2>Application Submitted Successfully!</h2>
+            <p>Dear <span th:text="${name}">John</span>,</p>
+            <p>Your application for the position of <strong th:text="${jobTitle}">Software Engineer</strong> 
+               at <strong th:text="${companyName}">Company Name</strong> has been successfully submitted.</p>
+            <p>The employer will review your application and get back to you soon.</p>
+            <p>You can track your application status anytime:</p>
+            <a th:href="${dashboardUrl}" class="button">View My Applications</a>
+        </div>
+        <div class="footer">
+            <p>© 2026 RevHire. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

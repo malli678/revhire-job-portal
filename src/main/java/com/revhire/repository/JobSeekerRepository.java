@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @Repository
 public interface JobSeekerRepository extends JpaRepository<JobSeeker, Long> {
-    Optional<JobSeeker> findByEmail(String email);
+	Optional<JobSeeker> findByEmail(String email);
     
     @Query("SELECT js FROM JobSeeker js WHERE :skill MEMBER OF js.skills")
     List<JobSeeker> findBySkill(@Param("skill") String skill);

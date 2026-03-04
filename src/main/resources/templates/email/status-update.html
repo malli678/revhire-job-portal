@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Application Status Update</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: #667eea; color: white; padding: 20px; text-align: center; }
+        .content { padding: 30px; background: #f9f9f9; }
+        .status { 
+            font-size: 18px; 
+            font-weight: bold; 
+            padding: 10px; 
+            border-radius: 5px; 
+            display: inline-block;
+            margin: 15px 0;
+        }
+        .status.APPLIED { background: #6c757d; color: white; }
+        .status.UNDER_REVIEW { background: #ffc107; color: black; }
+        .status.SHORTLISTED { background: #28a745; color: white; }
+        .status.REJECTED { background: #dc3545; color: white; }
+        .button { 
+            background: #667eea; 
+            color: white; 
+            padding: 12px 25px; 
+            text-decoration: none; 
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+        .footer { text-align: center; margin-top: 30px; color: #666; font-size: 12px; }
+        .notes { background: #e9ecef; padding: 15px; border-radius: 5px; margin: 15px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>RevHire</h1>
+        </div>
+        <div class="content">
+            <h2>Application Status Updated</h2>
+            <p>Dear <span th:text="${name}">John</span>,</p>
+            <p>Your application for <strong th:text="${jobTitle}">Software Engineer</strong> 
+               at <strong th:text="${companyName}">Company Name</strong> has been updated.</p>
+            
+            <div>
+                <span>Status changed from: </span>
+                <span class="status" th:classappend="${oldStatus}" th:text="${oldStatus}"></span>
+                <span> to </span>
+                <span class="status" th:classappend="${newStatus}" th:text="${newStatus}"></span>
+            </div>
+            
+            <div th:if="${notes != null}" class="notes">
+                <strong>Feedback:</strong>
+                <p th:text="${notes}"></p>
+            </div>
+            
+            <a th:href="${dashboardUrl}" class="button">View Details</a>
+        </div>
+        <div class="footer">
+            <p>© 2026 RevHire. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>

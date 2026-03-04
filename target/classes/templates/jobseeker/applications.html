@@ -1,77 +1,351 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <title>My Applications</title>
+    <title>My Applications - RevHire</title>
     <meta charset="UTF-8">
+
     <style>
-        body { font-family: Arial; padding:40px; background:#f4f6f9; }
-        table { width:100%; border-collapse: collapse; background:white; }
-        th, td { padding:12px; border-bottom:1px solid #ddd; text-align:left; }
-        th { background:#343a40; color:white; }
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1a202c;
+        }
 
-        .status-APPLIED { color:blue; font-weight:bold; }
-        .status-SHORTLISTED { color:green; font-weight:bold; }
-        .status-REJECTED { color:red; font-weight:bold; }
-        .status-WITHDRAWN { color:orange; font-weight:bold; }
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
 
-        .withdraw-btn {
-            background:#dc3545;
-            color:white;
-            border:none;
-            padding:6px 10px;
-            border-radius:4px;
-            cursor:pointer;
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        .header-section h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .applications-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .application-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s;
+            border-left: 6px solid #cbd5e0;
+        }
+
+        .application-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .application-card.status-APPLIED {
+            border-left-color: #4F46E5;
+        }
+
+        .application-card.status-UNDER_REVIEW {
+            border-left-color: #f59e0b;
+        }
+
+        .application-card.status-SHORTLISTED {
+            border-left-color: #10b981;
+        }
+
+        .application-card.status-REJECTED {
+            border-left-color: #ef4444;
+        }
+
+        .application-card.status-WITHDRAWN {
+            border-left-color: #64748b;
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .job-info h2 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: #1e293b;
+            font-weight: 700;
+        }
+
+        .company-name {
+            color: #4F46E5;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-top: 4px;
+        }
+
+        .status-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .status-APPLIED {
+            background: #e0e7ff;
+            color: #4338ca;
+        }
+
+        .status-UNDER_REVIEW {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-SHORTLISTED {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-REJECTED {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .status-WITHDRAWN {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .detail-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #94a3b8;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #334155;
+            font-size: 0.9rem;
+        }
+
+        .feedback-box {
+            background: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .feedback-box h4 {
+            margin: 0 0 5px 0;
+            color: #92400e;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .feedback-box p {
+            margin: 0;
+            color: #78350f;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .withdraw-area {
+            display: flex;
+            gap: 12px;
+            padding-top: 20px;
+            border-top: 1px solid #edf2f7;
+        }
+
+        .withdraw-input {
+            flex: 1;
+            padding: 10px 16px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            font-size: 0.9rem;
+        }
+
+        .btn-withdraw {
+            background: #fff5f5;
+            color: #e53e3e;
+            border: 1px solid #feb2b2;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-withdraw:hover {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+
+        .empty-state {
+            text-align: center;
+            background: white;
+            padding: 60px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-browse {
+            display: inline-block;
+            background: #4F46E5;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            margin-top: 25px;
+            transition: all 0.2s;
+        }
+
+        .btn-browse:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
     </style>
+
+    <style th:replace="fragments/header :: header-css"></style>
+    <style th:replace="fragments/footer :: footer-css"></style>
 </head>
+
 <body>
 
-<h2>My Applications</h2>
+<div th:replace="fragments/header :: header"></div>
 
-<table>
-    <tr>
-        <th>Job Title</th>
-        <th>Company</th>
-        <th>Status</th>
-        <th>Applied Date</th>
-        <th>Action</th> <!-- NEW COLUMN -->
-    </tr>
+<div class="container">
 
-    <tr th:each="app : ${applications}">
-        <td th:text="${app.job.title}"></td>
-        <td th:text="${app.job.employer.companyName}"></td>
+    <div class="header-section">
+        <div style="display:flex; align-items:center; gap:15px;">
+            <button onclick="history.back()"
+                style="background:#f1f5f9;color:#475569;border:1px solid #e2e8f0;padding:8px 12px;border-radius:8px;cursor:pointer;font-size:1.1rem;">←</button>
+            <h1>My Applications</h1>
+        </div>
+    </div>
 
-        <td th:text="${app.status}"
-            th:class="'status-' + ${app.status}">
-        </td>
+    <div class="applications-grid">
 
-        <td th:text="${#temporals.format(app.appliedDate, 'dd-MM-yyyy HH:mm')}"></td>
+        <div th:if="${applications == null or applications.isEmpty()}" class="empty-state">
+            <div style="font-size:4rem;margin-bottom:20px;">🎒</div>
+            <h3>Your application quest hasn't started!</h3>
+            <p>Opportunities are waiting for your unique skills.</p>
+            <a th:href="@{/jobseeker/search-jobs}" class="btn-browse">Explore Opportunities</a>
+        </div>
 
-        <!-- Withdraw button inside loop -->
-        <td>
-            <form th:action="@{/jobseeker/withdraw/{id}(id=${app.id})}"
-                  method="post"
-                  th:if="${app.status == T(com.revhire.model.Application.ApplicationStatus).APPLIED}">
+        <div th:each="app : ${applications}" class="application-card" th:classappend="'status-' + ${app.status}">
 
-                <!-- CSRF token -->
-                <input type="hidden"
-                       th:name="${_csrf.parameterName}"
-                       th:value="${_csrf.token}" />
+            <div class="card-top">
+                <div class="job-info">
+                    <h2 th:text="${app.job.title}"></h2>
+                    <div class="company-name" th:text="${app.job.employer.companyName}"></div>
+                </div>
 
-                <input type="text"
-                       name="notes"
-                       placeholder="Reason"
-                       required
-                       style="width:120px;" />
+                <span class="status-badge"
+                      th:classappend="'status-' + ${app.status}"
+                      th:text="${app.status}">
+                </span>
+            </div>
 
-                <button type="submit" class="withdraw-btn">
-                    Withdraw
-                </button>
-            </form>
-        </td>
-    </tr>
+            <div class="details-grid">
 
-</table>
+                <div class="detail-item">
+                    <span class="detail-label">Applied</span>
+                    <span class="detail-value"
+                          th:text="${#temporals.format(app.appliedDate,'dd MMM yyyy')}"></span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Location</span>
+                    <span class="detail-value" th:text="${app.job.location}"></span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Job Type</span>
+                    <span class="detail-value" th:text="${app.job.jobType}"></span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Salary</span>
+                    <span class="detail-value">
+                        <th:block th:if="${app.job.salaryMin != null}">
+                            ₹<span th:text="${app.job.salaryMin}"></span>
+                        </th:block>
+                    </span>
+                </div>
+
+            </div>
+
+            <div th:if="${app.notes != null}" class="feedback-box">
+                <h4>Recruiter Message</h4>
+                <p th:text="${app.notes}"></p>
+            </div>
+
+            <div th:if="${app.status.name() == 'APPLIED' or app.status.name() == 'UNDER_REVIEW'}"
+                 class="withdraw-area">
+
+                <form th:action="@{/jobseeker/withdraw/{id}(id=${app.id})}"
+                      method="post"
+                      style="display:contents;">
+
+                    <input type="hidden"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}" />
+
+                    <input type="text"
+                           name="notes"
+                           class="withdraw-input"
+                           placeholder="Feedback for recruiter (optional)" />
+
+                    <button type="submit" class="btn-withdraw">
+                        Withdraw
+                    </button>
+
+                </form>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<footer th:replace="fragments/footer :: footer"></footer>
+
+<script th:replace="fragments/header :: header-js"></script>
 
 </body>
 </html>

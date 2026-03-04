@@ -1,128 +1,242 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
-    <title>Job Seeker Dashboard - RevHire</title>
-
+    <title>Dashboard - RevHire</title>
+    <meta charset="UTF-8">
     <style>
-        body { font-family: Arial, sans-serif; margin:0; background:#f4f4f4; }
-
-        .header {
-            background:#007bff;
-            color:white;
-            padding:15px 30px;
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1a202c;
         }
 
         .container {
-            max-width:1200px;
-            margin:20px auto;
-            padding:20px;
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
         }
 
-        .card {
-            background:white;
-            padding:20px;
-            margin-bottom:20px;
-            border-radius:8px;
-            box-shadow:0 2px 4px rgba(0,0,0,0.1);
+        .welcome-card {
+            background: linear-gradient(135deg, #4F46E5 0%, #7c3aed 100%);
+            border-radius: 24px;
+            padding: 50px;
+            color: white;
+            box-shadow: 0 20px 50px rgba(79, 70, 229, 0.2);
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .card h2 { margin-top:0; }
-
-        .nav-links a {
-            color:white;
-            text-decoration:none;
-            margin-left:20px;
+        .welcome-card::after {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
         }
 
-        .stats {
-            display:flex;
-            gap:20px;
+        .welcome-card h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0;
+            letter-spacing: -0.02em;
         }
 
-        .stat-box {
-            flex:1;
-            background:#f8f9fa;
-            padding:20px;
-            text-align:center;
-            border-radius:8px;
+        .welcome-card p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            margin-top: 10px;
+            font-weight: 500;
         }
 
-        .stat-box h3 {
-            font-size:32px;
-            margin:0;
-            color:#007bff;
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
         }
 
-        .menu a {
-            text-decoration:none;
-            margin-right:15px;
-            color:#007bff;
-            font-weight:bold;
+        .stat-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: transform 0.2s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-info h3 {
+            margin: 0;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .stat-info p {
+            margin: 0;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .nav-item {
+            background: white;
+            padding: 25px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: #1e293b;
+            font-weight: 700;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+            border: 2px solid #f1f5f9;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-item:hover {
+            border-color: #4F46E5;
+            color: #4F46E5;
+            transform: scale(1.03);
+        }
+
+        .nav-item i {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .nav-item.highlight {
+            background: #4F46E5;
+            color: white;
+            border: none;
+        }
+
+        .nav-item.highlight:hover {
+            background: #4338ca;
+        }
+
+        .strength-bar-container {
+            width: 100%;
+            height: 8px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .strength-bar {
+            height: 100%;
+            background: #10b981;
+            border-radius: 10px;
+            transition: width 1s ease-out;
         }
     </style>
+    <!-- Common Fragments Styles -->
+    <style th:replace="fragments/header :: header-css"></style>
+    <style th:replace="fragments/footer :: footer-css"></style>
 </head>
 
 <body>
 
-<!-- HEADER -->
-<div class="header">
-    <h1>RevHire - Job Seeker</h1>
+    <div th:replace="fragments/header :: header"></div>
 
-    <div class="nav-links">
-        <span th:text="${session.userName}">User</span>
-        <a th:href="@{/auth/logout}">Logout</a>
-    </div>
-</div>
-
-<div class="container">
-
-    <!-- WELCOME -->
-    <div class="card">
-        <h2>
-            Welcome,
-            <span th:text="${user.fullName}">User</span>!
-        </h2>
-
-        <p>Email: <span th:text="${user.email}"></span></p>
-        <p>Location: <span th:text="${user.location}"></span></p>
-    </div>
-
-    <!-- MENU -->
-    <div class="card menu">
-
-        <!-- VERY IMPORTANT → use thymeleaf links -->
-        <a th:href="@{/jobs/search-page}">Search Jobs</a> |
-        <a th:href="@{/jobseeker/saved-jobs}">Saved Jobs</a> |
-        <a th:href="@{/jobseeker/applications}">My Applications</a> |
-        <a th:href="@{/jobseeker/profile}">Profile</a> |
-        <a th:href="@{/jobseeker/resume}">Resume</a>
-
-    </div>
-
-    <!-- STATS -->
-    <div class="stats">
-
-        <div class="stat-box">
-            <h3 th:text="${applicationCount}">0</h3>
-            <p>Applications</p>
+    <div class="container">
+        <!-- WELCOME SECTION -->
+        <div class="welcome-card">
+            <h1 th:text="'Welcome, ' + ${user.fullName.split(' ')[0]} + '!'">Welcome, User!</h1>
+            <p>You have <span th:text="${applicationCount}" style="font-weight: 800;">0</span> active applications in
+                progress. Let's find your next milestone.</p>
         </div>
 
-        <div class="stat-box">
-            <h3 th:text="${savedCount}">0</h3>
-            <p>Saved Jobs</p>
+        <!-- STATS SECTION -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #e0e7ff; color: #4338ca;">📝</div>
+                <div class="stat-info">
+                    <h3 th:text="${applicationCount}">0</h3>
+                    <p>Total Apps</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon" style="background: #fef3c7; color: #92400e;">🔖</div>
+                <div class="stat-info">
+                    <h3 th:text="${savedCount}">0</h3>
+                    <p>Saved Jobs</p>
+                </div>
+            </div>
+            <div class="stat-card" style="flex: 1.5;">
+                <div class="stat-icon" style="background: #d1fae5; color: #065f46;">⚡</div>
+                <div class="stat-info" style="width: 100%;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <h3 th:text="${completion + '%'}">70%</h3>
+                        <p>Profile Strength</p>
+                    </div>
+                    <div class="strength-bar-container">
+                        <div class="strength-bar" th:style="'width:' + ${completion} + '%'"></div>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="stat-box">
-            <h3 th:text="${completion + '%'}">0%</h3>
-            <p>Profile Completion</p>
+        <!-- NAVIGATION GRID -->
+        <div class="nav-grid">
+            <a th:href="@{/jobseeker/search-jobs}" class="nav-item highlight">
+                <i>🔍</i> Search Jobs
+            </a>
+            <a th:href="@{/jobseeker/recommendations}" class="nav-item">
+                <i>🎯</i> For You
+            </a>
+            <a th:href="@{/jobseeker/saved-jobs}" class="nav-item">
+                <i>💾</i> Saved
+            </a>
+            <a th:href="@{/jobseeker/applications}" class="nav-item">
+                <i>📄</i> My Applications
+            </a>
+            <a th:href="@{/jobseeker/profile}" class="nav-item">
+                <i>👤</i> Profile
+            </a>
+            <a th:href="@{/jobseeker/resume}" class="nav-item">
+                <i>📎</i> Resume
+            </a>
+            <a th:href="@{/jobseeker/alerts}" class="nav-item">
+                <i>🔔</i> Alerts
+            </a>
         </div>
-
     </div>
 
-</div>
+    <footer th:replace="fragments/footer :: footer"></footer>
 
+    <script th:replace="fragments/header :: header-js"></script>
 </body>
+
 </html>

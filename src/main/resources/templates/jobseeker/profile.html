@@ -1,56 +1,647 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>My Profile</title>
-    <style>
-        body { font-family:'Segoe UI'; background:#f5f6fa; padding:30px; }
 
-        .card {
-            background:white;
-            padding:25px;
-            border-radius:10px;
-            max-width:700px;
-            margin:auto;
-            box-shadow:0 4px 20px rgba(0,0,0,0.05);
+<head>
+    <title>My Profile - RevHire</title>
+    <meta charset="UTF-8">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1a202c;
         }
 
-        .progress {
-            background:#eee;
-            border-radius:20px;
-            overflow:hidden;
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .profile-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+        }
+
+        /* HEADER */
+        .header {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .avatar-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .avatar-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: #4F46E5;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+            font-weight: 800;
+            object-fit: cover;
+            border: 4px solid #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .edit-avatar-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            color: #4338ca;
+            transition: all 0.2s;
+        }
+
+        .edit-avatar-btn:hover {
+            background: #f8fafc;
+            transform: scale(1.1);
+        }
+
+        .remove-avatar-btn {
+            font-size: 0.75rem;
+            color: #ef4444;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 600;
+        }
+
+        .remove-avatar-btn:hover {
+            color: #dc2626;
+        }
+
+        .profile-title-area h2 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1e293b;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 0.95rem;
+            margin-top: 4px;
+        }
+
+        /* SECTIONS */
+        .section {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-header h3 {
+            margin: 0;
+            font-size: 1.25rem;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .edit-toggle-btn {
+            background: #f1f5f9;
+            color: #475569;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .edit-toggle-btn:hover {
+            background: #e2e8f0;
+        }
+
+        /* DATA CARDS */
+        .info-card {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid #edf2f7;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .info-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #94a3b8;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        /* FORMS */
+        .edit-form-card {
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px solid #edf2f7;
+            display: grid;
+            gap: 15px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        input,
+        select {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            background: #f8fafc;
+            font-size: 0.95rem;
+            color: #1e293b;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            border-color: #4F46E5;
+            background: white;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .btn-save {
+            background: #4F46E5;
+            color: white;
+        }
+
+        .btn-cancel {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        /* SKILLS & TAGS */
+        .tags-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #eef2ff;
+            color: #4338ca;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            border: 1px solid #c7d2fe;
+        }
+
+        .btn-tag-delete {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            padding: 0;
+            font-size: 1rem;
+            display: flex;
+        }
+
+        /* PROGRESS */
+        .progress-box {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .progress-container {
+            background: #e2e8f0;
+            border-radius: 20px;
+            height: 12px;
+            margin-top: 15px;
+            overflow: hidden;
         }
 
         .progress-bar {
-            background:#667eea;
-            color:white;
-            padding:6px;
-            text-align:center;
+            height: 100%;
+            background: linear-gradient(90deg, #4F46E5, #6366f1);
+            transition: width 0.5s ease-in-out;
+        }
+
+        .back-nav {
+            margin-bottom: 25px;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: #64748b;
+            font-weight: 700;
+            font-size: 0.9rem;
+            transition: color 0.2s;
+        }
+
+        .btn-back:hover {
+            color: #4F46E5;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .info-card {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
+    <!-- Common Fragments Styles -->
+    <style th:replace="fragments/header :: header-css"></style>
+    <style th:replace="fragments/footer :: footer-css"></style>
 </head>
+
 <body>
 
-<div class="card">
+    <div th:replace="fragments/header :: header"></div>
 
-    <h2 th:text="${user.fullName}"></h2>
+    <div class="container">
+        <!-- Back Nav -->
+        <div class="back-nav">
+            <a th:href="@{/jobseeker/dashboard}" class="btn-back">
+                ← Return to Dashboard
+            </a>
+        </div>
 
-    <p>Email: <span th:text="${user.email}"></span></p>
-    <p>Location: <span th:text="${user.location}"></span></p>
+        <div class="profile-card">
+            <!-- HEADER -->
+            <div class="header">
+                <div class="avatar-section">
+                    <div class="avatar-wrapper">
+                        <img th:if="${user.profilePicture != null}"
+                            th:src="@{/uploads/{img}(img=${user.profilePicture})}" class="avatar" alt="Profile Picture">
+                        <div th:unless="${user.profilePicture != null}" class="avatar"
+                            th:text="${#strings.substring(user.fullName,0,1)}"></div>
 
-    <hr>
+                        <div class="edit-avatar-btn" onclick="document.getElementById('profilePicInput').click()"
+                            title="Update Picture">
+                            📷
+                        </div>
+                    </div>
+                    <form th:if="${user.profilePicture != null}" th:action="@{/jobseeker/removeProfilePicture}"
+                        method="post">
+                        <button type="submit" class="remove-avatar-btn">Remove Photo</button>
+                    </form>
+                    <!-- Hidden Form -->
+                    <form id="profilePicForm" th:action="@{/jobseeker/uploadProfilePicture}" method="post"
+                        enctype="multipart/form-data" style="display:none;">
+                        <input type="file" id="profilePicInput" name="file" accept="image/png, image/jpeg"
+                            onchange="document.getElementById('profilePicForm').submit()">
+                    </form>
+                </div>
 
-    <h3>Profile Completion</h3>
+                <div class="profile-title-area">
+                    <h2 th:text="${user.fullName}">Candidate Name</h2>
+                    <div class="subtitle">Personal Success Profile</div>
+                    <div th:if="${success}"
+                        style="color: #10b981; font-weight: 700; font-size: 0.85rem; margin-top: 8px;"
+                        th:text="${success}"></div>
+                    <div th:if="${error}" style="color: #ef4444; font-weight: 700; font-size: 0.85rem; margin-top: 8px;"
+                        th:text="${error}"></div>
+                </div>
+            </div>
 
-    <div class="progress">
-        <div class="progress-bar"
-             th:style="'width:' + ${completion} + '%'">
+            <!-- PERSONAL DETAILS -->
+            <div class="section">
+                <div class="section-header">
+                    <h3>👤 Personal Details</h3>
+                    <button class="edit-toggle-btn" id="personal-toggle" onclick="toggleEdit('personal')">✏️ Edit
+                        Details</button>
+                </div>
 
-            <span th:text="${completion + '%'}"></span>
+                <div id="personal-view" class="info-card">
+                    <div class="info-item">
+                        <span class="info-label">Current Role</span>
+                        <span class="info-value" th:text="${user.designation ?: 'Job Seeker'}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Contact Email</span>
+                        <span class="info-value" th:text="${user.email}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Mobile Number</span>
+                        <span class="info-value" th:text="${user.phoneNumber}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Base Location</span>
+                        <span class="info-value" th:text="${user.location ?: 'Not specified'}"></span>
+                    </div>
+                </div>
 
+                <div id="personal-edit" style="display:none;" class="edit-form-card">
+                    <form th:action="@{/jobseeker/profile/update/personal}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Mobile Phone</label>
+                                <input type="text" name="phoneNumber" th:value="${user.phoneNumber}" />
+                            </div>
+                            <div class="form-group">
+                                <label>Residence Location</label>
+                                <input type="text" name="location" th:value="${user.location}" />
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-save">💾 Save Profile</button>
+                            <button type="button" class="btn btn-cancel"
+                                onclick="cancelEdit('personal')">Discard</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- EMPLOYMENT -->
+            <div class="section">
+                <div class="section-header">
+                    <h3>💼 Employment Status</h3>
+                    <button class="edit-toggle-btn" id="employment-toggle" onclick="toggleEdit('employment')">✏️ Edit
+                        Status</button>
+                </div>
+
+                <div id="employment-view" class="info-card">
+                    <div class="info-item">
+                        <span class="info-label">Career Stage</span>
+                        <span class="info-value" th:text="${user.currentEmploymentStatus ?: 'Exploring'}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Current/Latest Organization</span>
+                        <span class="info-value" th:text="${user.currentCompany ?: 'Not specified'}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Official Designation</span>
+                        <span class="info-value" th:text="${user.designation ?: 'Not specified'}"></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Professional Experience</span>
+                        <span class="info-value"><span th:text="${user.totalExperienceYears ?: '0'}">0</span>+
+                            Years</span>
+                    </div>
+                </div>
+
+                <div id="employment-edit" style="display:none;" class="edit-form-card">
+                    <form th:action="@{/jobseeker/profile/update/employment}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Employment Status</label>
+                                <select name="currentEmploymentStatus">
+                                    <option value="Employed"
+                                        th:selected="${user.currentEmploymentStatus == 'Employed'}">Employed</option>
+                                    <option value="Unemployed"
+                                        th:selected="${user.currentEmploymentStatus == 'Unemployed'}">Unemployed
+                                    </option>
+                                    <option value="Fresher" th:selected="${user.currentEmploymentStatus == 'Fresher'}">
+                                        Fresher</option>
+                                    <option value="Student" th:selected="${user.currentEmploymentStatus == 'Student'}">
+                                        Student</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Company Name</label>
+                                <input type="text" name="currentCompany" th:value="${user.currentCompany}" />
+                            </div>
+                            <div class="form-group">
+                                <label>Designation</label>
+                                <input type="text" name="designation" th:value="${user.designation}" />
+                            </div>
+                            <div class="form-group">
+                                <label>Experience (Years)</label>
+                                <input type="number" name="totalExperienceYears" th:value="${user.totalExperienceYears}"
+                                    min="0" step="1" />
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-save">💾 Update Status</button>
+                            <button type="button" class="btn btn-cancel"
+                                onclick="cancelEdit('employment')">Discard</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- SKILLS -->
+            <div class="section">
+                <div class="section-header">
+                    <h3>🧠 Skills</h3>
+                </div>
+                <div class="edit-form-card" style="margin-bottom: 20px;">
+                    <form th:action="@{/jobseeker/profile/skill/add}" method="post">
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" name="skillName" placeholder="Add a core technical or soft skill..."
+                                style="flex:1;" required />
+                            <button type="submit" class="btn btn-save">Add</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="tags-wrapper">
+                    <div th:each="skill : ${skills}" class="tag">
+                        <span th:text="${skill.name}">Skill</span>
+                        <form th:action="@{/jobseeker/profile/skill/delete/{id}(id=${skill.id})}" method="post">
+                            <button class="btn-tag-delete" title="Remove skill">✖</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                <!-- EDUCATION -->
+                <div class="section">
+                    <div class="section-header">
+                        <h3>🎓 Education</h3>
+                    </div>
+                    <div class="edit-form-card" style="margin-bottom: 20px;">
+                        <form th:action="@{/jobseeker/profile/education/add}" method="post">
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <input type="text" name="degree" placeholder="Degree / Certification" required />
+                                <input type="text" name="institution" placeholder="University / School" required />
+                                <button type="submit" class="btn btn-save">Add Entry</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div th:each="edu : ${education}" class="info-card"
+                        style="grid-template-columns: 1fr; margin-bottom: 15px; position: relative;">
+                        <div class="info-item">
+                            <span class="info-label" th:text="${edu.institution}">Institution</span>
+                            <span class="info-value" th:text="${edu.degree}">Degree</span>
+                        </div>
+                        <form th:action="@{/jobseeker/profile/education/delete/{id}(id=${edu.educationId})}"
+                            method="post" style="position: absolute; right: 15px; top: 15px;">
+                            <button class="btn-tag-delete">✖</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- CERTIFICATIONS -->
+                <div class="section">
+                    <div class="section-header">
+                        <h3>🏆 Certifications</h3>
+                    </div>
+                    <div class="edit-form-card" style="margin-bottom: 20px;">
+                        <form th:action="@{/jobseeker/profile/certification/add}" method="post">
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <input type="text" name="name" placeholder="Certification Name" required />
+                                <input type="text" name="issuer" placeholder="Issuing Organization" required />
+                                <input type="text" name="year" placeholder="Year Earned" />
+                                <button type="submit" class="btn btn-save">Add Entry</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div th:each="cert : ${certifications}" class="info-card"
+                        style="grid-template-columns: 1fr; margin-bottom: 15px; position: relative;">
+                        <div class="info-item">
+                            <span class="info-label" th:text="${cert.issuer + ' (' + cert.year + ')'}">Issuer</span>
+                            <span class="info-value" th:text="${cert.name}">Name</span>
+                        </div>
+                        <form th:action="@{/jobseeker/profile/certification/delete/{id}(id=${cert.id})}" method="post"
+                            style="position: absolute; right: 15px; top: 15px;">
+                            <button class="btn-tag-delete">✖</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- WORK EXPERIENCE -->
+            <div class="section">
+                <div class="section-header">
+                    <h3>🛠 Experience</h3>
+                    <a th:href="@{/jobseeker/experience/add}" class="edit-toggle-btn" style="text-decoration: none;">+
+                        Add Experience</a>
+                </div>
+                <div style="display: grid; gap: 15px;">
+                    <div th:each="exp : ${user.experiences}" class="info-card" style="grid-template-columns: 1fr auto;">
+                        <div>
+                            <div class="info-value" th:text="${exp.designation}"
+                                style="font-size: 1.1rem; color: #4F46E5;">Role</div>
+                            <div style="font-weight: 700; margin-top: 4px;" th:text="${exp.companyName}">Company</div>
+                            <div class="subtitle" style="margin-top: 4px;">
+                                <span th:text="${exp.startDate}">Start</span> — <span
+                                    th:text="${exp.endDate}">End</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- COMPLETION -->
+            <div class="progress-box">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <h3 style="margin:0; font-size: 1.1rem; color: #1e293b;">🚀 Profile Completion</h3>
+                    <span th:text="${completion + '%'}" style="font-weight: 800; color: #4F46E5;">0%</span>
+                </div>
+                <div class="progress-container">
+                    <div class="progress-bar" th:style="'width:' + ${completion} + '%'"></div>
+                </div>
+                <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 10px; text-align: center;">Keep your profile
+                    updated to receive more relevant job recommendations!</p>
+            </div>
         </div>
     </div>
 
-</div>
+    <footer th:replace="fragments/footer :: footer"></footer>
 
+    <!-- Common Fragments Scripts -->
+    <script th:replace="fragments/header :: header-js"></script>
+
+    <script>
+        function toggleEdit(section) {
+            document.getElementById(section + '-view').style.display = 'none';
+            document.getElementById(section + '-edit').style.display = 'grid';
+            document.getElementById(section + '-toggle').style.display = 'none';
+        }
+
+        function cancelEdit(section) {
+            document.getElementById(section + '-view').style.display = 'grid';
+            document.getElementById(section + '-edit').style.display = 'none';
+            document.getElementById(section + '-toggle').style.display = 'block';
+        }
+    </script>
 </body>
+
 </html>
