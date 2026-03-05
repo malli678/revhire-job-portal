@@ -99,6 +99,7 @@ public class SecurityConfig {
                                                                 "/jobs/all",
                                                                 "/jobs/search-page",
                                                                 "/jobs/view/**",
+                                                                "/auth/access-denied",
                                                                 "/favicon.ico")
                                                 .permitAll()
 
@@ -141,6 +142,10 @@ public class SecurityConfig {
 
                                                 .failureUrl("/auth/login?error")
                                                 .permitAll())
+
+                                // EXCEPTION HANDLING
+                                .exceptionHandling(exception -> exception
+                                                .accessDeniedPage("/auth/access-denied"))
 
                                 // LOGOUT
                                 .logout(logout -> logout

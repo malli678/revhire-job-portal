@@ -57,8 +57,7 @@ public class AuthController {
         // Convert employment status to uppercase
         if (registrationDto.getCurrentEmploymentStatus() != null) {
             registrationDto.setCurrentEmploymentStatus(
-                registrationDto.getCurrentEmploymentStatus().toUpperCase()
-            );
+                    registrationDto.getCurrentEmploymentStatus().toUpperCase());
         }
 
         // Field-level validation errors
@@ -82,7 +81,7 @@ public class AuthController {
             log.warn("Business validation failed: {}", e.getMessage());
             // Add error to the model
             result.reject("error.registration", e.getMessage());
-            return "auth/register-seeker";  // Return to same page with errors
+            return "auth/register-seeker"; // Return to same page with errors
 
         } catch (Exception e) {
             log.error("Unexpected registration error: ", e);
@@ -107,11 +106,10 @@ public class AuthController {
             Model model,
             RedirectAttributes redirectAttributes) {
 
-    	// Debug: print all errors
+        // Debug: print all errors
         if (result.hasErrors()) {
             System.out.println("=== VALIDATION ERRORS ===");
-            result.getAllErrors().forEach(error -> 
-                System.out.println(error.getDefaultMessage()));
+            result.getAllErrors().forEach(error -> System.out.println(error.getDefaultMessage()));
         }
 
         if (!registrationDto.getPassword().equals(registrationDto.getConfirmPassword())) {
@@ -135,5 +133,10 @@ public class AuthController {
             result.reject("error.registration", "Something went wrong. Please try again.");
             return "auth/register-employer";
         }
+    }
+
+    @GetMapping("/access-denied")
+    public String showAccessDenied() {
+        return "auth/access-denied";
     }
 }
