@@ -13,93 +13,76 @@ import java.util.List;
 @Repository
 public interface JobRepository extends JpaRepository<Job, Long> {
 
-    // ===================================
-    // SEARCH BY TITLE / ROLE
-    // ===================================
-    List<Job> findByTitleContainingIgnoreCase(String title);
+	// ===================================
+	// SEARCH BY TITLE / ROLE
+	// ===================================
+	List<Job> findByTitleContainingIgnoreCase(String title);
 
-    // ===================================
-    // SEARCH BY LOCATION
-    // ===================================
-    List<Job> findByLocationContainingIgnoreCase(String location);
+	// ===================================
+	// SEARCH BY LOCATION
+	// ===================================
+	List<Job> findByLocationContainingIgnoreCase(String location);
 
-    // ===================================
-    // SEARCH BY EXPERIENCE
-    // ===================================
-    List<Job> findByExperienceRequiredContainingIgnoreCase(String experience);
+	// ===================================
+	// SEARCH BY EXPERIENCE
+	// ===================================
+	List<Job> findByExperienceRequiredContainingIgnoreCase(String experience);
 
-    // ===================================
-    // SEARCH BY JOB TYPE
-    // ===================================
-    List<Job> findByJobTypeIgnoreCase(String jobType);
+	// ===================================
+	// SEARCH BY JOB TYPE
+	// ===================================
+	List<Job> findByJobTypeIgnoreCase(String jobType);
 
-    // ===================================
-    // SEARCH BY SALARY
-    // ===================================
-    List<Job> findBySalaryMinGreaterThanEqual(Double salary);
+	// ===================================
+	// SEARCH BY SALARY
+	// ===================================
+	List<Job> findBySalaryMinGreaterThanEqual(Double salary);
 
-    // ===================================
-    // SEARCH BY STATUS
-    // ===================================
-    List<Job> findByStatus(String status);
+	// ===================================
+	// SEARCH BY STATUS
+	// ===================================
+	List<Job> findByStatus(String status);
 
-    // ===================================
-    // GET JOBS BY EMPLOYER
-    // ===================================
-    List<Job> findByEmployer(Employer employer);
+	// ===================================
+	// GET JOBS BY EMPLOYER
+	// ===================================
+	List<Job> findByEmployer(Employer employer);
 
-    List<Job> findByDeadlineBeforeAndStatus(LocalDateTime deadline, String status);
+	List<Job> findByDeadlineBeforeAndStatus(LocalDateTime deadline, String status);
 
-    // ===================================
-    // DASHBOARD STATISTICS
-    // ===================================
-    long countByEmployerUserId(Long userId);
+	// ===================================
+	// DASHBOARD STATISTICS
+	// ===================================
+	long countByEmployerUserId(Long userId);
 
-    long countByEmployerUserIdAndStatus(Long userId, String status);
+	long countByEmployerUserIdAndStatus(Long userId, String status);
 
-    // ===================================
-    // RECOMMENDATIONS
-    // ===================================
-    List<Job> findTop10ByOrderByPostedDateDesc();
+	// Find top 10 most recent jobs (for recommendations when user has no skills)
+	List<Job> findTop10ByStatusOrderByPostedDateDesc(String status);
 
-    List<Job> findTopByOrderByPostedDateDesc(org.springframework.data.domain.Pageable pageable);
+	// Alternative with limit parameter
+	List<Job> findTopByOrderByPostedDateDesc(org.springframework.data.domain.Pageable pageable);
 
-    // ===================================
-    // COMPANY FILTER
-    // ===================================
-    List<Job> findByEmployer_CompanyNameContainingIgnoreCase(String companyName);
+	// Filter by company name
+	List<Job> findByEmployer_CompanyNameContainingIgnoreCase(String companyName);
 
-    // ===================================
-    // FILTER BY DATE POSTED
-    // ===================================
-    @Query("SELECT j FROM Job j WHERE j.postedDate >= :date")
-    List<Job> findByPostedDateAfter(@Param("date") LocalDateTime date);
+	// Filter by date posted (last N days)
+	@Query("SELECT j FROM Job j WHERE j.postedDate >= :date")
+	List<Job> findByPostedDateAfter(@Param("date") LocalDateTime date);
 
-    // ===================================
-    // FILTER BY EXPERIENCE RANGE
-    // ===================================
-    @Query("SELECT j FROM Job j WHERE " +
-            "CAST(REGEXP_SUBSTR(j.experienceRequired, '\\\\d+') AS integer) BETWEEN :minExp AND :maxExp")
-    List<Job> findByExperienceRange(@Param("minExp") int minExp, @Param("maxExp") int maxExp);
+	// Filter by experience range
+	@Query("SELECT j FROM Job j WHERE "
+			+ "CAST(REGEXP_SUBSTR(j.experienceRequired, '\\\\d+') AS integer) BETWEEN :minExp AND :maxExp")
+	List<Job> findByExperienceRange(@Param("minExp") int minExp, @Param("maxExp") int maxExp);
 
-    // ===================================
-    // ADVANCED SEARCH
-    // ===================================
-    @Query("SELECT j FROM Job j WHERE " +
-            "(:title IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :title, '%'))) AND " +
-            "(:location IS NULL OR LOWER(j.location) LIKE LOWER(CONCAT('%', :location, '%'))) AND " +
-            "(:company IS NULL OR LOWER(j.employer.companyName) LIKE LOWER(CONCAT('%', :company, '%'))) AND " +
-            "(:jobType IS NULL OR j.jobType = :jobType) AND " +
-            "(:minSalary IS NULL OR j.salaryMin >= :minSalary) AND " +
-            "(:maxSalary IS NULL OR j.salaryMax <= :maxSalary) AND " +
-            "(:status IS NULL OR j.status = :status)")
-    List<Job> advancedSearch(
-            @Param("title") String title,
-            @Param("location") String location,
-            @Param("company") String company,
-            @Param("jobType") String jobType,
-            @Param("minSalary") Double minSalary,
-            @Param("maxSalary") Double maxSalary,
-            @Param("status") String status
-    );
+	// Filter by multiple criteria
+	@Query("SELECT j FROM Job j WHERE " + "(:title IS NULL OR LOWER(j.title) LIKE LOWER(CONCAT('%', :title, '%'))) AND "
+			+ "(:location IS NULL OR LOWER(j.location) LIKE LOWER(CONCAT('%', :location, '%'))) AND "
+			+ "(:company IS NULL OR LOWER(j.employer.companyName) LIKE LOWER(CONCAT('%', :company, '%'))) AND "
+			+ "(:jobType IS NULL OR j.jobType = :jobType) AND "
+			+ "(:minSalary IS NULL OR j.salaryMin >= :minSalary) AND "
+			+ "(:maxSalary IS NULL OR j.salaryMax <= :maxSalary) AND " + "(:status IS NULL OR j.status = :status)")
+	List<Job> advancedSearch(@Param("title") String title, @Param("location") String location,
+			@Param("company") String company, @Param("jobType") String jobType, @Param("minSalary") Double minSalary,
+			@Param("maxSalary") Double maxSalary, @Param("status") String status);
 }

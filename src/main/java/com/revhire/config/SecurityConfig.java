@@ -50,7 +50,7 @@ public class SecurityConfig {
                 return new HttpSessionSecurityContextRepository();
         }
 
-        // FILTER CHAIN 
+        // FILTER CHAIN
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -72,7 +72,7 @@ public class SecurityConfig {
                                 // SESSION MANAGEMENT
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                                                .maximumSessions(1)
+                                                .maximumSessions(-1)
                                                 .maxSessionsPreventsLogin(false))
 
                                 // SECURITY CONTEXT
@@ -99,6 +99,7 @@ public class SecurityConfig {
                                                                 "/jobs/all",
                                                                 "/jobs/search-page",
                                                                 "/jobs/view/**",
+                                                                "/auth/access-denied",
                                                                 "/favicon.ico")
                                                 .permitAll()
 
@@ -141,6 +142,10 @@ public class SecurityConfig {
 
                                                 .failureUrl("/auth/login?error")
                                                 .permitAll())
+
+                                // EXCEPTION HANDLING
+                                .exceptionHandling(exception -> exception
+                                                .accessDeniedPage("/auth/access-denied"))
 
                                 // LOGOUT
                                 .logout(logout -> logout

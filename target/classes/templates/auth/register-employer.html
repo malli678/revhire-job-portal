@@ -149,19 +149,22 @@
         <div th:if="${error}" class="alert-error" th:text="${error}"></div>
         <div th:if="${success}" class="alert-success" th:text="${success}"></div>
 
-        <form th:action="@{/auth/register/employer}" th:object="${registrationDto}" method="post">
+        <form th:action="@{/auth/register/employer}" th:object="${registrationDto}" method="post" id="registrationForm"
+            novalidate>
 
             <!-- Full Name and Email -->
             <div class="form-row">
                 <div class="form-group">
                     <label>Your Name *</label>
                     <input type="text" th:field="*{fullName}" placeholder="Your full name" required>
+                    <span class="error client-error" id="fullNameError"></span>
                     <span th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="error"></span>
                 </div>
 
                 <div class="form-group">
                     <label>Email *</label>
                     <input type="email" th:field="*{email}" placeholder="Your email" required>
+                    <span class="error client-error" id="emailError"></span>
                     <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
                 </div>
             </div>
@@ -172,12 +175,14 @@
                     <label>Password *</label>
                     <input type="password" th:field="*{password}" placeholder="Create password" required>
                     <div class="hint">8-20 chars, with uppercase, lowercase, number & special character</div>
+                    <span class="error client-error" id="passwordError"></span>
                     <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
                 </div>
 
                 <div class="form-group">
                     <label>Confirm Password *</label>
                     <input type="password" th:field="*{confirmPassword}" placeholder="Confirm password" required>
+                    <span class="error client-error" id="confirmPasswordError"></span>
                     <span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"
                         class="error"></span>
                 </div>
@@ -187,6 +192,7 @@
             <div class="form-group">
                 <label>Company Name *</label>
                 <input type="text" th:field="*{companyName}" placeholder="Your company name" required>
+                <span class="error client-error" id="companyNameError"></span>
                 <span th:if="${#fields.hasErrors('companyName')}" th:errors="*{companyName}" class="error"></span>
             </div>
 
@@ -194,7 +200,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Industry *</label>
-                    <select th:field="*{industry}" required>
+                    <select th:field="*{industry}" id="industry" required>
                         <option value="">Select industry</option>
                         <option value="IT">Information Technology</option>
                         <option value="Finance">Finance & Banking</option>
@@ -205,12 +211,13 @@
                         <option value="Marketing">Marketing & Advertising</option>
                         <option value="Other">Other</option>
                     </select>
+                    <span class="error client-error" id="industryError"></span>
                     <span th:if="${#fields.hasErrors('industry')}" th:errors="*{industry}" class="error"></span>
                 </div>
 
                 <div class="form-group">
                     <label>Company Size *</label>
-                    <select th:field="*{companySize}" required>
+                    <select th:field="*{companySize}" id="companySize" required>
                         <option value="">Select size</option>
                         <option value="1-10">1-10 employees</option>
                         <option value="11-50">11-50 employees</option>
@@ -218,6 +225,7 @@
                         <option value="201-500">201-500 employees</option>
                         <option value="500+">500+ employees</option>
                     </select>
+                    <span class="error client-error" id="companySizeError"></span>
                     <span th:if="${#fields.hasErrors('companySize')}" th:errors="*{companySize}" class="error"></span>
                 </div>
             </div>
@@ -243,13 +251,14 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Security Question *</label>
-                    <select th:field="*{securityQuestion}" required>
+                    <select th:field="*{securityQuestion}" id="securityQuestion" required>
                         <option value="What is your favorite color?" selected>What is your favorite color?</option>
                         <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
                         <option value="What was the name of your first pet?">What was the name of your first pet?
                         </option>
                         <option value="What city were you born in?">What city were you born in?</option>
                     </select>
+                    <span class="error client-error" id="securityQuestionError"></span>
                     <span th:if="${#fields.hasErrors('securityQuestion')}" th:errors="*{securityQuestion}"
                         class="error"></span>
                 </div>
@@ -257,6 +266,7 @@
                 <div class="form-group">
                     <label>Security Answer *</label>
                     <input type="text" th:field="*{securityAnswer}" placeholder="Your answer" required>
+                    <span class="error client-error" id="securityAnswerError"></span>
                     <span th:if="${#fields.hasErrors('securityAnswer')}" th:errors="*{securityAnswer}"
                         class="error"></span>
                 </div>
@@ -266,6 +276,7 @@
             <div class="form-group">
                 <label>Headquarters Location *</label>
                 <input type="text" th:field="*{headquarters}" placeholder="City, Country" required>
+                <span class="error client-error" id="headquartersError"></span>
                 <span th:if="${#fields.hasErrors('headquarters')}" th:errors="*{headquarters}" class="error"></span>
             </div>
 
@@ -276,6 +287,69 @@
             Already have an account? <a th:href="@{/auth/login}">Login here</a>
         </div>
     </div>
+
+    <script>
+        document.getElementById('registrationForm').addEventListener('submit', function (event) {
+            let isValid = true;
+
+            // Clear previous client-side errors
+            document.querySelectorAll('.client-error').forEach(el => el.textContent = '');
+
+            // Helper to set error
+            const setError = (id, message) => {
+                document.getElementById(id).textContent = message;
+                isValid = false;
+            };
+
+            // Full Name validation
+            const fullName = document.getElementById('fullName');
+            if (!fullName.value.trim()) setError('fullNameError', 'Your name is required');
+
+            // Email validation
+            const email = document.getElementById('email');
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email.value.trim()) {
+                setError('emailError', 'Email is required');
+            } else if (!emailPattern.test(email.value)) {
+                setError('emailError', 'Invalid email format');
+            }
+
+            // Password validation
+            const password = document.getElementById('password');
+            if (!password.value) {
+                setError('passwordError', 'Password is required');
+            } else if (password.value.length < 8) {
+                setError('passwordError', 'Min 8 characters');
+            }
+
+            // Confirm Password validation
+            const confirmPassword = document.getElementById('confirmPassword');
+            if (confirmPassword.value !== password.value) {
+                setError('confirmPasswordError', 'Passwords do not match');
+            }
+
+            // Company Name
+            const companyName = document.getElementById('companyName');
+            if (!companyName.value.trim()) setError('companyNameError', 'Company name is required');
+
+            // Industry
+            if (!document.getElementById('industry').value) setError('industryError', 'Please select industry');
+
+            // Company Size
+            if (!document.getElementById('companySize').value) setError('companySizeError', 'Please select company size');
+
+            // Security Answer
+            if (!document.getElementById('securityAnswer').value.trim()) setError('securityAnswerError', 'Security answer is required');
+
+            // Headquarters
+            if (!document.getElementById('headquarters').value.trim()) setError('headquartersError', 'Headquarters is required');
+
+            if (!isValid) {
+                event.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    </script>
 </body>
 
 </html>

@@ -109,6 +109,11 @@ public class ApplicationService {
 	// SHORTLIST
 	public void shortlistCandidate(Long applicationId, String note) {
 		Application app = applicationRepository.findById(applicationId).orElseThrow();
+
+		if (app.getStatus() == ApplicationStatus.WITHDRAWN) {
+			throw new RuntimeException("Cannot update a withdrawn application.");
+		}
+
 		String oldStatus = app.getStatus().toString();
 		app.setStatus(Application.ApplicationStatus.SHORTLISTED);
 		app.setNotes(note);
@@ -127,6 +132,11 @@ public class ApplicationService {
 	public void rejectCandidate(Long applicationId, String notes) {
 		Application app = applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));
+
+		if (app.getStatus() == ApplicationStatus.WITHDRAWN) {
+			throw new RuntimeException("Cannot update a withdrawn application.");
+		}
+
 		String oldStatus = app.getStatus().toString();
 		app.setStatus(Application.ApplicationStatus.REJECTED);
 		app.setNotes(notes);
@@ -217,8 +227,11 @@ public class ApplicationService {
 		List<Application> applications = applicationRepository.findAllById(applicationIds);
 
 		for (Application app : applications) {
-			// Rule: once terminal (SHORTLISTED or REJECTED), don't change status via bulk
-			if (app.getStatus() == ApplicationStatus.SHORTLISTED || app.getStatus() == ApplicationStatus.REJECTED) {
+			// Rule: once terminal (SHORTLISTED or REJECTED) or WITHDRAWN, don't change
+			// status via bulk
+			if (app.getStatus() == ApplicationStatus.SHORTLISTED ||
+					app.getStatus() == ApplicationStatus.REJECTED ||
+					app.getStatus() == ApplicationStatus.WITHDRAWN) {
 				continue;
 			}
 
@@ -346,6 +359,10 @@ public class ApplicationService {
 		Application app = applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));
 
+		if (app.getStatus() == ApplicationStatus.WITHDRAWN) {
+			throw new RuntimeException("Cannot update a withdrawn application.");
+		}
+
 		if (app.getStatus() != ApplicationStatus.APPLIED) {
 			throw new RuntimeException("Only APPLIED applications can be moved to UNDER_REVIEW");
 		}
@@ -367,6 +384,10 @@ public class ApplicationService {
 	public void moveFromUnderReviewToShortlisted(Long applicationId, String notes) {
 		Application app = applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));
+
+		if (app.getStatus() == ApplicationStatus.WITHDRAWN) {
+			throw new RuntimeException("Cannot update a withdrawn application.");
+		}
 
 		if (app.getStatus() != ApplicationStatus.UNDER_REVIEW) {
 			throw new RuntimeException("Only UNDER_REVIEW applications can be shortlisted");
@@ -395,9 +416,11 @@ public class ApplicationService {
 		Application app = applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));
 
-		// Rule: once terminal, don't change
-		if (app.getStatus() == ApplicationStatus.SHORTLISTED || app.getStatus() == ApplicationStatus.REJECTED) {
-			throw new RuntimeException("This application has already been processed and its status is now permanent.");
+		// Rule: once terminal or withdrawn, don't change
+		if (app.getStatus() == ApplicationStatus.SHORTLISTED ||
+				app.getStatus() == ApplicationStatus.REJECTED ||
+				app.getStatus() == ApplicationStatus.WITHDRAWN) {
+			throw new RuntimeException("This application has already been processed or withdrawn.");
 		}
 
 		Application.ApplicationStatus oldStatus = app.getStatus();
