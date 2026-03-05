@@ -50,7 +50,7 @@ public class SecurityConfig {
                 return new HttpSessionSecurityContextRepository();
         }
 
-        // FILTER CHAIN 
+        // FILTER CHAIN
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -72,7 +72,7 @@ public class SecurityConfig {
                                 // SESSION MANAGEMENT
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                                                .maximumSessions(1)
+                                                .maximumSessions(-1)
                                                 .maxSessionsPreventsLogin(false))
 
                                 // SECURITY CONTEXT

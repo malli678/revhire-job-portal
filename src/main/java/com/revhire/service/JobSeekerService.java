@@ -104,7 +104,7 @@ public class JobSeekerService {
 	// GET ALL JOBS
 	// =========================
 	public List<Job> getAllJobs() {
-		return jobRepository.findAll();
+		return jobRepository.findByStatus("ACTIVE");
 	}
 
 	// =========================

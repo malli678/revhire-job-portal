@@ -147,35 +147,44 @@
                 <a th:href="@{/employer/manage-jobs}" class="btn-back">← Back to Manage</a>
             </div>
 
-            <form th:action="@{'/employer/job/update/' + ${job.jobId}}" method="post" class="form-grid">
+            <form th:action="@{'/employer/job/update/' + ${job.jobId}}" method="post" class="form-grid" id="editJobForm"
+                novalidate>
                 <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
                 <div class="form-group">
                     <label>Position Designation</label>
-                    <input type="text" name="title" th:value="${job.title}" placeholder="e.g. Lead Technical Architect"
-                        required />
+                    <input type="text" name="title" id="title" th:value="${job.title}"
+                        placeholder="e.g. Lead Technical Architect" required />
+                    <span class="error client-error" id="titleError"
+                        style="color: #e53e3e; font-size: 0.8rem; margin-top: 4px;"></span>
                 </div>
 
                 <div class="form-group">
                     <label>Strategic Mandate (Description)</label>
-                    <textarea name="description" th:text="${job.description}"
+                    <textarea name="description" id="description" th:text="${job.description}"
                         placeholder="Outline the core responsibilities and expectations..." required></textarea>
+                    <span class="error client-error" id="descriptionError"
+                        style="color: #e53e3e; font-size: 0.8rem; margin-top: 4px;"></span>
                 </div>
 
                 <div class="row">
                     <div class="form-group">
                         <label>Deployment Location</label>
-                        <input type="text" name="location" th:value="${job.location}"
+                        <input type="text" name="location" id="location" th:value="${job.location}"
                             placeholder="e.g. London, UK / Remote" required />
+                        <span class="error client-error" id="locationError"
+                            style="color: #e53e3e; font-size: 0.8rem; margin-top: 4px;"></span>
                     </div>
                     <div class="form-group">
                         <label>Employment Model</label>
-                        <select name="jobType" required>
+                        <select name="jobType" id="jobType" required>
                             <option value="Full-time" th:selected="${job.jobType == 'Full-time'}">Full-time</option>
                             <option value="Part-time" th:selected="${job.jobType == 'Part-time'}">Part-time</option>
                             <option value="Contract" th:selected="${job.jobType == 'Contract'}">Contract</option>
                             <option value="Internship" th:selected="${job.jobType == 'Internship'}">Internship</option>
                         </select>
+                        <span class="error client-error" id="jobTypeError"
+                            style="color: #e53e3e; font-size: 0.8rem; margin-top: 4px;"></span>
                     </div>
                 </div>
 
@@ -204,6 +213,48 @@
     <footer th:replace="fragments/footer :: footer"></footer>
 
     <script th:replace="fragments/header :: header-js"></script>
+
+    <script>
+        document.getElementById('editJobForm').addEventListener('submit', function (event) {
+            let isValid = true;
+
+            // Clear previous errors
+            document.querySelectorAll('.client-error').forEach(el => el.textContent = '');
+
+            // Title validation
+            const title = document.getElementById('title');
+            if (!title.value.trim()) {
+                document.getElementById('titleError').textContent = 'Position designation is required';
+                isValid = false;
+            }
+
+            // Description validation
+            const description = document.getElementById('description');
+            if (!description.value.trim()) {
+                document.getElementById('descriptionError').textContent = 'Strategic mandate is required';
+                isValid = false;
+            }
+
+            // Location validation
+            const location = document.getElementById('location');
+            if (!location.value.trim()) {
+                document.getElementById('locationError').textContent = 'Deployment location is required';
+                isValid = false;
+            }
+
+            // Job Type validation
+            const jobType = document.getElementById('jobType');
+            if (!jobType.value) {
+                document.getElementById('jobTypeError').textContent = 'Please select an employment model';
+                isValid = false;
+            }
+
+            if (!isValid) {
+                event.preventDefault();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
+    </script>
 </body>
 
 </html>

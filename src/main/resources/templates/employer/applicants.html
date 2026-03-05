@@ -186,9 +186,12 @@
 					</div>
 					<div class="card-actions"
 						style="display: flex; gap: 10px; padding-top: 20px; border-top: 1px solid #f0f2f5;">
-						<button type="button" th:onclick="'openStatusModal(' + ${app.id} + ', \'\')'"
+						<button type="button" th:if="${app.status.name() != 'WITHDRAWN'}"
+							th:onclick="'openStatusModal(' + ${app.id} + ', \'\')'"
 							style="flex: 1; background: #667eea; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600;">Update
 							Status</button>
+						<button type="button" th:if="${app.status.name() == 'WITHDRAWN'}" disabled
+							style="flex: 1; background: #cbd5e0; color: #718096; border: none; padding: 10px; border-radius: 8px; cursor: not-allowed; font-weight: 600;">Withdrawn</button>
 						<button type="button" th:onclick="'openNoteModal(' + ${app.id} + ')'"
 							style="flex: 1; background: #6c757d; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600;">Add
 							Note</button>
