@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <style th:fragment="footer-css">
+        .common-footer {
+            background: #ffffff;
+            color: #4a5568;
+            padding: 40px 20px 20px;
+            border-top: 1px solid #edf2f7;
+            margin-top: auto;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #4F46E5;
+            text-decoration: none;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .footer-section h4 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            text-decoration: none;
+            color: #718096;
+            transition: color 0.2s;
+            font-size: 0.95rem;
+        }
+
+        .footer-links a:hover {
+            color: #4F46E5;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 20px;
+            border-top: 1px solid #edf2f7;
+            color: #a0aec0;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body>
+    <footer th:fragment="footer" class="common-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <a href="/" class="footer-logo">RevHire</a>
+                <p style="color: #718096; line-height: 1.6; font-size: 0.9rem;">
+                    Connecting top talent with their dream opportunities. Empowering employers to find the perfect
+                    match.
+                </p>
+            </div>
+
+            <div class="footer-section">
+                <h4>Contact Us</h4>
+                <ul class="footer-links">
+                    <li>📧 support@revhire.com</li>
+                    <li>📍 123 Tech Square, Hyderabad, India</li>
+                    <li>📞 +91 98765 43210</li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul class="footer-links">
+                    <!-- Guest Links -->
+                    <th:block th:if="${session.userName == null}">
+                        <li><a href="/jobs/search-page">Browse Jobs</a></li>
+                        <li><a href="/auth/register/seeker">Join as Candidate</a></li>
+                        <li><a href="/auth/register/employer">Post a Job</a></li>
+                    </th:block>
+
+                    <!-- Seeker Links -->
+                    <th:block th:if="${session.userRole == 'JOBSEEKER'}">
+                        <li><a href="/jobseeker/dashboard">Dashboard</a></li>
+                        <li><a href="/jobs/search-page">Browse Jobs</a></li>
+                        <li><a href="/jobseeker/applications">My Applications</a></li>
+                        <li><a href="/jobseeker/profile">My Profile</a></li>
+                    </th:block>
+
+                    <!-- Employer Links -->
+                    <th:block th:if="${session.userRole == 'EMPLOYER'}">
+                        <li><a href="/employer/dashboard">Dashboard</a></li>
+                        <li><a href="/employer/manage-jobs">Manage Jobs</a></li>
+                        <li><a href="/jobs/post">Post a New Job</a></li>
+                        <li><a href="/employer/company-profile">Company Profile</a></li>
+                    </th:block>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            &copy; <span th:text="${#calendars.format(#calendars.createNow(), 'yyyy')}">2026</span> RevHire. All rights
+            reserved. |
+            <a href="#" style="color: #a0aec0; text-decoration: none; margin-left: 10px;">Privacy Policy</a> |
+            <a href="#" style="color: #a0aec0; text-decoration: none; margin-left: 10px;">Terms of Service</a>
+        </div>
+    </footer>
+</body>
+
+</html>

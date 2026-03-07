@@ -4,6 +4,9 @@
 .project
 .factorypath
 .settings/
+<<<<<<< HEAD
+target/"bin/" 
+=======
 
 # ===== Maven =====
 target/
@@ -25,3 +28,4 @@ test_output.txt
 
 # ===== IDEs =====
 .vscode/
+>>>>>>> ae4945fda54b001eb77a890f6d62f4e13c797f0e
