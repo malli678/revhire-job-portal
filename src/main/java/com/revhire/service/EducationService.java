@@ -21,7 +21,7 @@ public class EducationService {
     @Autowired
     private JobSeekerRepository jobSeekerRepository;
 
-    // ✅ Add Education
+    //  Add Education
     public ResponseEntity<?> addEducation(Long jobSeekerId, Education education) {
 
         JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
@@ -34,7 +34,7 @@ public class EducationService {
         return ResponseEntity.ok("Education added successfully");
     }
 
-    // ✅ View Education
+    //  View Education
     public ResponseEntity<?> getEducation(Long jobSeekerId) {
 
         JobSeeker jobSeeker = jobSeekerRepository.findById(jobSeekerId)
@@ -45,7 +45,7 @@ public class EducationService {
         return ResponseEntity.ok(educationList);
     }
 
-    // ✅ Delete Education
+    //  Delete Education
     public ResponseEntity<?> deleteEducation(Long educationId) {
 
         Education education = educationRepository.findById(educationId)

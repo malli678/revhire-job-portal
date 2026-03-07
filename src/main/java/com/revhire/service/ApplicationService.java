@@ -98,7 +98,7 @@ public class ApplicationService {
 
 		applicationRepository.save(application);
 
-		// ✅ Create notifications
+		// Create notifications
 		notificationService.createNotification(
 				jobSeeker.getUserId(),
 				"Application Submitted",
@@ -155,7 +155,7 @@ public class ApplicationService {
 		app.setNotes(note);
 		applicationRepository.save(app);
 		emailService.sendApplicationStatusUpdate(app, oldStatus);
-		// ✅ Create notification for shortlist
+		//  Create notification for shortlist
 		notificationService.createNotification(
 				app.getJobSeeker().getUserId(),
 				"Application Shortlisted",
