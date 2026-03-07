@@ -35,11 +35,11 @@ public class Application {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "JOB_ID", nullable = false) // ✅ This is correct
+    @JoinColumn(name = "JOB_ID", nullable = false)
     private Job job;
 
     @ManyToOne
-    @JoinColumn(name = "JOBSEEKER_ID", nullable = false) // ✅ Make sure this matches the SQL
+    @JoinColumn(name = "JOBSEEKER_ID", nullable = false)
     private JobSeeker jobSeeker;
 
     @Enumerated(EnumType.STRING)

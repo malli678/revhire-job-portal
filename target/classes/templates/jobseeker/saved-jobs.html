@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Saved Jobs - RevHire</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1a202c;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 35px;
+        }
+
+        .header-section h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .jobs-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .job-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .job-card:hover {
+            transform: translateY(-4px);
+            border-color: #e0e7ff;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .job-main-info {
+            flex: 1;
+        }
+
+        .job-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+
+        .company-name {
+            color: #4F46E5;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .meta-row {
+            display: flex;
+            gap: 20px;
+            color: #64748b;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-apply {
+            background: #4F46E5;
+            color: white;
+        }
+
+        .btn-apply:hover {
+            background: #4338ca;
+            transform: scale(1.05);
+        }
+
+        .btn-view {
+            background: #f8fafc;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+
+        .btn-view:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-remove {
+            background: #fff5f5;
+            color: #ef4444;
+        }
+
+        .btn-remove:hover {
+            background: #fee2e2;
+        }
+
+        .empty-state {
+            text-align: center;
+            background: white;
+            padding: 80px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-explore {
+            display: inline-block;
+            background: #4F46E5;
+            color: white;
+            padding: 14px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            margin-top: 25px;
+            transition: all 0.2s;
+        }
+
+        @media (max-width: 768px) {
+            .job-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 20px;
+            }
+
+            .card-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+    <!-- Common Fragments Styles -->
+    <style th:replace="fragments/header :: header-css"></style>
+    <style th:replace="fragments/footer :: footer-css"></style>
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+</head>
+
+<body>
+
+    <div th:replace="fragments/header :: header"></div>
+
+    <div class="container">
+        <div style="margin-bottom: 20px;">
+            <button onclick="history.back()"
+                style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 600;">←
+                Back</button>
+        </div>
+        <div class="header-section">
+            <h1>⭐ Saved Jobs</h1>
+        </div>
+
+        <div class="jobs-grid">
+            <!-- EMPTY STATE -->
+            <div th:if="${#lists.isEmpty(savedJobs)}" class="empty-state">
+                <div style="font-size: 4rem; margin-bottom: 20px;">🔖</div>
+                <h3>Your saved folder is looking a bit light!</h3>
+                <p>Found something interesting but not ready to apply? Save it here for later.</p>
+                <a th:href="@{/jobseeker/search-jobs}" class="btn-explore">Browse Jobs</a>
+            </div>
+
+            <!-- JOB CARDS -->
+            <div th:each="saved : ${savedJobs}" class="job-card">
+                <div class="job-main-info">
+                    <div class="job-title">
+                        <a th:href="@{/jobseeker/job/{id}(id=${saved.job.jobId})}" th:text="${saved.job.title}"
+                            style="color: inherit; text-decoration: none; border-bottom: 2px solid transparent; transition: border 0.2s;"
+                            onmouseover="this.style.borderBottomColor='#4F46E5'"
+                            onmouseout="this.style.borderBottomColor='transparent'">Position</a>
+                    </div>
+                    <div class="company-name" th:text="${saved.job.employer.companyName}">Organization</div>
+                    <div class="meta-row">
+                        <div class="meta-item">📍 <span th:text="${saved.job.location}">Remote</span></div>
+                        <div class="meta-item">💼 <span th:text="${saved.job.jobType}">Full-time</span></div>
+                    </div>
+                </div>
+
+                <div class="card-actions" th:id="'actions-' + ${saved.job.jobId}">
+                    <a th:href="@{/jobseeker/job/{id}(id=${saved.job.jobId})}" class="btn btn-view">View</a>
+
+                    <th:block th:if="${appliedJobIds != null and appliedJobIds.contains(saved.job.jobId)}">
+                        <span
+                            style="background: #dcfce7; color: #16a34a; padding: 6px 12px; border-radius: 8px; font-weight: 800; font-size: 0.9rem; display: flex; align-items: center; gap: 4px;">
+                            ✅ Applied
+                        </span>
+                    </th:block>
+
+                    <button class="btn btn-remove" th:onclick="'removeSaved(' + ${saved.job.jobId} + ', this)'"
+                        title="Remove from list">
+                        ✖
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="fragments/footer :: footer"></footer>
+
+    <!-- Common Fragments Scripts -->
+    <script th:replace="fragments/header :: header-js"></script>
+
+    <script th:inline="javascript">
+        function getCsrfHeaders() {
+            const tokenMeta = document.querySelector("meta[name='_csrf']");
+            const headerMeta = document.querySelector("meta[name='_csrf_header']");
+            if (!tokenMeta || !headerMeta) return {};
+            return { [headerMeta.content]: tokenMeta.content };
+        }
+
+        function showNotification(message, isError = false) {
+            const div = document.createElement('div');
+            div.style.cssText = `
+                position: fixed; top: 20px; right: 20px; z-index: 9999;
+                padding: 16px 24px; border-radius: 12px; font-weight: 700;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                background: ${isError ? '#ef4444' : '#10b981'}; color: white;
+                animation: slideIn 0.3s ease-out;
+            `;
+            div.textContent = message;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+
+        async function removeSaved(jobId, button) {
+            try {
+                const response = await fetch('/jobseeker/removeSaved/' + jobId, {
+                    method: 'POST',
+                    headers: getCsrfHeaders()
+                });
+                if (response.ok) {
+                    showNotification('Removed from saved jobs');
+                    const card = button.closest('.job-card');
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateX(20px)';
+                    setTimeout(() => {
+                        card.remove();
+                        if (document.querySelectorAll('.job-card').length === 0) location.reload();
+                    }, 300);
+                }
+            } catch (err) {
+                showNotification('Failed to remove job', true);
+            }
+        }
+    </script>
+    <style>
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</body>
+
+</html>
