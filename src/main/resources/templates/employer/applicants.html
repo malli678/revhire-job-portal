@@ -74,6 +74,17 @@
 	<div th:replace="fragments/header :: header"></div>
 
 	<div style="padding: 40px; max-width: 1250px; margin: 0 auto; min-height: 80vh;">
+
+		<!-- Error/Success Messages -->
+		<div th:if="${errorMessage}"
+			style="background: #fee2e2; color: #dc2626; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #fecaca; font-weight: 600;">
+			<span th:text="${errorMessage}"></span>
+		</div>
+		<div th:if="${successMessage}"
+			style="background: #dcfce7; color: #16a34a; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bbf7d0; font-weight: 600;">
+			<span th:text="${successMessage}"></span>
+		</div>
+
 		<div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px;">
 			<button onclick="history.back()"
 				style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-size: 1.1rem;">←</button>
@@ -175,9 +186,12 @@
 					</div>
 					<div class="card-actions"
 						style="display: flex; gap: 10px; padding-top: 20px; border-top: 1px solid #f0f2f5;">
-						<button type="button" th:onclick="'openStatusModal(' + ${app.id} + ', \'\')'"
+						<button type="button" th:if="${app.status.name() != 'WITHDRAWN'}"
+							th:onclick="'openStatusModal(' + ${app.id} + ', \'\')'"
 							style="flex: 1; background: #667eea; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600;">Update
 							Status</button>
+						<button type="button" th:if="${app.status.name() == 'WITHDRAWN'}" disabled
+							style="flex: 1; background: #cbd5e0; color: #718096; border: none; padding: 10px; border-radius: 8px; cursor: not-allowed; font-weight: 600;">Withdrawn</button>
 						<button type="button" th:onclick="'openNoteModal(' + ${app.id} + ')'"
 							style="flex: 1; background: #6c757d; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: 600;">Add
 							Note</button>
@@ -230,7 +244,7 @@
 							<label style="display:block; margin-bottom:5px; font-weight:bold;">New Status:</label>
 							<select name="status" id="targetStatus" required
 								style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd;">
-								<option value="APPLIED">Applied</option>
+								<option value="" disabled selected>Select Status</option>
 								<option value="UNDER_REVIEW">Under Review</option>
 								<option value="SHORTLISTED">Shortlisted</option>
 								<option value="REJECTED">Rejected</option>

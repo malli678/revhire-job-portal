@@ -47,7 +47,6 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 	// GET JOBS BY EMPLOYER
 	// ===================================
 	List<Job> findByEmployer(Employer employer);
-	
 
 	List<Job> findByDeadlineBeforeAndStatus(LocalDateTime deadline, String status);
 
@@ -58,9 +57,8 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
 	long countByEmployerUserIdAndStatus(Long userId, String status);
 
-
 	// Find top 10 most recent jobs (for recommendations when user has no skills)
-	List<Job> findTop10ByOrderByPostedDateDesc();
+	List<Job> findTop10ByStatusOrderByPostedDateDesc(String status);
 
 	// Alternative with limit parameter
 	List<Job> findTopByOrderByPostedDateDesc(org.springframework.data.domain.Pageable pageable);

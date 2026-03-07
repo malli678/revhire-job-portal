@@ -50,7 +50,7 @@ public class SecurityConfig {
                 return new HttpSessionSecurityContextRepository();
         }
 
-        // FILTER CHAIN ⭐⭐⭐
+        // FILTER CHAIN
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -62,7 +62,7 @@ public class SecurityConfig {
 
                                                                 "/api/**",
 
-                                                                // ✅ AJAX / FETCH ENDPOINTS ⭐⭐⭐
+                                                                // AJAX / FETCH ENDPOINTS
                                                                 "/jobseeker/applyJob/**",
                                                                 "/jobseeker/saveJob/**",
                                                                 "/jobseeker/removeSaved/**"
@@ -72,14 +72,14 @@ public class SecurityConfig {
                                 // SESSION MANAGEMENT
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                                                .maximumSessions(1)
+                                                .maximumSessions(-1)
                                                 .maxSessionsPreventsLogin(false))
 
                                 // SECURITY CONTEXT
                                 .securityContext(context -> context
                                                 .securityContextRepository(securityContextRepository()))
 
-                                // AUTHORIZATION RULES ⭐⭐⭐
+                                // AUTHORIZATION RULES
 
                                 .authorizeHttpRequests(authz -> authz
 
@@ -99,6 +99,7 @@ public class SecurityConfig {
                                                                 "/jobs/all",
                                                                 "/jobs/search-page",
                                                                 "/jobs/view/**",
+                                                                "/auth/access-denied",
                                                                 "/favicon.ico")
                                                 .permitAll()
 
@@ -115,7 +116,7 @@ public class SecurityConfig {
                                 // JWT FILTER (SAFE TO KEEP)
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
-                                // FORM LOGIN ⭐⭐⭐
+                                // FORM LOGIN
                                 .formLogin(form -> form
                                                 .loginPage("/auth/login")
                                                 .loginProcessingUrl("/auth/login")
@@ -141,6 +142,10 @@ public class SecurityConfig {
 
                                                 .failureUrl("/auth/login?error")
                                                 .permitAll())
+
+                                // EXCEPTION HANDLING
+                                .exceptionHandling(exception -> exception
+                                                .accessDeniedPage("/auth/access-denied"))
 
                                 // LOGOUT
                                 .logout(logout -> logout

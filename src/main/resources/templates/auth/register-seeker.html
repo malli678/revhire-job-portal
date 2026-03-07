@@ -151,7 +151,8 @@
         <div th:if="${error}" class="alert-error" th:text="${error}"></div>
         <div th:if="${success}" class="alert-success" th:text="${success}"></div>
 
-        <form th:action="@{/auth/register/seeker}" th:object="${registrationDto}" method="post">
+        <form th:action="@{/auth/register/seeker}" th:object="${registrationDto}" method="post" id="registrationForm"
+            novalidate>
 
             <!-- Global Errors -->
             <div th:if="${#fields.hasErrors('global')}" class="alert-error">
@@ -162,12 +163,14 @@
                 <div class="form-group" th:classappend="${#fields.hasErrors('fullName')} ? 'has-error' : ''">
                     <label>Full Name *</label>
                     <input type="text" th:field="*{fullName}" placeholder="Enter your full name" required>
+                    <span class="error client-error" id="fullNameError"></span>
                     <span th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="error"></span>
                 </div>
 
                 <div class="form-group" th:classappend="${#fields.hasErrors('email')} ? 'has-error' : ''">
                     <label>Email *</label>
                     <input type="email" th:field="*{email}" placeholder="Enter your email" required>
+                    <span class="error client-error" id="emailError"></span>
                     <span th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error"></span>
                 </div>
             </div>
@@ -180,12 +183,14 @@
                         minlength="8">
                     <small class="hint">Must contain uppercase, lowercase, number and special character
                         (@$!%*?&)</small>
+                    <span class="error client-error" id="passwordError"></span>
                     <span th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error"></span>
                 </div>
 
                 <div class="form-group" th:classappend="${#fields.hasErrors('confirmPassword')} ? 'has-error' : ''">
                     <label>Confirm Password *</label>
                     <input type="password" th:field="*{confirmPassword}" placeholder="Re-enter password" required>
+                    <span class="error client-error" id="confirmPasswordError"></span>
                     <span th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}"
                         class="error"></span>
                 </div>
@@ -196,12 +201,14 @@
                     <label>Phone Number *</label>
                     <input type="text" th:field="*{phoneNumber}" placeholder="10 digit mobile number" required
                         pattern="[0-9]{10}">
+                    <span class="error client-error" id="phoneNumberError"></span>
                     <span th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="error"></span>
                 </div>
 
                 <div class="form-group" th:classappend="${#fields.hasErrors('location')} ? 'has-error' : ''">
                     <label>Location *</label>
                     <input type="text" th:field="*{location}" placeholder="City, Country" required>
+                    <span class="error client-error" id="locationError"></span>
                     <span th:if="${#fields.hasErrors('location')}" th:errors="*{location}" class="error"></span>
                 </div>
             </div>
@@ -209,13 +216,14 @@
             <div class="form-row">
                 <div class="form-group" th:classappend="${#fields.hasErrors('securityQuestion')} ? 'has-error' : ''">
                     <label>Security Question *</label>
-                    <select th:field="*{securityQuestion}" required>
+                    <select th:field="*{securityQuestion}" id="securityQuestion" required>
                         <option value="What is your favorite color?" selected>What is your favorite color?</option>
                         <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
                         <option value="What was the name of your first pet?">What was the name of your first pet?
                         </option>
                         <option value="What city were you born in?">What city were you born in?</option>
                     </select>
+                    <span class="error client-error" id="securityQuestionError"></span>
                     <span th:if="${#fields.hasErrors('securityQuestion')}" th:errors="*{securityQuestion}"
                         class="error"></span>
                 </div>
@@ -223,6 +231,7 @@
                 <div class="form-group" th:classappend="${#fields.hasErrors('securityAnswer')} ? 'has-error' : ''">
                     <label>Security Answer *</label>
                     <input type="text" th:field="*{securityAnswer}" placeholder="Your answer" required>
+                    <span class="error client-error" id="securityAnswerError"></span>
                     <span th:if="${#fields.hasErrors('securityAnswer')}" th:errors="*{securityAnswer}"
                         class="error"></span>
                 </div>
@@ -230,7 +239,7 @@
 
             <div class="form-group" th:classappend="${#fields.hasErrors('currentEmploymentStatus')} ? 'has-error' : ''">
                 <label>Current Employment Status *</label>
-                <select th:field="*{currentEmploymentStatus}" required>
+                <select th:field="*{currentEmploymentStatus}" id="currentEmploymentStatus" required>
                     <option value="">Select status</option>
                     <option value="EMPLOYED">Employed</option>
                     <option value="UNEMPLOYED">Unemployed</option>
@@ -238,6 +247,7 @@
                     <option value="FRESHER">Fresher</option>
                     <option value="FREELANCER">Freelancer</option>
                 </select>
+                <span class="error client-error" id="currentEmploymentStatusError"></span>
                 <span th:if="${#fields.hasErrors('currentEmploymentStatus')}" th:errors="*{currentEmploymentStatus}"
                     class="error"></span>
             </div>
@@ -249,6 +259,98 @@
             Already have an account? <a th:href="@{/auth/login}">Login here</a>
         </div>
     </div>
+
+    <script>
+        document.getElementById('registrationForm').addEventListener('submit', function (event) {
+            let isValid = true;
+
+            // Clear previous client-side errors
+            document.querySelectorAll('.client-error').forEach(el => el.textContent = '');
+            document.querySelectorAll('.form-group').forEach(el => el.classList.remove('has-error'));
+
+            // Full Name validation
+            const fullName = document.getElementById('fullName');
+            if (!fullName.value.trim()) {
+                document.getElementById('fullNameError').textContent = 'Full name is required';
+                fullName.parentElement.classList.add('has-error');
+                isValid = false;
+            }
+
+            // Email validation
+            const email = document.getElementById('email');
+            const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!email.value.trim()) {
+                document.getElementById('emailError').textContent = 'Email is required';
+                email.parentElement.classList.add('has-error');
+                isValid = false;
+            } else if (!emailPattern.test(email.value)) {
+                document.getElementById('emailError').textContent = 'Invalid email format';
+                email.parentElement.classList.add('has-error');
+                isValid = false;
+            }
+
+            // Password validation
+            const password = document.getElementById('password');
+            if (!password.value) {
+                document.getElementById('passwordError').textContent = 'Password is required';
+                password.parentElement.classList.add('has-error');
+                isValid = false;
+            } else if (password.value.length < 8) {
+                document.getElementById('passwordError').textContent = 'Password must be at least 8 characters';
+                password.parentElement.classList.add('has-error');
+                isValid = false;
+            }
+
+            // Confirm Password validation
+            const confirmPassword = document.getElementById('confirmPassword');
+            if (confirmPassword.value !== password.value) {
+                document.getElementById('confirmPasswordError').textContent = 'Passwords do not match';
+                confirmPassword.parentElement.classList.add('has-error');
+                isValid = false;
+            }
+
+            // Phone Number validation
+            const phoneNumber = document.getElementById('phoneNumber');
+            const phonePattern = /^[0-9]{10}$/;
+            if (!phoneNumber.value.trim()) {
+                document.getElementById('phoneNumberError').textContent = 'Phone number is required';
+                phoneNumber.parentElement.classList.add('has-error');
+                isValid = false;
+            } else if (!phonePattern.test(phoneNumber.value)) {
+                document.getElementById('phoneNumberError').textContent = 'Enter a valid 10-digit mobile number';
+                phoneNumber.parentElement.classList.add('has-error');
+                isValid = false;
+            }
+
+            // Location validation
+            const location = document.getElementById('location');
+            if (!location.value.trim()) {
+                document.getElementById('locationError').textContent = 'Location is required';
+                location.parentElement.classList.add('has-error');
+                isValid = false;
+            }
+
+            // Security Answer validation
+            const securityAnswer = document.getElementById('securityAnswer');
+            if (!securityAnswer.value.trim()) {
+                document.getElementById('securityAnswerError').textContent = 'Security answer is required';
+                securityAnswer.parentElement.classList.add('has-error');
+                isValid = false;
+            }
+
+            // Employment Status validation
+            const status = document.getElementById('currentEmploymentStatus');
+            if (!status.value) {
+                document.getElementById('currentEmploymentStatusError').textContent = 'Please select your employment status';
+                status.parentElement.classList.add('has-error');
+                isValid = false;
+            }
+
+            if (!isValid) {
+                event.preventDefault();
+            }
+        });
+    </script>
 </body>
 
 </html>

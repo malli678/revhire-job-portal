@@ -278,12 +278,7 @@
                                 ✏️ Edit
                             </a>
 
-                            <form th:action="@{/employer/job/filled/{id}(id=${job.jobId})}" method="post"
-                                th:if="${job.status=='ACTIVE'}" style="display:inline;">
-                                <button type="submit" class="btn btn-action" title="Mark as Filled">
-                                    🎯 Filled
-                                </button>
-                            </form>
+
 
                             <form th:action="@{/employer/job/close/{id}(id=${job.jobId})}" method="post"
                                 th:if="${job.status=='ACTIVE'}" style="display:inline;">
