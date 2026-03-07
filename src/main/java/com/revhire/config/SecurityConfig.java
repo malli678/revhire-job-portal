@@ -16,26 +16,67 @@ import org.springframework.security.web.context.HttpSessionSecurityContextReposi
 import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
+/**
+ * SecurityConfig is the main configuration class for Spring Security.
+ *
+ * Responsibilities:
+ * - Configure authentication provider
+ * - Configure password encoding
+ * - Define security rules for routes
+ * - Manage session handling
+ * - Add JWT authentication filter
+ * - Configure login and logout functionality
+ *
+ * This class ensures that only authorized users can access protected resources
+ * based on their roles (JOBSEEKER or EMPLOYER).
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
+        /**
+         * CustomUserDetailsService is used to load user data from the database.
+         */
         private final CustomUserDetailsService customUserDetailsService;
+
+        /**
+         * JWT authentication filter used to validate JWT tokens in requests.
+         */
         private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+        /**
+         * Constructor used for dependency injection.
+         *
+         * @param customUserDetailsService service used to load user details
+         * @param jwtAuthenticationFilter filter used for JWT authentication
+         */
         public SecurityConfig(CustomUserDetailsService customUserDetailsService,
                         JwtAuthenticationFilter jwtAuthenticationFilter) {
                 this.customUserDetailsService = customUserDetailsService;
                 this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         }
 
-        // PASSWORD ENCODER
+        /**
+         * Creates a password encoder bean.
+         *
+         * BCryptPasswordEncoder is used to securely hash user passwords
+         * before storing them in the database.
+         *
+         * @return PasswordEncoder instance
+         */
         @Bean
         public PasswordEncoder passwordEncoder() {
                 return new BCryptPasswordEncoder();
         }
 
-        // AUTH PROVIDER
+        /**
+         * Configures the authentication provider.
+         *
+         * DaoAuthenticationProvider uses CustomUserDetailsService to load
+         * user information and PasswordEncoder to verify passwords.
+         *
+         * @return DaoAuthenticationProvider instance
+         */
         @Bean
         public DaoAuthenticationProvider authenticationProvider() {
                 DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -44,13 +85,36 @@ public class SecurityConfig {
                 return authProvider;
         }
 
-        // SECURITY CONTEXT (SESSION BASED)
+        /**
+         * Configures security context storage.
+         *
+         * HttpSessionSecurityContextRepository stores authentication
+         * information inside the HTTP session.
+         *
+         * @return SecurityContextRepository instance
+         */
         @Bean
         public SecurityContextRepository securityContextRepository() {
                 return new HttpSessionSecurityContextRepository();
         }
 
-        // FILTER CHAIN
+        /**
+         * Main security filter chain configuration.
+         *
+         * This method defines:
+         * - CSRF configuration
+         * - Session management
+         * - Authorization rules
+         * - Authentication provider
+         * - JWT authentication filter
+         * - Form login configuration
+         * - Access denied handling
+         * - Logout behavior
+         *
+         * @param http HttpSecurity object used to configure security settings
+         * @return SecurityFilterChain configuration
+         * @throws Exception if configuration fails
+         */
         @Bean
         public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
@@ -80,7 +144,6 @@ public class SecurityConfig {
                                                 .securityContextRepository(securityContextRepository()))
 
                                 // AUTHORIZATION RULES
-
                                 .authorizeHttpRequests(authz -> authz
 
                                                 // PUBLIC ROUTES
@@ -113,7 +176,7 @@ public class SecurityConfig {
                                 // AUTH PROVIDER
                                 .authenticationProvider(authenticationProvider())
 
-                                // JWT FILTER (SAFE TO KEEP)
+                                // JWT FILTER
                                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 
                                 // FORM LOGIN
