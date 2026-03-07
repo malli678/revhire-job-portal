@@ -336,7 +336,7 @@
             this.style.borderColor = '#e1e1e1';
         });
 
-        // Auto-hide success messages after 5 seconds
+        // Auto-hide success messages after 3 seconds
         document.addEventListener('DOMContentLoaded', function () {
             const successMessages = document.querySelectorAll('.success-message');
             successMessages.forEach(msg => {
@@ -344,8 +344,25 @@
                     msg.style.transition = 'opacity 0.6s ease';
                     msg.style.opacity = '0';
                     setTimeout(() => msg.style.display = 'none', 600);
-                }, 5000);
+                }, 3000);
             });
+
+            // Clean up URL parameters to prevent messages from reappearing on refresh
+            if (window.history.replaceState) {
+                const url = new URL(window.location.href);
+                let paramsChanged = false;
+
+                ['logout', 'error', 'success'].forEach(param => {
+                    if (url.searchParams.has(param)) {
+                        url.searchParams.delete(param);
+                        paramsChanged = true;
+                    }
+                });
+
+                if (paramsChanged) {
+                    window.history.replaceState(null, '', url.pathname + url.search);
+                }
+            }
         });
     </script>
 </body>
