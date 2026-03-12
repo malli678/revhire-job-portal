@@ -3,310 +3,196 @@
 
 <head>
     <title>Post Job - RevHire</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Common Fragments Styles -->
+    <style th:replace="~{fragments/header :: header-css}"></style>
+    <style th:replace="~{fragments/footer :: footer-css}"></style>
     <style>
-        body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background: #f0f2f5;
-            color: #1a202c;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .main-card {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        }
-
-        .header-section {
-            margin-bottom: 35px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #edf2f7;
-            text-align: center;
-        }
-
-        .header-section h2 {
-            margin: 0;
-            font-size: 1.8rem;
-            color: #2d3748;
-            font-weight: 700;
-        }
-
-        .job-form {
-            display: grid;
-            gap: 25px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
-        label {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #4a5568;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        label.required::after {
+        .required::after {
             content: " *";
-            color: #e53e3e;
-        }
-
-        input,
-        textarea,
-        select {
-            padding: 12px 16px;
-            border-radius: 10px;
-            border: 2px solid #edf2f7;
-            background: #f8fafc;
-            font-size: 1rem;
-            transition: all 0.2s;
-            color: #2d3748;
-        }
-
-        input:focus,
-        textarea:focus,
-        select:focus {
-            outline: none;
-            border-color: #4F46E5;
-            background: white;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
-        }
-
-        textarea {
-            height: 150px;
-            resize: vertical;
-        }
-
-        .hint {
-            font-size: 0.75rem;
-            color: #a0aec0;
-            margin-top: 4px;
-        }
-
-        .form-actions {
-            margin-top: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .btn {
-            padding: 14px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-            text-decoration: none;
-            border: none;
-        }
-
-        .btn-submit {
-            background: #4F46E5;
-            color: white;
-        }
-
-        .btn-submit:hover {
-            background: #4338ca;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-        }
-
-        .btn-cancel {
-            background: #f1f5f9;
-            color: #475569;
-        }
-
-        .btn-cancel:hover {
-            background: #e2e8f0;
-        }
-
-        @media (max-width: 600px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
+            color: #dc3545;
         }
     </style>
-    <!-- Common Fragments Styles -->
-    <style th:replace="fragments/header :: header-css"></style>
-    <style th:replace="fragments/footer :: footer-css"></style>
 </head>
 
-<body>
+<body class="bg-light">
 
-    <div th:replace="fragments/header :: header"></div>
+    <div th:replace="~{fragments/header :: header}"></div>
 
-    <div class="container">
-        <div class="main-card">
-            <div class="header-section">
-                <h2>📝 Post New Opportunity</h2>
+    <div class="container py-5" style="max-width: 800px;">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-bottom p-4 text-center">
+                <h2 class="h3 fw-bold text-dark m-0 d-flex justify-content-center align-items-center gap-2">
+                    <i class="bi bi-pencil-square text-primary"></i> Post New Opportunity
+                </h2>
             </div>
+            
+            <div class="card-body p-4 p-md-5">
+                <form th:action="@{/jobs/save}" method="post" th:object="${jobDto}" id="postJobForm" novalidate>
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
 
-            <form th:action="@{/jobs/save}" method="post" th:object="${jobDto}" class="job-form" id="postJobForm"
-                novalidate>
+                    <div class="row g-4">
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-secondary small text-uppercase required">Job Title</label>
+                            <input type="text" th:field="*{title}" id="title" class="form-control form-control-lg bg-light" placeholder="e.g. Senior Full Stack Engineer" required />
+                            <div class="invalid-feedback client-error" id="titleError"></div>
+                            <div class="form-text small">Use a clear, descriptive title</div>
+                        </div>
 
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-secondary small text-uppercase required">Job Description</label>
+                            <textarea th:field="*{description}" id="description" class="form-control bg-light" rows="6" placeholder="Detail the responsibilities, requirements, and culture..." action></textarea>
+                            <div class="invalid-feedback client-error" id="descriptionError"></div>
+                        </div>
 
-                <div class="form-group">
-                    <label class="required">Job Title</label>
-                    <input type="text" th:field="*{title}" id="title" placeholder="e.g. Senior Full Stack Engineer"
-                        required />
-                    <span class="error client-error" id="titleError"
-                        style="color: #e53e3e; font-size: 0.8rem; margin-top: 4px;"></span>
-                    <div class="hint">Use a clear, descriptive title</div>
-                </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary small text-uppercase required">Location</label>
+                            <input type="text" th:field="*{location}" id="location" class="form-control bg-light" placeholder="e.g. Hyderabad, IN or Remote" required />
+                            <div class="invalid-feedback client-error" id="locationError"></div>
+                        </div>
 
-                <div class="form-group">
-                    <label class="required">Job Description</label>
-                    <textarea th:field="*{description}" id="description"
-                        placeholder="Detail the responsibilities, requirements, and culture..." required></textarea>
-                    <span class="error client-error" id="descriptionError"
-                        style="color: #e53e3e; font-size: 0.8rem; margin-top: 4px;"></span>
-                </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary small text-uppercase required">Job Type</label>
+                            <select th:field="*{jobType}" id="jobType" class="form-select bg-light" required>
+                                <option value="">Select Category</option>
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                                <option value="Contract">Contract</option>
+                                <option value="Internship">Internship</option>
+                                <option value="Freelance">Freelance</option>
+                            </select>
+                            <div class="invalid-feedback client-error" id="jobTypeError"></div>
+                        </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="required">Location</label>
-                        <input type="text" th:field="*{location}" id="location"
-                            placeholder="e.g. Hyderabad, IN or Remote" required />
-                        <span class="error client-error" id="locationError"
-                            style="color: #e53e3e; font-size: 0.8rem; margin-top: 4px;"></span>
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-secondary small text-uppercase required">Core Skills Required</label>
+                            <input type="text" name="skillsRequired" id="skillsRequired" class="form-control bg-light" placeholder="e.g. Java, React, Docker" th:value="*{skillsRequired}" required />
+                            <div class="invalid-feedback client-error" id="skillsRequiredError"></div>
+                            <div class="form-text small">Separate with commas (e.g. Java, Python, AWS)</div>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">Preferred Education</label>
+                            <input type="text" name="educationRequired" class="form-control bg-light" placeholder="e.g. Bachelor's in CS or equivalent" th:value="*{educationRequired}" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">Target Experience</label>
+                            <input type="text" name="experienceRequired" class="form-control bg-light" placeholder="e.g. 5+ Years" th:value="*{experienceRequired}" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">Available Vacancies</label>
+                            <input type="number" name="numberOfOpenings" class="form-control bg-light" min="1" th:value="*{numberOfOpenings ?: 1}" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">Min Salary (₹ Annual)</label>
+                            <input type="number" id="salaryMin" name="salaryMin" class="form-control bg-light" placeholder="500000" min="0" step="50000" th:value="*{salaryMin}" />
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">Max Salary (₹ Annual)</label>
+                            <input type="number" id="salaryMax" name="salaryMax" class="form-control bg-light" placeholder="1500000" min="0" step="50000" th:value="*{salaryMax}" />
+                            <div class="invalid-feedback client-error" id="salaryMaxError"></div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold text-secondary small text-uppercase">Application Deadline</label>
+                            <input type="datetime-local" name="deadline" class="form-control bg-light" th:value="*{deadline}" />
+                            <div class="form-text small">Candidates cannot apply after this date</div>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label class="required">Job Type</label>
-                        <select th:field="*{jobType}" id="jobType" required>
-                            <option value="">Select Category</option>
-                            <option value="Full-time">Full-time</option>
-                            <option value="Part-time">Part-time</option>
-                            <option value="Contract">Contract</option>
-                            <option value="Internship">Internship</option>
-                            <option value="Freelance">Freelance</option>
-                        </select>
-                        <span class="error client-error" id="jobTypeError"
-                            style="color: #e53e3e; font-size: 0.8rem; margin-top: 4px;"></span>
-                    </div>
-                </div>
+                    <hr class="my-4 opacity-25">
 
-                <div class="form-group">
-                    <label class="required">Core Skills Required</label>
-                    <input type="text" name="skillsRequired" id="skillsRequired" placeholder="e.g. Java, React, Docker"
-                        th:value="*{skillsRequired}" required />
-                    <span class="error client-error" id="skillsRequiredError"
-                        style="color: #e53e3e; font-size: 0.8rem; margin-top: 4px;"></span>
-                    <div class="hint">Separate with commas (e.g. Java, Python, AWS)</div>
-                </div>
-
-                <div class="form-group">
-                    <label>Preferred Education</label>
-                    <input type="text" name="educationRequired" placeholder="e.g. Bachelor's in CS or equivalent"
-                        th:value="*{educationRequired}" />
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Target Experience</label>
-                        <input type="text" name="experienceRequired" placeholder="e.g. 5+ Years"
-                            th:value="*{experienceRequired}" />
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <button type="submit" class="btn btn-primary w-100 fw-bold py-3 fs-6 rounded-3">
+                                <i class="bi bi-send-fill me-2"></i> Publish Job
+                            </button>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="/employer/dashboard" class="btn btn-light w-100 fw-bold py-3 fs-6 rounded-3 text-secondary border">
+                                Cancel
+                            </a>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Available Vacancies</label>
-                        <input type="number" name="numberOfOpenings" min="1" th:value="*{numberOfOpenings ?: 1}" />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Min Salary (₹ Annual)</label>
-                        <input type="number" name="salaryMin" placeholder="500000" min="0" step="50000"
-                            th:value="*{salaryMin}" />
-                    </div>
-
-                    <div class="form-group">
-                        <label>Max Salary (₹ Annual)</label>
-                        <input type="number" name="salaryMax" placeholder="1500000" min="0" step="50000"
-                            th:value="*{salaryMax}" />
-                    </div>
-                </div>
-
-                <div class="form-group" style="max-width: 400px;">
-                    <label>Application Deadline</label>
-                    <input type="datetime-local" name="deadline" th:value="*{deadline}" />
-                    <div class="hint">Candidates cannot apply after this date</div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-submit">🚀 Publish Job</button>
-                    <a href="/employer/dashboard" class="btn btn-cancel">Cancel</a>
-                </div>
-
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 
-    <footer th:replace="fragments/footer :: footer"></footer>
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
 
-    <!-- Common Fragments Scripts -->
-    <script th:replace="fragments/header :: header-js"></script>
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:replace="~{fragments/header :: header-js}"></script>
 
     <script>
         document.getElementById('postJobForm').addEventListener('submit', function (event) {
             let isValid = true;
 
-            // Clear previous errors
-            document.querySelectorAll('.client-error').forEach(el => el.textContent = '');
+            // Clear previous errors - remove is-invalid class from all elements
+            document.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+            document.querySelectorAll('.invalid-feedback').forEach(el => el.textContent = '');
+
+            function setError(id, message) {
+                document.getElementById(id).classList.add('is-invalid');
+                document.getElementById(id + 'Error').textContent = message;
+                document.getElementById(id + 'Error').style.display = 'block';
+                isValid = false;
+            }
 
             // Title validation
             const title = document.getElementById('title');
             if (!title.value.trim()) {
-                document.getElementById('titleError').textContent = 'Job title is required';
-                isValid = false;
+                setError('title', 'Job title is required');
             }
 
             // Description validation
             const description = document.getElementById('description');
             if (!description.value.trim()) {
-                document.getElementById('descriptionError').textContent = 'Job description is required';
-                isValid = false;
+                setError('description', 'Job description is required');
             }
 
             // Location validation
             const location = document.getElementById('location');
             if (!location.value.trim()) {
-                document.getElementById('locationError').textContent = 'Location is required';
-                isValid = false;
+                setError('location', 'Location is required');
             }
 
             // Job Type validation
             const jobType = document.getElementById('jobType');
             if (!jobType.value) {
-                document.getElementById('jobTypeError').textContent = 'Please select a job type';
-                isValid = false;
+                setError('jobType', 'Please select a job type');
             }
 
             // Skills validation
             const skills = document.getElementById('skillsRequired');
             if (!skills.value.trim()) {
-                document.getElementById('skillsRequiredError').textContent = 'Skills are required';
-                isValid = false;
+                setError('skillsRequired', 'Skills are required');
+            }
+
+            // Salary Validation (Max >= Min)
+            const minSal = document.getElementById('salaryMin');
+            const maxSal = document.getElementById('salaryMax');
+            if (minSal.value && maxSal.value) {
+                const minVal = parseFloat(minSal.value);
+                const maxVal = parseFloat(maxSal.value);
+                if (maxVal < minVal) {
+                    setError('salaryMax', 'Maximum salary cannot be less than minimum salary.');
+                }
             }
 
             if (!isValid) {

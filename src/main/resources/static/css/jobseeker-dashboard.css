@@ -1,0 +1,123 @@
+/* jobseeker-dashboard.css */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.welcome-card {
+    background: linear-gradient(135deg, #4F46E5 0%, #7c3aed 100%);
+    border-radius: 1.5rem;
+    color: white;
+    box-shadow: 0 1rem 3rem rgba(79, 70, 229, 0.15);
+    position: relative;
+    overflow: hidden;
+    padding: 3rem;
+    margin-bottom: 2.5rem;
+}
+
+.welcome-card::after {
+    content: '';
+    position: absolute;
+    top: -50px;
+    right: -50px;
+    width: 250px;
+    height: 250px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+}
+
+.welcome-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    position: relative;
+    z-index: 2;
+}
+
+.welcome-text {
+    font-size: 1.15rem;
+    font-weight: 500;
+    opacity: 0.9;
+    position: relative;
+    z-index: 2;
+}
+
+.stat-card {
+    border-radius: 1.25rem;
+    border: none;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon-wrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+}
+
+.bg-light-primary { background: #e0e7ff; color: #4338ca; }
+.bg-light-warning { background: #fef3c7; color: #92400e; }
+.bg-light-success { background: #d1fae5; color: #065f46; }
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 0;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+
+.nav-item-card {
+    background: white;
+    border-radius: 1.25rem;
+    padding: 1.5rem;
+    text-align: center;
+    text-decoration: none;
+    color: #212529;
+    font-weight: 600;
+    box-shadow: 0 0.25rem 1rem rgba(0, 0, 0, 0.03);
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.nav-item-card i {
+    font-size: 1.75rem;
+}
+
+.nav-item-card:hover {
+    border-color: #4F46E5;
+    color: #4F46E5;
+    transform: scale(1.03);
+}
+
+.nav-item-card.highlight {
+    background: #4F46E5;
+    color: white;
+    box-shadow: 0 0.5rem 1.5rem rgba(79, 70, 229, 0.3);
+}
+
+.nav-item-card.highlight:hover {
+    background: #4338ca;
+    color: white;
+}
