@@ -12,6 +12,6 @@ import java.util.List;
 @Repository
 public interface SkillRepository extends JpaRepository<Skill, Long> {
 
-    // ✅ Get all skills of a JobSeeker
+    //  Get all skills of a JobSeeker
     List<Skill> findByJobSeeker(JobSeeker jobSeeker);
 }

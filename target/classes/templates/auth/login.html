@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - RevHire</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 420px;
+            padding: 40px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: #667eea;
+            font-size: 32px;
+            font-weight: bold;
+        }
+
+        .logo p {
+            color: #666;
+            margin-top: 5px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-weight: 500;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 6px;
+            font-size: 15px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .remember-me input {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+
+        .remember-me label {
+            margin-bottom: 0;
+            color: #666;
+            font-weight: normal;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c00;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #fcc;
+        }
+
+        .error-text {
+            color: #ef4444;
+            font-size: 13px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #060;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #cfc;
+        }
+
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 25px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: #e1e1e1;
+        }
+
+        .divider span {
+            padding: 0 15px;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .links {
+            text-align: center;
+        }
+
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+        .register-links {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+
+        .register-btn {
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .register-btn.seeker {
+            background: #e8f4fd;
+            color: #1976d2;
+        }
+
+        .register-btn.seeker:hover {
+            background: #d0e8fc;
+        }
+
+        .register-btn.employer {
+            background: #e8fdf4;
+            color: #388e3c;
+        }
+
+        .register-btn.employer:hover {
+            background: #d0fce8;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-top: -15px;
+            margin-bottom: 20px;
+        }
+
+        .forgot-password a {
+            color: #999;
+            font-size: 14px;
+            text-decoration: none;
+        }
+
+        .forgot-password a:hover {
+            color: #667eea;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>RevHire</h1>
+            <p>Find Your Dream Job</p>
+        </div>
+
+        <h2>Welcome Back</h2>
+
+        <div th:if="${error}" class="error-message" th:text="${error}"></div>
+        <div th:if="${success}" class="success-message" th:text="${success}"></div>
+        <div th:if="${param.logout}" class="success-message">You have been logged out successfully.</div>
+        <div th:if="${param.error}" class="error-message">Invalid email or password. Please try again.</div>
+
+        <form th:action="@{/auth/login}" method="post" id="loginForm" novalidate>
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                <div class="error-text" id="email-error">Please fill out this field.</div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <div class="error-text" id="password-error">Please fill out this field.</div>
+            </div>
+
+            <div class="remember-me">
+                <input type="checkbox" id="rememberMe" name="rememberMe">
+                <label for="rememberMe">Remember me</label>
+            </div>
+
+            <div class="forgot-password">
+                <a th:href="@{/auth/forgot-password}">Forgot Password?</a>
+            </div>
+
+            <button type="submit">Login</button>
+        </form>
+
+        <div class="divider">
+            <span>OR</span>
+        </div>
+
+        <div class="links">
+            <p>Don't have an account?</p>
+            <div class="register-links">
+                <a th:href="@{/auth/register/seeker}" class="register-btn seeker">
+                    Register as Job Seeker
+                </a>
+                <a th:href="@{/auth/register/employer}" class="register-btn employer">
+                    Register as Employer
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Form Validation
+        document.getElementById('loginForm').addEventListener('submit', function (e) {
+            let isValid = true;
+
+            // Email Validation
+            const email = document.getElementById('email');
+            const emailError = document.getElementById('email-error');
+            if (!email.value.trim()) {
+                emailError.textContent = 'Please fill out this field.';
+                emailError.style.display = 'block';
+                email.style.borderColor = '#ef4444';
+                isValid = false;
+            } else if (!email.value.includes('@')) {
+                emailError.textContent = 'Please enter a valid email address.';
+                emailError.style.display = 'block';
+                email.style.borderColor = '#ef4444';
+                isValid = false;
+            } else {
+                emailError.style.display = 'none';
+                email.style.borderColor = '#e1e1e1';
+            }
+
+            // Password Validation
+            const password = document.getElementById('password');
+            const passwordError = document.getElementById('password-error');
+            if (!password.value) {
+                passwordError.textContent = 'Please fill out this field.';
+                passwordError.style.display = 'block';
+                password.style.borderColor = '#ef4444';
+                isValid = false;
+            } else {
+                passwordError.style.display = 'none';
+                password.style.borderColor = '#e1e1e1';
+            }
+
+            if (!isValid) {
+                e.preventDefault();
+            }
+        });
+
+        // Hide errors on input
+        document.getElementById('email').addEventListener('input', function () {
+            document.getElementById('email-error').style.display = 'none';
+            this.style.borderColor = '#e1e1e1';
+        });
+        document.getElementById('password').addEventListener('input', function () {
+            document.getElementById('password-error').style.display = 'none';
+            this.style.borderColor = '#e1e1e1';
+        });
+
+        // Auto-hide success messages after 3 seconds
+        document.addEventListener('DOMContentLoaded', function () {
+            const successMessages = document.querySelectorAll('.success-message');
+            successMessages.forEach(msg => {
+                setTimeout(() => {
+                    msg.style.transition = 'opacity 0.6s ease';
+                    msg.style.opacity = '0';
+                    setTimeout(() => msg.style.display = 'none', 600);
+                }, 3000);
+            });
+
+            // Clean up URL parameters to prevent messages from reappearing on refresh
+            if (window.history.replaceState) {
+                const url = new URL(window.location.href);
+                let paramsChanged = false;
+
+                ['logout', 'error', 'success'].forEach(param => {
+                    if (url.searchParams.has(param)) {
+                        url.searchParams.delete(param);
+                        paramsChanged = true;
+                    }
+                });
+
+                if (paramsChanged) {
+                    window.history.replaceState(null, '', url.pathname + url.search);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>

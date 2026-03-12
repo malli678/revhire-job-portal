@@ -13,7 +13,7 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    // ✅ Handle missing static resources (favicon.ico etc.) silently - no ERROR log
+    // Handle missing static resources (favicon.ico etc.) silently - no ERROR log
     @ExceptionHandler(NoResourceFoundException.class)
     public ResponseEntity<?> handleNoResourceFound(NoResourceFoundException ex) {
         log.debug("Static resource not found: {}", ex.getMessage());
