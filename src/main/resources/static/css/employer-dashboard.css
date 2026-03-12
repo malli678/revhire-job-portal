@@ -1,0 +1,61 @@
+/* employer-dashboard.css */
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.stat-card {
+    border-left: 4px solid #0d6efd;
+    transition: transform 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+.stat-card.success { border-left-color: #198754; }
+.stat-card.warning { border-left-color: #ffc107; }
+.stat-card.danger { border-left-color: #dc3545; }
+.stat-card.info { border-left-color: #0dcaf0; }
+
+.section-title {
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #343a40;
+}
+
+.chart-container-custom {
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
+    height: 100%;
+}
+
+.chart-container-custom canvas {
+    max-height: 300px;
+}
+
+.table-custom {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,.075);
+}
+
+.table-custom thead th {
+    background-color: #f1f3f5;
+    color: #495057;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.status-badge-APPLIED { background-color: #0d6efd; color: white; }
+.status-badge-UNDER_REVIEW { background-color: #fd7e14; color: white; }
+.status-badge-SHORTLISTED { background-color: #198754; color: white; }
+.status-badge-REJECTED { background-color: #dc3545; color: white; }
+.status-badge-WITHDRAWN { background-color: #6c757d; color: white; }
+
+.action-btn i {
+    margin-right: 5px;
+}

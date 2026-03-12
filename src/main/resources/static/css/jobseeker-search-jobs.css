@@ -1,0 +1,11 @@
+/* jobseeker-search-jobs.css */
+.job-card-hover {
+    transition: all 0.2s ease-in-out;
+    border: 1px solid transparent !important;
+}
+
+.job-card-hover:hover {
+    transform: translateY(-4px);
+    border-color: #e0e7ff !important;
+    box-shadow: 0 1rem 3rem rgba(0,0,0,0.08) !important;
+}

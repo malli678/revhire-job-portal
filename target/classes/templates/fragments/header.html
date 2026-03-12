@@ -2,7 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 
 <head>
-    <style th:fragment="header-css">
+    <th:block th:fragment="header-css">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <style>
         .common-header {
             background: #ffffff;
             color: #1a202c;
@@ -57,7 +59,7 @@
             color: #4a5568;
         }
 
-        .badge {
+        .notification-trigger .badge {
             position: absolute;
             top: -5px;
             right: -8px;
@@ -158,7 +160,8 @@
             background: #fff5f5;
             color: #c53030;
         }
-    </style>
+        </style>
+    </th:block>
 </head>
 
 <body>
@@ -175,7 +178,7 @@
             <th:block th:if="${session.userName != null}">
                 <!-- Notifications -->
                 <a href="/notifications" class="notification-trigger" id="headerNotifTrigger">
-                    <span role="img" aria-label="notifications">🔔</span>
+                    <i class="bi bi-bell-fill"></i>
                     <span class="badge" id="headerNotifBadge" style="display: none;">0</span>
                 </a>
 
@@ -186,25 +189,25 @@
                             <span th:text="${#strings.substring(session.userName, 0, 1).toUpperCase()}">U</span>
                         </div>
                         <span class="profile-name" th:text="${session.userName}">User</span>
-                        <span style="font-size: 0.7rem; color: #a0aec0;">▼</span>
+                        <i class="bi bi-chevron-down" style="font-size: 0.7rem; color: #a0aec0;"></i>
                     </div>
 
                     <div class="dropdown-menu" id="profileMenu">
                         <th:block th:if="${session.userRole == 'EMPLOYER'}">
-                            <a href="/employer/dashboard" class="dropdown-item">📊 Dashboard</a>
-                            <a href="/employer/manage-jobs" class="dropdown-item">💼 Manage Jobs</a>
-                            <a href="/employer/company-profile" class="dropdown-item">🏢 Company Profile</a>
+                            <a href="/employer/dashboard" class="dropdown-item"><i class="bi bi-speedometer2" style="margin-right: 8px;"></i> Dashboard</a>
+                            <a href="/employer/manage-jobs" class="dropdown-item"><i class="bi bi-briefcase" style="margin-right: 8px;"></i> Manage Jobs</a>
+                            <a href="/employer/company-profile" class="dropdown-item"><i class="bi bi-building" style="margin-right: 8px;"></i> Company Profile</a>
                         </th:block>
                         <th:block th:if="${session.userRole == 'JOBSEEKER'}">
-                            <a th:href="@{/jobseeker/dashboard}" class="dropdown-item">📊 Dashboard</a>
-                            <a th:href="@{/jobseeker/profile}" class="dropdown-item">👤 Profile</a>
-                            <a th:href="@{/jobseeker/applications}" class="dropdown-item">📝 My Applications</a>
+                            <a th:href="@{/jobseeker/dashboard}" class="dropdown-item"><i class="bi bi-speedometer2" style="margin-right: 8px;"></i> Dashboard</a>
+                            <a th:href="@{/jobseeker/profile}" class="dropdown-item"><i class="bi bi-person" style="margin-right: 8px;"></i> Profile</a>
+                            <a th:href="@{/jobseeker/applications}" class="dropdown-item"><i class="bi bi-card-list" style="margin-right: 8px;"></i> My Applications</a>
                         </th:block>
                         <div class="dropdown-divider"></div>
-                        <a th:href="@{/auth/change-password}" class="dropdown-item">🔑 Change Password</a>
+                        <a th:href="@{/auth/change-password}" class="dropdown-item"><i class="bi bi-key" style="margin-right: 8px;"></i> Change Password</a>
                         <div class="dropdown-divider"></div>
                         <a href="/auth/logout" class="dropdown-item logout-item">
-                            <span role="img" aria-label="logout">📤</span> Logout
+                            <i class="bi bi-box-arrow-right" style="margin-right: 8px;"></i> Logout
                         </a>
                     </div>
                 </div>

@@ -4,304 +4,202 @@
 <head>
     <title>Applicant Profile - RevHire</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Common Fragments Styles -->
     <th:block th:insert="~{fragments/header :: header-css}"></th:block>
     <th:block th:insert="~{fragments/footer :: footer-css}"></th:block>
-    <style>
-        body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background: #f8fafc;
-        }
-
-        .details-wrapper {
-            max-width: 1000px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-
-        .profile-card {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-        }
-
-        .profile-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 40px;
-            border-bottom: 1px solid #edf2f7;
-            padding-bottom: 25px;
-        }
-
-        .applicant-name {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #1e293b;
-            margin: 0;
-        }
-
-        .status-pill {
-            padding: 8px 16px;
-            border-radius: 30px;
-            font-size: 0.85rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            background: #e0e7ff;
-            color: #4338ca;
-        }
-
-        .section-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-
-        .info-box {
-            background: #f8fafc;
-            padding: 24px;
-            border-radius: 16px;
-            border: 1px solid #edf2f7;
-        }
-
-        .info-box h3 {
-            margin-top: 0;
-            font-size: 1.1rem;
-            color: #4F46E5;
-            margin-bottom: 20px;
-        }
-
-        .data-item {
-            margin-bottom: 15px;
-        }
-
-        .data-label {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: #94a3b8;
-            font-weight: 800;
-            letter-spacing: 0.05em;
-        }
-
-        .data-value {
-            font-weight: 700;
-            color: #334155;
-            display: block;
-            margin-top: 4px;
-        }
-
-        .resume-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            background: #4F46E5;
-            color: white;
-            padding: 14px 28px;
-            border-radius: 12px;
-            text-decoration: none;
-            font-weight: 700;
-            transition: all 0.2s;
-            margin-top: 20px;
-        }
-
-        .resume-btn:hover {
-            background: #4338ca;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #64748b;
-            text-decoration: none;
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-        }
-
-        .back-link:hover {
-            color: #4F46E5;
-        }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-box {
-            background: white;
-            width: 450px;
-            margin: 100px auto;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-    </style>
 </head>
 
-<body>
+<body class="bg-light">
     <div th:replace="~{fragments/header :: header}"></div>
 
-    <div class="details-wrapper">
-        <a onclick="history.back()" class="back-link">&#8592; Back</a>
+    <div class="container py-5" style="max-width: 1000px;">
+        <div class="mb-4">
+            <a onclick="history.back()" class="btn btn-light border text-secondary fw-bold px-3 py-2 rounded-3" style="cursor: pointer;">
+                <i class="bi bi-arrow-left"></i> Back to Applicants
+            </a>
+        </div>
 
-        <div class="profile-card" th:if="${application != null}">
-            <div class="profile-header">
+        <div class="card border-0 shadow-sm rounded-4" th:if="${jobApplication != null}">
+            <!-- Header -->
+            <div class="card-header bg-white border-bottom p-4 p-md-5 d-flex justify-content-between align-items-start flex-wrap gap-3 rounded-top-4">
                 <div>
-                    <h1 class="applicant-name"
-                        th:text="${applicant != null ? applicant.fullName : 'Anonymous Applicant'}">Name</h1>
-                    <p style="color:#64748b; font-weight:600; margin-top:5px;">
-                        Applying for: <span
-                            th:text="${application.job != null ? application.job.title : 'Position'}">Job Title</span>
+                    <h1 class="h2 fw-bold text-dark m-0" th:text="${applicant != null ? applicant.fullName : 'Anonymous Applicant'}">Name</h1>
+                    <p class="text-secondary fw-semibold mt-2 mb-0 fs-5 d-flex align-items-center gap-2">
+                        <i class="bi bi-briefcase text-primary"></i> Applying for: 
+                        <span class="text-dark" th:text="${jobApplication.job != null ? jobApplication.job.title : 'Position'}">Job Title</span>
                     </p>
                 </div>
-                <div class="status-pill" th:text="${application.status}">Applied</div>
-            </div>
-
-            <!-- ADD NOTE BUTTON -->
-            <div style="margin-bottom:25px;">
-                <button type="button" onclick="document.getElementById('noteModal').style.display='block'"
-                    style="background:#6c757d; color:white; border:none; padding:10px 20px; border-radius:10px; font-weight:700; cursor:pointer;">
-                    &#128204; Add Internal Note
-                </button>
-
-                <div th:if="${application.notes != null and !application.notes.isEmpty()}"
-                    style="margin-top:15px; background:#fffbeb; padding:20px; border-radius:12px; border-left:5px solid #f59e0b;">
-                    <h3 style="margin-top:0; font-size:1rem; color:#92400e;">&#128221; Internal Tracking Note</h3>
-                    <p style="margin:10px 0 0 0; color:#451a03; font-weight:600;" th:text="${application.notes}"></p>
+                <!-- Status Pill -->
+                <div class="badge rounded-pill text-uppercase fw-bold px-4 py-2 fs-6"
+                     th:classappend="${jobApplication.status.name() == 'APPLIED'} ? 'bg-primary bg-opacity-10 text-primary border border-primary-subtle' : 
+                                   (${jobApplication.status.name() == 'SHORTLISTED'} ? 'bg-success bg-opacity-10 text-success border border-success-subtle' : 
+                                    (${jobApplication.status.name() == 'REJECTED'} ? 'bg-danger bg-opacity-10 text-danger border border-danger-subtle' : 
+                                     (${jobApplication.status.name() == 'UNDER_REVIEW'} ? 'bg-warning bg-opacity-10 text-dark border border-warning-subtle' : 'bg-secondary bg-opacity-10 text-secondary border border-secondary-subtle')))"
+                     th:text="${jobApplication.status}">
+                     Applied
                 </div>
             </div>
 
-            <div class="section-grid">
-                <div class="info-box" th:if="${applicant != null}">
-                    <h3>&#128100; Contact Details</h3>
-                    <div class="data-item">
-                        <span class="data-label">Email</span>
-                        <span class="data-value" th:text="${applicant.email}">email@example.com</span>
-                    </div>
-                    <div class="data-item">
-                        <span class="data-label">Phone</span>
-                        <span class="data-value"
-                            th:text="${applicant.phoneNumber != null ? applicant.phoneNumber : 'Not provided'}">Phone</span>
-                    </div>
-                </div>
+            <div class="card-body p-4 p-md-5">
+                
+                <!-- Notes Section -->
+                <div class="mb-5">
+                    <button type="button" class="btn btn-secondary fw-bold d-inline-flex align-items-center gap-2 mb-4" data-bs-toggle="modal" data-bs-target="#noteModal">
+                        <i class="bi bi-sticky-fill"></i> Add Internal Note
+                    </button>
 
-                <div class="info-box">
-                    <h3>&#128197; Application Details</h3>
-                    <div class="data-item">
-                        <span class="data-label">Submission Date</span>
-                        <span class="data-value"
-                            th:text="${application.appliedDate != null ? #temporals.format(application.appliedDate, 'dd MMM yyyy, HH:mm') : 'Not available'}">Date</span>
-                    </div>
-                    <div class="data-item"
-                        th:if="${application.coverLetter != null and !application.coverLetter.isEmpty()}">
-                        <span class="data-label">Cover Letter</span>
-                        <p class="data-value"
-                            style="background:white; padding:15px; border-radius:8px; border:1px solid #edf2f7; font-weight:normal; font-style:italic;"
-                            th:text="${application.coverLetter}">Cover Letter Text</p>
+                    <div th:if="${jobApplication.notes != null and !jobApplication.notes.isEmpty()}" class="alert alert-warning border border-warning-subtle shadow-sm rounded-4 p-4 d-flex gap-3 align-items-start">
+                        <i class="bi bi-stickies-fill text-warning fs-3 mt-1"></i>
+                        <div>
+                            <h3 class="h6 fw-bold text-dark text-uppercase tracking-wider mb-2">Internal Tracking Note</h3>
+                            <p class="m-0 text-dark fw-semibold lh-lg" th:text="${jobApplication.notes}"></p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="info-box" th:if="${applicant != null and 
-                             ((applicant.skillEntities != null and !applicant.skillEntities.isEmpty()) 
-                              or (applicant.skills != null and !applicant.skills.isEmpty()))}">
+                <!-- Three Column Grid -->
+                <div class="row g-4 mb-5">
+                    <!-- Contact -->
+                    <div class="col-md-4" th:if="${applicant != null}">
+                        <div class="card bg-light border-0 h-100 rounded-3 p-4">
+                            <h3 class="h6 fw-bold text-primary text-uppercase mb-4 d-flex align-items-center gap-2">
+                                <i class="bi bi-person-lines-fill"></i> Contact Details
+                            </h3>
+                            <div class="mb-3">
+                                <span class="d-block text-secondary small fw-bold text-uppercase tracking-wider mb-1">Email</span>
+                                <span class="fw-bold text-dark text-break" th:text="${applicant.email}">email@example.com</span>
+                            </div>
+                            <div>
+                                <span class="d-block text-secondary small fw-bold text-uppercase tracking-wider mb-1">Phone</span>
+                                <span class="fw-bold text-dark text-break" th:text="${applicant.phoneNumber != null ? applicant.phoneNumber : 'Not provided'}">Phone</span>
+                            </div>
+                        </div>
+                    </div>
 
-                    <h3>🛠 Skills</h3>
+                    <!-- Application Info -->
+                    <div class="col-md-4">
+                        <div class="card bg-light border-0 h-100 rounded-3 p-4">
+                            <h3 class="h6 fw-bold text-primary text-uppercase mb-4 d-flex align-items-center gap-2">
+                                <i class="bi bi-calendar-event"></i> Application Info
+                            </h3>
+                            <div>
+                                <span class="d-block text-secondary small fw-bold text-uppercase tracking-wider mb-1">Submission Date</span>
+                                <span class="fw-bold text-dark text-break" th:text="${jobApplication.appliedDate != null ? #temporals.format(jobApplication.appliedDate, 'dd MMM yyyy, HH:mm') : 'Not available'}">Date</span>
+                            </div>
+                        </div>
+                    </div>
 
-                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px;">
-
-                        <!-- If using Skill entity -->
-                        <span th:each="skill : ${applicant.skillEntities}" th:text="${skill.name}" style="background:#eef2ff;
-                                     color:#4338ca;
-                                     padding:6px 12px;
-                                     border-radius:20px;
-                                     font-size:0.8rem;
-                                     font-weight:600;">
-                        </span>
-
-                        <!-- If using @ElementCollection List<String> -->
-                        <span th:each="skill : ${applicant.skills}" th:text="${skill}" style="background:#eef2ff;
-                                     color:#4338ca;
-                                     padding:6px 12px;
-                                     border-radius:20px;
-                                     font-size:0.8rem;
-                                     font-weight:600;">
-                        </span>
-
+                    <!-- Skills -->
+                    <div class="col-md-4" th:if="${applicant != null and ((applicant.skillEntities != null and !applicant.skillEntities.isEmpty()) or (applicant.skills != null and !applicant.skills.isEmpty()))}">
+                        <div class="card bg-light border-0 h-100 rounded-3 p-4">
+                            <h3 class="h6 fw-bold text-primary text-uppercase mb-4 d-flex align-items-center gap-2">
+                                <i class="bi bi-lightbulb-fill text-warning"></i> Skills
+                            </h3>
+                            <div class="d-flex flex-wrap gap-2">
+                                <span th:each="skill : ${applicant.skillEntities}" th:text="${skill.name}" 
+                                      class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle rounded-pill px-3 py-2 fw-semibold"></span>
+                                <span th:each="skill : ${applicant.skills}" th:text="${skill}" 
+                                      class="badge bg-primary bg-opacity-10 text-primary border border-primary-subtle rounded-pill px-3 py-2 fw-semibold"></span>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Resume Text -->
-            <div class="info-box" style="margin-top:30px;"
-                th:if="${applicant != null and applicant.resumeText != null and !applicant.resumeText.isEmpty()}">
-                <h3>&#128221; Professional Summary</h3>
-                <div style="background:white; padding:20px; border-radius:12px; border:1px solid #edf2f7; white-space:pre-wrap; color:#475569;"
-                    th:text="${applicant.resumeText}">Text</div>
-            </div>
+                <!-- Cover Letter -->
+                <div class="card border border-light-subtle shadow-sm rounded-4 mb-5" th:if="${jobApplication.coverLetter != null and !#strings.isEmpty(jobApplication.coverLetter)}">
+                    <div class="card-header bg-white border-bottom p-4">
+                        <h3 class="h6 fw-bold text-dark m-0 d-flex align-items-center gap-2">
+                            <i class="bi bi-envelope-paper-fill text-primary"></i> Cover Letter
+                        </h3>
+                    </div>
+                    <div class="card-body p-4 bg-light">
+                        <p class="m-0 text-secondary fst-italic lh-lg" th:text="${jobApplication.coverLetter}"></p>
+                    </div>
+                </div>
 
-            <!-- Download Resume -->
-            <div style="margin-top:30px;">
-                <div
-                    th:if="${application.id != null and (application.resumePath != null or (applicant != null and applicant.resumeFile != null))}">
-                    <a th:href="@{/employer/download-resume/{id}(id=${application.id})}" class="resume-btn">
-                        &#128229; Download Uploaded Resume
-                    </a>
+                <!-- Summary / Resume Text -->
+                <div class="card border border-light-subtle shadow-sm rounded-4 mb-5" th:if="${applicant != null and applicant.resumeText != null and !#strings.isEmpty(applicant.resumeText)}">
+                    <div class="card-header bg-white border-bottom p-4">
+                        <h3 class="h6 fw-bold text-dark m-0 d-flex align-items-center gap-2">
+                            <i class="bi bi-file-text-fill text-primary"></i> Professional Summary Extracted
+                        </h3>
+                    </div>
+                    <div class="card-body p-4 bg-light">
+                        <div class="text-secondary lh-lg" style="white-space: pre-wrap;" th:text="${applicant.resumeText}"></div>
+                    </div>
                 </div>
-                <div th:if="${application.resumePath == null and (applicant == null or applicant.resumeFile == null)}"
-                    style="margin-top:10px; color:#94a3b8; font-style:italic;">
-                    No resume file uploaded for this application.
+
+                <!-- View/Download Resume -->
+                <div class="d-flex align-items-center gap-3 pt-3 border-top">
+                    <th:block th:if="${jobApplication.id != null and ((jobApplication.resumePath != null and !#strings.isEmpty(jobApplication.resumePath)) or (applicant != null and applicant.resumeFile != null and !#strings.isEmpty(applicant.resumeFile)) or (applicant != null and applicant.resumePath != null and !#strings.isEmpty(applicant.resumePath)))}">
+                        
+                        <a th:href="@{/employer/view-resume/{id}(id=${jobApplication.id})}" class="btn btn-primary fw-bold px-4 py-2 d-inline-flex align-items-center gap-2 rounded-3" target="_blank">
+                            <i class="bi bi-eye-fill"></i> View Original Resume
+                        </a>
+
+                        <a th:href="@{/employer/download-resume/{id}(id=${jobApplication.id})}" class="btn btn-outline-primary fw-bold px-4 py-2 d-inline-flex align-items-center gap-2 rounded-3">
+                            <i class="bi bi-download"></i> Download
+                        </a>
+                        
+                    </th:block>
+                    
+                    <div th:unless="${jobApplication.id != null and ((jobApplication.resumePath != null and !#strings.isEmpty(jobApplication.resumePath)) or (applicant != null and applicant.resumeFile != null and !#strings.isEmpty(applicant.resumeFile)) or (applicant != null and applicant.resumePath != null and !#strings.isEmpty(applicant.resumePath)))}"
+                         class="alert alert-secondary border-secondary-subtle d-inline-block m-0 d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-x"></i> <span>No resume file uploaded for this application.</span>
+                    </div>
                 </div>
+
             </div>
         </div>
 
-        <div th:unless="${application != null}" style="text-align:center; padding:100px;">
-            <h2>Application not found or inaccessible.</h2>
+        <!-- Not Found -->
+        <div th:unless="${jobApplication != null}" class="text-center py-5">
+            <i class="bi bi-file-earmark-excel display-1 text-muted mb-4 d-block"></i>
+            <h2 class="fw-bold text-dark">Application not found</h2>
+            <p class="text-secondary">The requested application might have been removed or is inaccessible.</p>
         </div>
     </div>
 
-    <!-- NOTE MODAL -->
-    <div id="noteModal" class="modal-overlay">
-        <div class="modal-box">
-            <h3>📌 Add Internal Note</h3>
-            <form th:if="${application != null}" th:action="@{/applications/add-notes}" method="post">
-                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-                <input type="hidden" name="applicationId" th:value="${application != null ? application.id : ''}" />
-
-                <div style="margin-bottom:15px;">
-                    <label style="display:block; margin-bottom:8px; font-weight:600;">Your Note:</label>
-                    <textarea name="notes" required
-                        style="width:100%; height:120px; padding:12px; border-radius:8px; border:1px solid #ddd; resize:vertical; font-family:inherit;"
-                        placeholder="Internal tracking notes..."></textarea>
+    <!-- NOTE MODAL (Bootstrap) -->
+    <div class="modal fade" id="noteModal" tabindex="-1" aria-labelledby="noteModalLabel" aria-hidden="true" th:if="${jobApplication != null}">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 rounded-4 shadow">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title fw-bold text-dark" id="noteModalLabel"><i class="bi bi-sticky-fill text-info me-2"></i> Add Internal Note</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
+                <form th:action="@{/applications/add-notes}" method="post">
+                    <div class="modal-body p-4">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                        <input type="hidden" name="applicationId" th:value="${jobApplication.id}" />
 
-                <div style="display:flex; justify-content:flex-end; gap:12px;">
-                    <button type="button" onclick="document.getElementById('noteModal').style.display='none'"
-                        style="background:#f1f5f9; color:#475569; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Cancel</button>
-                    <button type="submit"
-                        style="background:#4F46E5; color:white; border:none; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:600;">Save
-                        Note</button>
-                </div>
-            </form>
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Your Tracking Note</label>
+                            <textarea name="notes" required class="form-control" rows="5" placeholder="Enter private notes about this candidate..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top bg-light rounded-bottom-4">
+                        <button type="button" class="btn btn-light fw-bold text-secondary border" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-info text-white fw-bold">Save Note</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
     <footer th:replace="~{fragments/footer :: footer}"></footer>
+    
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <th:block th:insert="~{fragments/header :: header-js}"></th:block>
 
-    <script>
-        window.onclick = function (event) {
-            var modal = document.getElementById('noteModal');
-            if (event.target == modal) modal.style.display = 'none';
-        }
-    </script>
 </body>
 
 </html>

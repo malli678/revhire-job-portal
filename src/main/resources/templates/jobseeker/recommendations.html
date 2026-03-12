@@ -4,140 +4,79 @@
 <head>
     <title>Recommendations - RevHire</title>
     <meta charset="UTF-8">
-    <style th:replace="fragments/header :: header-css"></style>
-    <style th:replace="fragments/footer :: footer-css"></style>
-    <style>
-        .container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        .jobs-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-            gap: 25px;
-        }
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
-        .job-card {
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            transition: all 0.2s;
-            border: 1px solid transparent;
-        }
-
-        .job-card:hover {
-            transform: translateY(-5px);
-            border-color: #e0e7ff;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
-        }
-
-        .match-badge {
-            display: inline-block;
-            background: #d1fae5;
-            color: #065f46;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-        }
-
-        .job-title {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: #1e293b;
-            margin-bottom: 5px;
-        }
-
-        .company-name {
-            color: #4F46E5;
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-        }
-
-        .meta-row {
-            display: flex;
-            gap: 15px;
-            color: #64748b;
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-            font-weight: 600;
-        }
-
-        .btn-view {
-            display: block;
-            width: 100%;
-            background: #4F46E5;
-            color: white;
-            padding: 12px;
-            border-radius: 12px;
-            text-align: center;
-            text-decoration: none;
-            font-weight: 700;
-            transition: all 0.2s;
-        }
-
-        .btn-view:hover {
-            background: #4338ca;
-        }
-
-        .empty-state {
-            grid-column: 1 / -1;
-            text-align: center;
-            background: white;
-            padding: 60px;
-            border-radius: 20px;
-        }
-    </style>
+    <!-- Common Fragments Styles -->
+    <style th:replace="~{fragments/header :: header-css}"></style>
+    <style th:replace="~{fragments/footer :: footer-css}"></style>
+    
+    <!-- Shared Hover effect CSS -->
+    <link rel="stylesheet" th:href="@{/css/jobseeker-search-jobs.css}" />
 </head>
 
-<body>
-    <div th:replace="fragments/header :: header"></div>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
 
-    <div class="container">
-        <div style="margin-bottom: 20px;">
-            <button onclick="history.back()"
-                style="background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 600;">←
-                Back</button>
+    <div class="container py-5" style="max-width: 1200px;">
+        <div class="mb-4">
+            <button onclick="history.back()" class="btn btn-outline-secondary btn-sm fw-bold">
+                <i class="bi bi-arrow-left"></i> Back
+            </button>
         </div>
-        <h1
-            style="font-weight: 800; color: #1e293b; margin-bottom: 30px; display: flex; align-items: center; gap: 15px;">
-            🎯 Recommended for You
+        
+        <h1 class="h3 fw-bold text-dark mb-4 d-flex align-items-center gap-2">
+            <i class="bi bi-bullseye text-primary"></i> Recommended for You
         </h1>
 
-        <div class="jobs-grid">
-            <div th:if="${recommendedJobs == null or recommendedJobs.isEmpty()}" class="empty-state">
-                <div style="font-size: 3rem; margin-bottom: 20px;">🏜️</div>
-                <h3>No recommendations yet</h3>
-                <p>Add more skills or preferences to your profile to see tailored jobs.</p>
-                <a th:href="@{/jobseeker/profile}"
-                    style="display: inline-block; margin-top: 20px; color: #4F46E5; font-weight: 700;">Update Profile
-                    →</a>
+        <div class="row g-4">
+            <div th:if="${recommendedJobs == null or recommendedJobs.isEmpty()}" class="col-12 py-5 text-center">
+                <div class="card border-0 shadow-sm rounded-4 w-100 py-5">
+                    <div class="card-body">
+                        <i class="bi bi-inbox text-muted display-1 mb-3 d-block"></i>
+                        <h3 class="fw-bold">No recommendations yet</h3>
+                        <p class="text-secondary mb-4">Add more skills or preferences to your profile to see tailored jobs.</p>
+                        <a th:href="@{/jobseeker/profile}" class="btn btn-primary fw-bold rounded-3 px-4 py-2">
+                            Update Profile <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
 
-            <div th:each="job : ${recommendedJobs}" class="job-card">
-                <span class="match-badge">⭐ Perfect Match</span>
-                <div class="job-title" th:text="${job.title}">Job Title</div>
-                <div class="company-name" th:text="${job.employer != null ? job.employer.companyName : 'Organization'}">
-                    Company Name</div>
+            <div th:each="job : ${recommendedJobs}" class="col-md-6 col-lg-4">
+                <div class="card border-0 shadow-sm rounded-4 h-100 job-card-hover p-4 d-flex flex-column">
+                    <div class="mb-3">
+                        <span class="badge bg-success bg-opacity-10 text-success fw-bold px-3 py-2 rounded-pill text-uppercase" style="font-size: 0.75rem;">
+                            <i class="bi bi-star-fill text-warning me-1"></i> Perfect Match
+                        </span>
+                    </div>
+                    
+                    <h4 class="card-title fw-bold text-dark mb-1" th:text="${job.title}">Job Title</h4>
+                    <h6 class="card-subtitle text-primary fw-bold mb-4" th:text="${job.employer != null ? job.employer.companyName : 'Organization'}">
+                        Company Name</h6>
 
-                <div class="meta-row">
-                    <span>📍 <span th:text="${job.location}">Location</span></span>
-                    <span>💼 <span th:text="${job.jobType}">Type</span></span>
+                    <div class="d-flex gap-3 text-secondary fw-semibold mb-4 flex-wrap">
+                        <span class="d-flex align-items-center gap-1"><i class="bi bi-geo-alt-fill"></i> <span th:text="${job.location}">Location</span></span>
+                        <span class="d-flex align-items-center gap-1"><i class="bi bi-briefcase-fill"></i> <span th:text="${job.jobType}">Type</span></span>
+                    </div>
+
+                    <div class="mt-auto">
+                        <a th:href="@{'/jobseeker/job/' + ${job.jobId}}" class="btn btn-primary w-100 fw-bold py-2 rounded-3">View Details</a>
+                    </div>
                 </div>
-
-                <a th:href="@{'/jobseeker/job/' + ${job.jobId}}" class="btn-view">View Details</a>
             </div>
         </div>
     </div>
 
-    <footer th:replace="fragments/footer :: footer"></footer>
-    <script th:replace="fragments/header :: header-js"></script>
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+    
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:replace="~{fragments/header :: header-js}"></script>
 </body>
 
 </html>

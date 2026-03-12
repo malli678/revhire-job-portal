@@ -201,7 +201,7 @@ public class JobSeekerController {
 
         model.addAttribute("job", job);
 
-        // ⭐⭐⭐ IMPORTANT
+        //  IMPORTANT
         model.addAttribute("alreadyApplied", alreadyApplied);
 
         return "jobseeker/job-details";
