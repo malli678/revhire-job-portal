@@ -4,6 +4,7 @@ import com.revhire.model.JobAlert;
 import com.revhire.model.JobSeeker;
 import com.revhire.service.JobAlertService;
 import com.revhire.service.JobSeekerService;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -91,7 +92,9 @@ public class JobAlertController {
      */
     @GetMapping("/create")
     public String showCreateForm(Model model) {
+
         model.addAttribute("alert", new JobAlert());
+
         return "jobseeker/create-alert";
     }
 
@@ -112,25 +115,37 @@ public class JobAlertController {
     public String createAlert(@ModelAttribute JobAlert alert,
                               Authentication authentication,
                               RedirectAttributes redirectAttributes) {
+
         try {
-            JobSeeker jobSeeker = jobSeekerService.getJobSeekerByEmail(authentication.getName());
-            
+
+            JobSeeker jobSeeker =
+                    jobSeekerService.getJobSeekerByEmail(authentication.getName());
+
             jobAlertService.createAlert(
-                jobSeeker,
-                alert.getAlertName(),
-                alert.getKeywords(),
-                alert.getLocation(),
-                alert.getJobType(),
-                alert.getMinSalary(),
-                alert.getFrequency()
+                    jobSeeker,
+                    alert.getAlertName(),
+                    alert.getKeywords(),
+                    alert.getLocation(),
+                    alert.getJobType(),
+                    alert.getMinSalary(),
+                    alert.getFrequency()
             );
-            
-            redirectAttributes.addFlashAttribute("success", "Job alert created successfully!");
+
+            redirectAttributes.addFlashAttribute(
+                    "success",
+                    "Job alert created successfully!"
+            );
+
         } catch (Exception e) {
+
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Failed to create alert: " + e.getMessage());
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "Failed to create alert: " + e.getMessage()
+            );
         }
-        
+
         return "redirect:/jobseeker/alerts";
     }
 
@@ -146,15 +161,26 @@ public class JobAlertController {
     public String toggleAlert(@PathVariable Long id,
                               @RequestParam boolean active,
                               RedirectAttributes redirectAttributes) {
+
         try {
+
             jobAlertService.toggleAlert(id, active);
-            redirectAttributes.addFlashAttribute("success", 
-                active ? "Alert activated" : "Alert deactivated");
+
+            redirectAttributes.addFlashAttribute(
+                    "success",
+                    active ? "Alert activated" : "Alert deactivated"
+            );
+
         } catch (Exception e) {
+
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Failed to update alert");
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "Failed to update alert"
+            );
         }
-        
+
         return "redirect:/jobseeker/alerts";
     }
 
@@ -168,14 +194,26 @@ public class JobAlertController {
     @PostMapping("/delete/{id}")
     public String deleteAlert(@PathVariable Long id,
                               RedirectAttributes redirectAttributes) {
+
         try {
+
             jobAlertService.deleteAlert(id);
-            redirectAttributes.addFlashAttribute("success", "Alert deleted successfully");
+
+            redirectAttributes.addFlashAttribute(
+                    "success",
+                    "Alert deleted successfully"
+            );
+
         } catch (Exception e) {
+
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("error", "Failed to delete alert");
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "Failed to delete alert"
+            );
         }
-        
+
         return "redirect:/jobseeker/alerts";
     }
 }
