@@ -127,7 +127,7 @@ public class ApplicationService {
 			application.setNotes(notes);
 			applicationRepository.save(application);
 
-			// ✅ Create notification for withdrawal
+			//  Create notification for withdrawal
 			notificationService.createNotification(
 					application.getJobSeeker().getUserId(),
 					"Application Withdrawn",
@@ -482,6 +482,7 @@ public class ApplicationService {
 	 * @param applicationId application ID
 	 * @param notes optional employer notes
 	 */
+	//Under Review
 	public void moveToUnderReview(Long applicationId, String notes) {
 		Application app = applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));
@@ -517,7 +518,7 @@ public class ApplicationService {
 	 * @param applicationId application ID
 	 * @param notes optional employer notes
 	 */
-
+    //Move From UnderReview To Shortlist
 	public void moveFromUnderReviewToShortlisted(Long applicationId, String notes) {
 		Application app = applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));

@@ -296,7 +296,7 @@ public class EmployerController {
     }
 
     // =========================
-    // BULK UPDATE ⭐⭐⭐
+    // BULK UPDATE 
     // =========================
     @PostMapping("/application/bulk-update")
     public String bulkUpdate(@RequestParam(name = "applicationIds", required = false) List<Long> applicationIds,
@@ -464,7 +464,7 @@ public class EmployerController {
                 throw new RuntimeException("Unauthorized access");
             }
 
-            model.addAttribute("application", application);
+            model.addAttribute("jobApplication", application);
             model.addAttribute("applicant", application.getJobSeeker());
 
             return "employer/applicant-details";
@@ -492,6 +492,9 @@ public class EmployerController {
             String resumeFileName = application.getResumePath();
             if (resumeFileName == null || resumeFileName.isEmpty()) {
                 resumeFileName = application.getJobSeeker().getResumeFile();
+            }
+            if (resumeFileName == null || resumeFileName.isEmpty()) {
+                resumeFileName = application.getJobSeeker().getResumePath();
             }
 
             if (resumeFileName == null || resumeFileName.isEmpty()) {
@@ -521,6 +524,64 @@ public class EmployerController {
                     .body(resource);
         } catch (Exception e) {
             System.err.println("Download Error: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/view-resume/{applicationId}")
+    public ResponseEntity<Resource> viewApplicantResume(
+            @PathVariable Long applicationId,
+            Authentication authentication) {
+
+        try {
+            Application application = applicationService.getApplicationById(applicationId);
+            Employer employer = employerService.getEmployerByEmail(authentication.getName());
+
+            // Security check
+            if (!application.getJob().getEmployer().getUserId()
+                    .equals(employer.getUserId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            String resumeFileName = application.getResumePath();
+            if (resumeFileName == null || resumeFileName.isEmpty()) {
+                resumeFileName = application.getJobSeeker().getResumeFile();
+            }
+            if (resumeFileName == null || resumeFileName.isEmpty()) {
+                resumeFileName = application.getJobSeeker().getResumePath();
+            }
+
+            if (resumeFileName == null || resumeFileName.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            Path path = Paths.get("uploads").resolve(resumeFileName).normalize();
+            Resource resource = new FileSystemResource(path.toFile());
+
+            if (!resource.exists() || !resource.isReadable()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            }
+
+            String contentType = "application/octet-stream";
+            String lowerName = resumeFileName.toLowerCase();
+            if (lowerName.endsWith(".pdf"))
+                contentType = "application/pdf";
+            else if (lowerName.endsWith(".doc"))
+                contentType = "application/msword";
+            else if (lowerName.endsWith(".docx"))
+                contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+            else if (lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg"))
+                contentType = "image/jpeg";
+            else if (lowerName.endsWith(".png"))
+                contentType = "image/png";
+
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_TYPE, contentType)
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"" + resource.getFilename() + "\"")
+                    .body(resource);
+        } catch (Exception e) {
+            System.err.println("View Error: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }

@@ -27,9 +27,6 @@ public class Employer extends User {
         this.setRole(Role.EMPLOYER);
     }
 
-    // =========================
-    // Getters and Setters
-    // =========================
     public String getCompanyName() { return companyName; }
     public void setCompanyName(String companyName) { this.companyName = companyName; }
 

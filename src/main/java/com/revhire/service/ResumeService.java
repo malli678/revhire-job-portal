@@ -59,7 +59,7 @@ public class ResumeService {
         }
     }
 
-    // ✅ SAVE BUILDER DATA ⭐⭐⭐
+    //  SAVE BUILDER DATA 
     public void save(ResumeDto dto, String email) {
 
         try {
@@ -98,7 +98,7 @@ public class ResumeService {
         } catch (Exception e) {
 
             System.out.println("❌ REAL ERROR:");
-            e.printStackTrace();   // ⭐⭐⭐ MUST SEE THIS
+            e.printStackTrace();   //  MUST SEE THIS
             throw new RuntimeException(e);
         }
     }
