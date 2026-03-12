@@ -14,33 +14,33 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
 /**
- * Controller responsible for handling Job Alert related operations.
+ * JobAlertController manages job alert related operations for job seekers.
  *
- * Job alerts allow job seekers to receive notifications when
- * new jobs matching their preferences are posted.
- *
- * This controller provides endpoints for:
- * - Viewing job alerts
- * - Creating new job alerts
- * - Activating or deactivating alerts
- * - Deleting alerts
- *
- * The controller communicates with:
- * - JobAlertService → Business logic for alerts
- * - JobSeekerService → Fetch logged-in job seeker information
+ * Responsibilities:
+ * - Display job alerts created by the job seeker.
+ * - Allow job seekers to create new job alerts.
+ * - Enable or disable existing job alerts.
+ * - Delete job alerts when they are no longer needed.
  */
 @Controller
 @RequestMapping("/jobseeker/alerts")
 public class JobAlertController {
-
+    
+    /**
+     * Service used to manage job alert related operations.
+     */
     private final JobAlertService jobAlertService;
-    private final JobSeekerService jobSeekerService;
 
     /**
-     * Constructor injection for required services.
+     * Service used to retrieve job seeker information.
+     */
+    private final JobSeekerService jobSeekerService;
+    
+    /**
+     * Constructor used for dependency injection.
      *
-     * @param jobAlertService service responsible for job alert logic
-     * @param jobSeekerService service responsible for job seeker operations
+     * @param jobAlertService service responsible for job alert management
+     * @param jobSeekerService service used to retrieve job seeker details
      */
     public JobAlertController(JobAlertService jobAlertService,
                               JobSeekerService jobSeekerService) {
@@ -51,56 +51,44 @@ public class JobAlertController {
     /**
      * Displays all job alerts created by the logged-in job seeker.
      *
-     * Steps:
-     * 1. Get logged-in user's email from Spring Security authentication
-     * 2. Retrieve JobSeeker entity
-     * 3. Fetch job alerts associated with the user
-     * 4. Add alerts to the model
+     * Steps performed:
+     * - Retrieve authenticated user's email.
+     * - Fetch job seeker details using the email.
+     * - Retrieve job alerts associated with the job seeker.
+     * - Add alerts to the model for view rendering.
      *
-     * @param model Spring model to pass attributes to Thymeleaf
-     * @param authentication authenticated user session
-     * @return job alerts view page
+     * @param model Spring model used to pass data to the view
+     * @param authentication Spring Security authentication object
+     * @return job alerts page
      */
     @GetMapping
     public String viewAlerts(Model model, Authentication authentication) {
         try {
-
-            // Get logged in user email
             String email = authentication.getName();
             System.out.println("Logged in user email: " + email);
 
-            // Fetch JobSeeker entity
             JobSeeker jobSeeker = jobSeekerService.getJobSeekerByEmail(email);
             System.out.println("JobSeeker ID: " + jobSeeker.getUserId());
 
-            // Fetch job alerts
-            List<JobAlert> alerts =
-                    jobAlertService.getUserAlerts(jobSeeker.getUserId());
-
+            List<JobAlert> alerts = jobAlertService.getUserAlerts(jobSeeker.getUserId());
             System.out.println("Alerts found: " + alerts.size());
 
             model.addAttribute("alerts", alerts);
 
             return "jobseeker/job-alerts";
-
+            
         } catch (Exception e) {
-
             e.printStackTrace();
-
-            model.addAttribute(
-                    "error",
-                    "Error loading alerts: " + e.getMessage()
-            );
-
+            model.addAttribute("error", "Error loading alerts: " + e.getMessage());
             return "jobseeker/job-alerts";
         }
     }
 
     /**
-     * Displays the job alert creation form.
+     * Displays the form used to create a new job alert.
      *
-     * @param model Spring model
-     * @return create alert form page
+     * @param model Spring model used to bind alert data
+     * @return create job alert page
      */
     @GetMapping("/create")
     public String showCreateForm(Model model) {
@@ -113,16 +101,15 @@ public class JobAlertController {
     /**
      * Handles creation of a new job alert.
      *
-     * Steps:
-     * 1. Get logged-in job seeker
-     * 2. Collect alert details from form
-     * 3. Call JobAlertService to create alert
-     * 4. Redirect to alerts page
+     * Steps performed:
+     * - Retrieve the logged-in job seeker.
+     * - Pass alert details to the JobAlertService.
+     * - Store success or error messages in redirect attributes.
      *
-     * @param alert alert form data
-     * @param authentication logged-in user
-     * @param redirectAttributes flash messages
-     * @return redirect to alerts page
+     * @param alert job alert details submitted by the user
+     * @param authentication authenticated user information
+     * @param redirectAttributes used to pass messages after redirect
+     * @return redirect to job alerts page
      */
     @PostMapping("/create")
     public String createAlert(@ModelAttribute JobAlert alert,
@@ -163,16 +150,12 @@ public class JobAlertController {
     }
 
     /**
-     * Activates or deactivates a job alert.
-     *
-     * Example:
-     * - Turn ON alert
-     * - Turn OFF alert
+     * Enables or disables a job alert.
      *
      * @param id alert ID
-     * @param active true = activate, false = deactivate
-     * @param redirectAttributes flash messages
-     * @return redirect to alerts page
+     * @param active true if alert should be active, false otherwise
+     * @param redirectAttributes used to pass status messages
+     * @return redirect to job alerts page
      */
     @PostMapping("/toggle/{id}")
     public String toggleAlert(@PathVariable Long id,
@@ -202,11 +185,11 @@ public class JobAlertController {
     }
 
     /**
-     * Deletes a job alert created by the user.
+     * Deletes a job alert.
      *
      * @param id alert ID
-     * @param redirectAttributes flash messages
-     * @return redirect to alerts page
+     * @param redirectAttributes used to pass result messages
+     * @return redirect to job alerts page
      */
     @PostMapping("/delete/{id}")
     public String deleteAlert(@PathVariable Long id,

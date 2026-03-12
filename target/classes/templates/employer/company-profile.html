@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Company Profile - RevHire</title>
+    <meta charset="UTF-8">
+    <style>
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1a202c;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .main-card {
+            background: white;
+            border-radius: 20px;
+            padding: 45px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 25px;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .header-section h2 {
+            margin: 0;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .org-badge {
+            background: #ebf8ff;
+            color: #3182ce;
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .data-box {
+            background: #f8fafc;
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid #edf2f7;
+            transition: all 0.2s;
+        }
+
+        .data-box:hover {
+            background: #ffffff;
+            border-color: #e0e7ff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            transform: translateY(-2px);
+        }
+
+        .label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 8px;
+        }
+
+        .value {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #334155;
+            word-break: break-all;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .website-link {
+            color: #4F46E5;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 800;
+        }
+
+        .website-link:hover {
+            text-decoration: underline;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 28px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn-edit {
+            background: #4F46E5;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-back {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        .btn-back:hover {
+            background: #e2e8f0;
+        }
+
+        .empty-val {
+            color: #cbd5e1;
+            font-style: italic;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .full-width {
+                grid-column: span 1;
+            }
+        }
+    </style>
+    <!-- Common Fragments Styles -->
+    <style th:replace="fragments/header :: header-css"></style>
+    <style th:replace="fragments/footer :: footer-css"></style>
+</head>
+
+<body>
+
+    <div th:replace="fragments/header :: header"></div>
+
+    <div class="container">
+        <div class="main-card">
+            <div class="header-section">
+                <h2>🏢 Corporate Identity</h2>
+                <div class="org-badge">Verified Partner</div>
+            </div>
+
+            <div class="profile-grid">
+                <!-- Org Name -->
+                <div class="data-box">
+                    <div class="label">Legal Entity Name</div>
+                    <div class="value" th:text="${user.companyName ?: 'RevHire Partner'}"
+                        th:classappend="${user.companyName == null ? 'empty-val' : ''}"></div>
+                </div>
+
+                <!-- Industry -->
+                <div class="data-box">
+                    <div class="label">Industry Vertical</div>
+                    <div class="value" th:text="${user.industry ?: 'Technology'}"
+                        th:classappend="${user.industry == null ? 'empty-val' : ''}"></div>
+                </div>
+
+                <!-- Size -->
+                <div class="data-box">
+                    <div class="label">Workforce Scale</div>
+                    <div class="value" th:text="${user.companySize ?: '50-100 Employees'}"
+                        th:classappend="${user.companySize == null ? 'empty-val' : ''}"></div>
+                </div>
+
+                <!-- URL -->
+                <div class="data-box">
+                    <div class="label">Digital Portal</div>
+                    <div class="value">
+                        <th:block th:if="${user.companyWebsite != null}">
+                            <a class="website-link"
+                                th:href="${#strings.startsWith(user.companyWebsite,'http') ? user.companyWebsite : 'https://' + user.companyWebsite}"
+                                th:text="${user.companyWebsite}"></a>
+                        </th:block>
+                        <span th:unless="${user.companyWebsite != null}" class="empty-val">Not listed</span>
+                    </div>
+                </div>
+
+                <!-- Description -->
+                <div class="data-box full-width">
+                    <div class="label">Mission & Vision Statement</div>
+                    <div class="value" style="font-size: 1.05rem; line-height: 1.7; font-weight: 500;"
+                        th:text="${user.companyDescription ?: 'Revolutionizing hiring with RevHire.'}"
+                        th:classappend="${user.companyDescription == null ? 'empty-val' : ''}"></div>
+                </div>
+
+                <!-- Headquarters -->
+                <div class="data-box">
+                    <div class="label">Global Headquarters</div>
+                    <div class="value" th:text="${user.headquarters ?: 'Global'}"
+                        th:classappend="${user.headquarters == null ? 'empty-val' : ''}"></div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <a href="/employer/company-profile/edit" class="btn btn-edit">✏️ Refine Identity</a>
+                <a href="/employer/dashboard" class="btn btn-back">← Dashboard</a>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="fragments/footer :: footer"></footer>
+
+    <!-- Common Fragments Scripts -->
+    <script th:replace="fragments/header :: header-js"></script>
+</body>
+
+</html>

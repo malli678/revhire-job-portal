@@ -16,19 +16,42 @@ import java.util.List;
 
 import org.springframework.ui.Model;
 
+/**
+ * ApplicationController handles all operations related to job applications.
+ *
+ * Responsibilities:
+ * - Allow job seekers to apply for jobs.
+ * - Allow employers to view applicants.
+ * - Allow employers to add notes to applications.
+ * - Allow job seekers to view their submitted applications.
+ * - Handle resume and cover letter submission.
+ */
 @Controller
-
 @RequestMapping("/applications")
 public class ApplicationController {
 
+    /**
+     * Service responsible for handling application-related business logic.
+     */
     @Autowired
     private ApplicationService applicationService;
+
+    /**
+     * Service responsible for retrieving job details.
+     */
     @Autowired
     private JobService jobService;
 
     // ================= APPLY =================
+
+    /**
+     * Allows a job seeker to apply for a job.
+     *
+     * @param jobId ID of the job being applied for
+     * @param jobSeekerId ID of the job seeker applying
+     * @return redirect to the job seeker applications page
+     */
     @PostMapping("/apply")
-    // @GetMapping("/apply")
     public String applyJob(@RequestParam Long jobId,
             @RequestParam Long jobSeekerId) {
 
@@ -39,6 +62,16 @@ public class ApplicationController {
     }
 
     // ================= ADD NOTES =================
+
+    /**
+     * Allows an employer to add notes to a specific application.
+     *
+     * @param applicationId ID of the application
+     * @param notes notes added by the employer
+     * @param jobId optional job ID for redirection
+     * @param referer previous page URL for redirection
+     * @return redirect to the appropriate page after saving notes
+     */
     @PostMapping("/add-notes")
     public String addNotes(@RequestParam(required = false) Long applicationId,
             @RequestParam String notes,
@@ -62,6 +95,14 @@ public class ApplicationController {
     }
 
     // ================= VIEW JOB SEEKER APPLICATIONS =================
+
+    /**
+     * Displays all applications submitted by a specific job seeker.
+     *
+     * @param jobSeekerId ID of the job seeker
+     * @param model Spring model used to pass data to the view
+     * @return job seeker applications page
+     */
     @GetMapping("/jobseeker/{jobSeekerId}")
     public String viewApplicationsByJobSeeker(
             @PathVariable Long jobSeekerId,
@@ -76,6 +117,14 @@ public class ApplicationController {
     }
 
     // ================= VIEW JOB APPLICANTS =================
+
+    /**
+     * Displays all applicants for a specific job.
+     *
+     * @param jobId ID of the job
+     * @param model Spring model used to pass data to the view
+     * @return employer applicants page
+     */
     @GetMapping("/job/{jobId}")
     public String viewApplicationsByJob(
             @PathVariable Long jobId,
@@ -89,6 +138,13 @@ public class ApplicationController {
         return "employer/applicants";
     }
 
+    /**
+     * Displays the job application page for a specific job.
+     *
+     * @param jobId ID of the job
+     * @param model Spring model used to pass job details to the view
+     * @return job application page
+     */
     @GetMapping("/apply/{jobId}")
     public String showApplyPage(@PathVariable Long jobId, Model model) {
 
@@ -99,6 +155,16 @@ public class ApplicationController {
         return "jobseeker/apply-job";
     }
 
+    /**
+     * Handles submission of a job application including resume and cover letter.
+     *
+     * @param jobId ID of the job
+     * @param resume uploaded resume file
+     * @param coverLetter optional cover letter text
+     * @param principal authenticated user information
+     * @param ra redirect attributes used to pass messages
+     * @return redirect to job seeker dashboard after submission
+     */
     @PostMapping("/submit")
     public String submitApplication(
             @RequestParam Long jobId,

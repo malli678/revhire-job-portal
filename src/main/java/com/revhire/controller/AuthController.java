@@ -13,20 +13,53 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+/**
+ * AuthController handles authentication related operations in the application.
+ *
+ * Responsibilities:
+ * - Display login page.
+ * - Register new job seekers.
+ * - Register new employers.
+ * - Handle validation errors during registration.
+ * - Show access denied page.
+ *
+ * This controller works together with Spring Security
+ * to manage authentication and user registration.
+ */
 @Controller
 @RequestMapping("/auth")
 public class AuthController {
 
+    /**
+     * Logger used to track authentication related events and errors.
+     */
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
+    /**
+     * UserService handles business logic related to user registration.
+     */
     private final UserService userService;
 
+    /**
+     * Constructor for dependency injection.
+     *
+     * @param userService service responsible for user-related operations
+     */
     public AuthController(UserService userService) {
         this.userService = userService;
     }
 
     // ===================== LOGIN =====================
 
+    /**
+     * Displays the login form.
+     *
+     * If the login DTO is not already present in the model,
+     * a new LoginDto object is created and added to the model.
+     *
+     * @param model Spring model used to pass data to the view
+     * @return login page
+     */
     @GetMapping("/login")
     public String showLoginForm(Model model) {
         if (!model.containsAttribute("loginDto")) {
@@ -39,6 +72,12 @@ public class AuthController {
 
     // ===================== JOB SEEKER REGISTRATION =====================
 
+    /**
+     * Displays the job seeker registration form.
+     *
+     * @param model Spring model used to pass registration data
+     * @return job seeker registration page
+     */
     @GetMapping("/register/seeker")
     public String showJobSeekerRegistrationForm(Model model) {
         if (!model.containsAttribute("registrationDto")) {
@@ -47,6 +86,22 @@ public class AuthController {
         return "auth/register-seeker";
     }
 
+    /**
+     * Handles job seeker registration.
+     *
+     * Steps performed:
+     * - Validate form fields.
+     * - Convert employment status to uppercase.
+     * - Check password confirmation.
+     * - Register the job seeker using UserService.
+     * - Handle validation and system errors.
+     *
+     * @param registrationDto job seeker registration data
+     * @param result validation result
+     * @param model Spring model
+     * @param redirectAttributes used to pass success messages
+     * @return redirect to login page if successful
+     */
     @PostMapping("/register/seeker")
     public String registerJobSeeker(
             @Valid @ModelAttribute("registrationDto") JobSeekerRegistrationDto registrationDto,
@@ -79,9 +134,8 @@ public class AuthController {
 
         } catch (IllegalArgumentException e) {
             log.warn("Business validation failed: {}", e.getMessage());
-            // Add error to the model
             result.reject("error.registration", e.getMessage());
-            return "auth/register-seeker"; // Return to same page with errors
+            return "auth/register-seeker";
 
         } catch (Exception e) {
             log.error("Unexpected registration error: ", e);
@@ -89,8 +143,15 @@ public class AuthController {
             return "auth/register-seeker";
         }
     }
+
     // ===================== EMPLOYER REGISTRATION =====================
 
+    /**
+     * Displays the employer registration form.
+     *
+     * @param model Spring model used to pass registration data
+     * @return employer registration page
+     */
     @GetMapping("/register/employer")
     public String showEmployerRegistrationForm(Model model) {
         if (!model.containsAttribute("registrationDto")) {
@@ -99,6 +160,21 @@ public class AuthController {
         return "auth/register-employer";
     }
 
+    /**
+     * Handles employer registration.
+     *
+     * Steps performed:
+     * - Validate form fields.
+     * - Check password confirmation.
+     * - Register employer using UserService.
+     * - Handle validation and system errors.
+     *
+     * @param registrationDto employer registration data
+     * @param result validation result
+     * @param model Spring model
+     * @param redirectAttributes used to pass success messages
+     * @return redirect to login page if successful
+     */
     @PostMapping("/register/employer")
     public String registerEmployer(
             @Valid @ModelAttribute("registrationDto") EmployerRegistrationDto registrationDto,
@@ -135,6 +211,11 @@ public class AuthController {
         }
     }
 
+    /**
+     * Displays access denied page when user tries to access restricted resources.
+     *
+     * @return access denied page
+     */
     @GetMapping("/access-denied")
     public String showAccessDenied() {
         return "auth/access-denied";

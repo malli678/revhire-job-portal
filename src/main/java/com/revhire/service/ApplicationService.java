@@ -1,6 +1,7 @@
 package com.revhire.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -18,6 +19,21 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * ApplicationService handles the business logic related to job applications.
+ *
+ * Responsibilities:
+ * - Allow job seekers to apply for jobs.
+ * - Manage application status updates (shortlist, reject, withdraw, review).
+ * - Handle bulk operations on applications.
+ * - Store resumes and cover letters.
+ * - Send email notifications.
+ * - Create in-app notifications.
+ *
+ * This service acts as the middle layer between controllers
+ * and the database repositories.
+ */
 
 @Service
 @Transactional
@@ -38,9 +54,22 @@ public class ApplicationService {
 	@Autowired
 	private EmailService emailService;
 
-	// ✅ ADD THIS - Inject NotificationService
+	/**
+	 * Service used to generate in-app notifications.
+	 */
 	@Autowired
 	private NotificationService notificationService;
+	
+	/**
+	 * Allows a job seeker to apply for a job.
+	 *
+	 * Steps performed:
+	 * - Validate job and job seeker existence
+	 * - Check if the user already applied
+	 * - Create a new application
+	 * - Save application in database
+	 * - Send notifications to job seeker and employer
+	 */
 
 	// APPLY JOB
 	public void applyJob(Long jobId, Long jobSeekerId) {
@@ -69,7 +98,7 @@ public class ApplicationService {
 
 		applicationRepository.save(application);
 
-		// ✅ Create notifications
+		// Create notifications
 		notificationService.createNotification(
 				jobSeeker.getUserId(),
 				"Application Submitted",
@@ -85,6 +114,9 @@ public class ApplicationService {
 		System.out.println("APPLICATION SAVED ✅");
 	}
 
+	/**
+	 * Allows a job seeker to withdraw their application.
+	 */
 	// WITHDRAW
 	public void withdrawApplication(Long applicationId, String notes) {
 		Application application = applicationRepository.findById(applicationId)
@@ -106,6 +138,10 @@ public class ApplicationService {
 		}
 	}
 
+
+	/**
+	 * Shortlists a candidate for the job.
+	 */
 	// SHORTLIST
 	public void shortlistCandidate(Long applicationId, String note) {
 		Application app = applicationRepository.findById(applicationId).orElseThrow();
@@ -119,7 +155,7 @@ public class ApplicationService {
 		app.setNotes(note);
 		applicationRepository.save(app);
 		emailService.sendApplicationStatusUpdate(app, oldStatus);
-		// ✅ Create notification for shortlist
+		//  Create notification for shortlist
 		notificationService.createNotification(
 				app.getJobSeeker().getUserId(),
 				"Application Shortlisted",
@@ -128,6 +164,9 @@ public class ApplicationService {
 				"/jobseeker/applications");
 	}
 
+	/**
+	 * Rejects a candidate application.
+	 */
 	// REJECT
 	public void rejectCandidate(Long applicationId, String notes) {
 		Application app = applicationRepository.findById(applicationId)
@@ -152,6 +191,9 @@ public class ApplicationService {
 				"/jobseeker/applications");
 	}
 
+	/**
+	 * Updates application status manually.
+	 */
 	// UPDATE STATUS
 	public void updateApplicationStatus(Long applicationId, Application.ApplicationStatus status) {
 		Application application = applicationRepository.findById(applicationId)
@@ -169,6 +211,10 @@ public class ApplicationService {
 						" has been updated from " + oldStatus + " to " + status,
 				"/jobseeker/applications");
 	}
+	
+	/**
+	 * Performs bulk update operations such as SHORTLIST or REJECT.
+	 */
 
 	// BULK UPDATE
 	public void bulkUpdate(List<Long> applicationIds, String action) {
@@ -196,6 +242,9 @@ public class ApplicationService {
 		}
 	}
 
+	/**
+	 * Adds employer notes to an application.
+	 */
 	// ADD NOTES
 	public void addNotes(Long applicationId, String notes) {
 		Application application = applicationRepository.findById(applicationId)
@@ -205,22 +254,45 @@ public class ApplicationService {
 		applicationRepository.save(application);
 	}
 
+	/**
+	 * Retrieves applications submitted by a specific job seeker.
+	 */
 	// Get applications by job seeker ID
 	public List<Application> getApplicationsByJobSeeker(Long jobSeekerId) {
 		return applicationRepository.findByJobSeeker_UserId(jobSeekerId);
 	}
-
+	/**
+	 * Retrieves all applications for a specific job.
+	 */
 	// Get applications by job ID
 	public List<Application> getApplicationsByJob(Long jobId) {
 		return applicationRepository.findByJob_JobId(jobId);
 	}
 
+	/**
+	 * Checks whether a job seeker has already applied to a job.
+	 */
 	// Check if already applied
 	public boolean hasAlreadyApplied(Long jobId, Long jobSeekerId) {
 		return applicationRepository
 				.findByJob_JobIdAndJobSeeker_UserId(jobId, jobSeekerId)
 				.isPresent();
 	}
+	
+	/**
+	 * Performs bulk update of application statuses.
+	 *
+	 * This method updates multiple applications at once. It prevents updating
+	 * applications that are already in terminal states such as SHORTLISTED,
+	 * REJECTED, or WITHDRAWN.
+	 *
+	 * If notes are provided, they will be attached to the updated application.
+	 * A notification is also created for each job seeker whose application status changes.
+	 *
+	 * @param applicationIds list of application IDs to update
+	 * @param newStatus new status to apply
+	 * @param note optional note from the employer
+	 */
 
 	// bulk update status
 	public void bulkUpdateStatus(List<Long> applicationIds, Application.ApplicationStatus newStatus, String note) {
@@ -255,6 +327,13 @@ public class ApplicationService {
 					"/jobseeker/applications");
 		}
 	}
+	
+	/**
+	 * Retrieves all applications submitted for jobs posted by a specific employer.
+	 *
+	 * @param employer employer whose applications need to be retrieved
+	 * @return list of applications belonging to the employer's jobs
+	 */
 
 	// filter and count
 	public List<Application> getApplicationsForEmployer(Employer employer) {
@@ -264,6 +343,14 @@ public class ApplicationService {
 				.toList();
 	}
 
+	
+	/**
+	 * Filters applications by status for a specific employer.
+	 *
+	 * @param employer employer whose applications are being filtered
+	 * @param status application status to filter by
+	 * @return filtered list of applications
+	 */
 	public List<Application> filterByStatus(Employer employer,
 			Application.ApplicationStatus status) {
 		return applicationRepository.findAll()
@@ -273,6 +360,13 @@ public class ApplicationService {
 				.toList();
 	}
 
+	/**
+	 * Filters applications based on minimum experience of job seekers.
+	 *
+	 * @param employer employer whose applications are being filtered
+	 * @param years minimum experience required
+	 * @return list of applications matching the experience criteria
+	 */
 	public List<Application> filterByExperience(Employer employer, Integer years) {
 		return applicationRepository.findAll()
 				.stream()
@@ -280,6 +374,10 @@ public class ApplicationService {
 				.filter(app -> app.getJobSeeker().getTotalExperienceYears() >= years)
 				.toList();
 	}
+	
+	/**
+	 * Filters employer applications by job seeker education degree.
+	 */
 
 	public List<Application> filterByEducation(Employer employer, String degree) {
 		return applicationRepository.findAll()
@@ -289,6 +387,9 @@ public class ApplicationService {
 				.toList();
 	}
 
+	/**
+	 * Filters employer applications submitted after a given date.
+	 */
 	public List<Application> filterByDate(Employer employer, LocalDateTime date) {
 		return applicationRepository.findAll()
 				.stream()
@@ -297,6 +398,22 @@ public class ApplicationService {
 				.toList();
 	}
 
+	/**
+	 * Allows a job seeker to apply for a job with resume and cover letter.
+	 *
+	 * This method:
+	 * - Validates job and job seeker existence
+	 * - Checks if the user already applied
+	 * - Stores the uploaded resume
+	 * - Creates a new application record
+	 * - Sends email notifications
+	 * - Creates system notifications
+	 *
+	 * @param jobId job ID being applied for
+	 * @param resume uploaded resume file
+	 * @param coverLetter optional cover letter text
+	 * @param email job seeker email
+	 */
 	// FIXED apply method with notification
 	public void apply(Long jobId, MultipartFile resume, String coverLetter, String email) {
 		Job job = jobRepository.findById(jobId)
@@ -355,6 +472,16 @@ public class ApplicationService {
 	}
 	// Add these methods to ApplicationService.java
 
+	
+	/**
+	 * Moves an application from APPLIED status to UNDER_REVIEW.
+	 *
+	 * Only applications currently in APPLIED state can be moved to UNDER_REVIEW.
+	 * A notification is sent to the job seeker.
+	 *
+	 * @param applicationId application ID
+	 * @param notes optional employer notes
+	 */
 	public void moveToUnderReview(Long applicationId, String notes) {
 		Application app = applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));
@@ -380,6 +507,16 @@ public class ApplicationService {
 				"Your application for " + app.getJob().getTitle() + " is now under review.",
 				"/jobseeker/applications");
 	}
+	
+	/**
+	 * Moves an application from UNDER_REVIEW to SHORTLISTED.
+	 *
+	 * Only applications currently in UNDER_REVIEW state can be shortlisted.
+	 * A notification is sent to the job seeker informing them about the shortlist.
+	 *
+	 * @param applicationId application ID
+	 * @param notes optional employer notes
+	 */
 
 	public void moveFromUnderReviewToShortlisted(Long applicationId, String notes) {
 		Application app = applicationRepository.findById(applicationId)
@@ -407,11 +544,17 @@ public class ApplicationService {
 				"/jobseeker/applications");
 	}
 
+	/**
+	 * Retrieves an application by its ID.
+	 */
 	public Application getApplicationById(Long applicationId) {
 		return applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));
 	}
 
+	/**
+	 * Updates the status of an application and saves optional notes.
+	 */
 	public void updateStatus(Long applicationId, Application.ApplicationStatus status, String notes) {
 		Application app = applicationRepository.findById(applicationId)
 				.orElseThrow(() -> new RuntimeException("Application not found"));

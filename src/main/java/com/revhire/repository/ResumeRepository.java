@@ -9,6 +9,6 @@ import com.revhire.model.JobSeeker;
 
 public interface ResumeRepository extends JpaRepository<Resume, Long> {
 
-    // ✅ CRITICAL METHOD ⭐⭐⭐
+    //  CRITICAL METHOD ⭐⭐⭐
     Optional<Resume> findByJobSeeker(JobSeeker jobSeeker);
 }
